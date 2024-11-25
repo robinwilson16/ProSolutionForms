@@ -1,0 +1,274 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\pages\\criminalconviction.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\pages\\criminalconviction.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\models\\criminalconvictionmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\models\\criminalconvictionmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\models\\studentmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\models\\studentmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\wwwroot\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\wwwroot\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\layout\\navmenu.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\layout\\navmenu.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\layout\\navmenu.razor.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\layout\\navmenu.razor.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\libman.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\libman.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\layout\\mainlayout.razor.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\layout\\mainlayout.razor.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\layout\\mainlayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\layout\\mainlayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\_imports.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\_imports.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\wwwroot\\css\\prosolutionforms.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\wwwroot\\css\\prosolutionforms.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 8,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "_Imports.razor",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\_Imports.razor",
+              "RelativeDocumentMoniker": "ProSolutionForms\\_Imports.razor",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\_Imports.razor",
+              "RelativeToolTip": "ProSolutionForms\\_Imports.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-11-25T13:10:14.203Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "NavMenu.razor.css",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\NavMenu.razor.css",
+              "RelativeDocumentMoniker": "ProSolutionForms\\Layout\\NavMenu.razor.css",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\NavMenu.razor.css",
+              "RelativeToolTip": "ProSolutionForms\\Layout\\NavMenu.razor.css",
+              "ViewState": "AgIAACAAAAAAAAAAAAAswDoAAABFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2024-11-25T12:56:21.783Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "MainLayout.razor.css",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\MainLayout.razor.css",
+              "RelativeDocumentMoniker": "ProSolutionForms\\Layout\\MainLayout.razor.css",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\MainLayout.razor.css",
+              "RelativeToolTip": "ProSolutionForms\\Layout\\MainLayout.razor.css",
+              "ViewState": "AgIAACkAAAAAAAAAAAAswE0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2024-11-25T12:55:19.328Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Counter.razor",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Pages\\Counter.razor",
+              "RelativeDocumentMoniker": "ProSolutionForms\\Pages\\Counter.razor",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Pages\\Counter.razor",
+              "RelativeToolTip": "ProSolutionForms\\Pages\\Counter.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-11-25T12:46:05.168Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "NavMenu.razor",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\NavMenu.razor",
+              "RelativeDocumentMoniker": "ProSolutionForms\\Layout\\NavMenu.razor",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\NavMenu.razor",
+              "RelativeToolTip": "ProSolutionForms\\Layout\\NavMenu.razor",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAAwBcAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-11-25T12:43:04.342Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\appsettings.json",
+              "RelativeDocumentMoniker": "ProSolutionForms\\wwwroot\\appsettings.json",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\appsettings.json",
+              "RelativeToolTip": "ProSolutionForms\\wwwroot\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-11-19T16:49:10.817Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "StudentModel.cs",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Models\\StudentModel.cs",
+              "RelativeDocumentMoniker": "ProSolutionForms\\Models\\StudentModel.cs",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Models\\StudentModel.cs",
+              "RelativeToolTip": "ProSolutionForms\\Models\\StudentModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-19T16:43:47.517Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CriminalConvictionModel.cs",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Models\\CriminalConvictionModel.cs",
+              "RelativeDocumentMoniker": "ProSolutionForms\\Models\\CriminalConvictionModel.cs",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Models\\CriminalConvictionModel.cs",
+              "RelativeToolTip": "ProSolutionForms\\Models\\CriminalConvictionModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-19T16:43:42.11Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CriminalConviction.razor",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Pages\\CriminalConviction.razor",
+              "RelativeDocumentMoniker": "ProSolutionForms\\Pages\\CriminalConviction.razor",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Pages\\CriminalConviction.razor",
+              "RelativeToolTip": "ProSolutionForms\\Pages\\CriminalConviction.razor",
+              "ViewState": "AgIAAGEAAAAAAAAAAAAAADcAAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-11-19T16:41:04.458Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ProSolutionForms.css",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\css\\ProSolutionForms.css",
+              "RelativeDocumentMoniker": "ProSolutionForms\\wwwroot\\css\\ProSolutionForms.css",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\css\\ProSolutionForms.css",
+              "RelativeToolTip": "ProSolutionForms\\wwwroot\\css\\ProSolutionForms.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2024-11-19T16:40:02.169Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "index.html",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\index.html",
+              "RelativeDocumentMoniker": "ProSolutionForms\\wwwroot\\index.html",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\index.html",
+              "RelativeToolTip": "ProSolutionForms\\wwwroot\\index.html",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2024-11-19T16:38:54.547Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "MainLayout.razor",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\MainLayout.razor",
+              "RelativeDocumentMoniker": "ProSolutionForms\\Layout\\MainLayout.razor",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\MainLayout.razor",
+              "RelativeToolTip": "ProSolutionForms\\Layout\\MainLayout.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-11-19T16:38:01.618Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Program.cs",
+              "RelativeDocumentMoniker": "ProSolutionForms\\Program.cs",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Program.cs",
+              "RelativeToolTip": "ProSolutionForms\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-19T16:37:57.718Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "App.razor",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\App.razor",
+              "RelativeDocumentMoniker": "ProSolutionForms\\App.razor",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\App.razor",
+              "RelativeToolTip": "ProSolutionForms\\App.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-11-19T16:37:50.617Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "libman.json",
+              "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\libman.json",
+              "RelativeDocumentMoniker": "ProSolutionForms\\libman.json",
+              "ToolTip": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\libman.json",
+              "RelativeToolTip": "ProSolutionForms\\libman.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-11-19T16:31:17.02Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

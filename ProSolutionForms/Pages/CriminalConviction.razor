@@ -1,0 +1,138 @@
+﻿@page "/CriminalConviction"
+@page "/CriminalConviction/{StudentGUID}"
+
+@using ProSolutionForms.Models
+@using System.Net
+@inject HttpClient Http
+@inject IConfiguration configuration
+
+<PageTitle>Criminal Conviction Form</PageTitle>
+
+<h3>Criminal Conviction Form</h3>
+
+@if (loadDataErrorMsg != null) 
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md">
+                <div class="alert alert-danger hstack gap-3" role="alert">
+                    <div>
+                        <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                    </div>
+                    <div>
+                        <p>
+                            @loadDataErrorMsg
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if(student == null) {
+    <div class="container">
+        <div class="row">
+            <div class="col-md">
+                <div class="alert alert-primary text-center" role="alert">
+                    <h1>
+                        <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else {
+    <div class="container">
+        <div class="row">
+            <div class="col-md">
+                <h1>Form Here for @student?.Forename</h1>
+
+                <EditForm FormName="Hello" Model="criminalConviction" OnSubmit="SubmitForm">
+                    <InputDate @bind-Value="criminalConviction!.DateOfOffence" />
+                    <InputTextArea @bind-Value="criminalConviction!.Offence" />
+                    <InputTextArea @bind-Value="criminalConviction!.Penalty" />
+                    <InputTextArea @bind-Value="criminalConviction!.Comments" />
+                    <InputText @bind-Value="criminalConviction!.ContactName" />
+                    <button type="submit">Submit</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? StudentGUID { get; set; }
+
+    bool formSubmitted = false;
+
+    [SupplyParameterFromForm]
+    public CriminalConvictionModel? criminalConviction { get; set; }
+
+    public string? loadDataErrorMsg = null;
+
+    private StudentModel? student;
+    private string? studentEndPoint;
+    protected override async Task OnInitializedAsync()
+    {
+        criminalConviction ??= new();
+
+        studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+        try {
+            student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+            {
+                loadDataErrorMsg = $"You are not authorised to view this page";
+            }
+            else if (ex.Message.Contains("404 (Not Found)"))
+            {
+                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+            }
+            else if (ex.Message.Contains("400 (Bad Request)"))
+            {
+                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+            }
+            else loadDataErrorMsg = $"Error: {ex.Message}";
+        }
+    }
+
+    private string? formEndPoint;
+    public string? formDataErrorMsg = null;
+    private async Task SubmitForm()
+    {
+        formSubmitted = true;
+
+        formEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction";
+        try
+        {
+            if (criminalConviction != null) {
+                HttpResponseMessage formResponse = await Http.PostAsJsonAsync<CriminalConvictionModel>(formEndPoint, criminalConviction);
+            }
+            else
+            {
+                formDataErrorMsg = "The form could not be submitted as the form values could not be read";
+            }
+
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+            {
+                loadDataErrorMsg = $"You are not authorised to view this page";
+            }
+            else if (ex.Message.Contains("404 (Not Found)"))
+            {
+                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+            }
+            else if (ex.Message.Contains("400 (Bad Request)"))
+            {
+                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+            }
+            else loadDataErrorMsg = $"Error: {ex.Message}";
+        }
+    }
+}
