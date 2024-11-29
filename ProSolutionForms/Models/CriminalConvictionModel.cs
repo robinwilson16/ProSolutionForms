@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FluentValidation;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace ProSolutionForms.Models
 {
@@ -6,6 +8,8 @@ namespace ProSolutionForms.Models
     {
         public int CriminalConvictionID { get; set; }
         public DateTime? DateOfOffence { get; set; }
+
+        [Required(ErrorMessage = "Please record details of the offence")]
         public string? Offence { get; set; }
         public string? Penalty { get; set; }
         public string? Comments { get; set; }
@@ -25,5 +29,13 @@ namespace ProSolutionForms.Models
 
         [MaxLength(12)]
         public string? StudentRef {  get; set; }
+    }
+
+    public class CriminalConvictionValidator : AbstractValidator<CriminalConvictionModel>
+    {
+        public CriminalConvictionValidator()
+        {
+            RuleFor(c => c.Offence).NotEmpty();
+        }
     }
 }

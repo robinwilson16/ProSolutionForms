@@ -5,61 +5,211 @@
 @using System.Net
 @inject HttpClient Http
 @inject IConfiguration configuration
+@inject NavigationManager NavManager
+@inject ILogger<CriminalConviction> Logger
 
 <PageTitle>Criminal Conviction Form</PageTitle>
 
-<h3>Criminal Conviction Form</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-md text-center">
+            <img class="img-fluid CollegeLogo" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+        </div>
+    </div>
+</div>
 
-@if (loadDataErrorMsg != null) 
-{
+<div class="bd-callout bd-callout-SHCG-blue bd-callout-grey GreyBackground">
     <div class="container">
         <div class="row">
-            <div class="col-md">
-                <div class="alert alert-danger hstack gap-3" role="alert">
-                    <div>
-                        <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
-                    </div>
-                    <div>
-                        <p>
-                            @loadDataErrorMsg
-                        </p>
+            <div class="col-md text-center">
+                <h3 class="mt-3 mb-3"><i class="fa-solid fa-handcuffs"></i> Criminal Conviction Form</h3>
+            </div>
+        </div>
+    </div>
+
+    @if (loadDataErrorMsg != null) 
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                @loadDataErrorMsg
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-}
-else if(student == null) {
-    <div class="container">
-        <div class="row">
-            <div class="col-md">
-                <div class="alert alert-primary text-center" role="alert">
-                    <h1>
-                        <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
-                    </h1>
+    }
+    else if (formSubmitted == true)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-success hstack gap-3" role="alert">
+                        <div class="ms-auto me-3">
+                            <h1><i class="fa-solid fa-clipboard-check"></i></h1>
+                        </div>
+                        <div class="me-auto">
+                            <h4 class="alert-heading">Criminal Convictions Successfully Submitted</h4>
+                            <hr>
+                            <p>
+                                Thank you for declaring your Criminal Convictions.
+                            </p>
+                            <p>
+                                We will be in touch with you soon to discuss the next steps.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="row">
+                            <div class="col-md">
+                                <button type="button" class="btn btn-primary" @onclick="AddMoreConvictions"><i class="fa-solid fa-handcuffs"></i> Add Another Criminal Conviction</button>
+                            </div>
+                            <div class="col-md text-end">
+                                <button type="button" class="btn btn-success" @onclick="GoToSHCGHomepage"><i class="fa-solid fa-arrow-up-right-from-square"></i> Go To The SHCG Website</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-}
-else {
-    <div class="container">
-        <div class="row">
-            <div class="col-md">
-                <h1>Form Here for @student?.Forename</h1>
-
-                <EditForm FormName="Hello" Model="criminalConviction" OnSubmit="SubmitForm">
-                    <InputDate @bind-Value="criminalConviction!.DateOfOffence" />
-                    <InputTextArea @bind-Value="criminalConviction!.Offence" />
-                    <InputTextArea @bind-Value="criminalConviction!.Penalty" />
-                    <InputTextArea @bind-Value="criminalConviction!.Comments" />
-                    <InputText @bind-Value="criminalConviction!.ContactName" />
-                    <button type="submit">Submit</button>
-                </EditForm>
+    }
+    else if(student == null) {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-primary text-center" role="alert">
+                        <h1>
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                        </h1>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-}
+    }
+    else {
+        <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
+            <div class="container">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-user"></i> Name
+                    </div>
+                    <div class="col-md-8">
+                        @student?.Forename @student?.Surname
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-graduation-cap"></i> Course
+                    </div>
+                    <div class="col-md-8">
+                        Course Here
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <EditForm FormName="CriminalConvictions" Model="criminalConvictions" OnSubmit="SubmitMany">
+            <FluentValidationValidator @ref="_fluentValidationValidator" />
+
+            @if (criminalConvictions != null) {
+                @if (criminalConvictions.Convictions != null)
+                {
+                    foreach (var conv in criminalConvictions.Convictions) {
+                        <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="row g-3 mb-3 align-items-center">
+                                            <div class="col-md-4">
+                                                <i class="fa-regular fa-calendar-days"></i> <label class="col-form-label">Date of Offence</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputDate @bind-Value="conv!.DateOfOffence" class="form-control" />
+                                                <ValidationMessage For="@(() => conv!.DateOfOffence)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3 align-items-center">
+                                            <div class="col-md-4">
+                                                <i class="fa-solid fa-handcuffs"></i> <label class="col-form-label">Offence</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputTextArea @bind-Value="conv!.Offence" class="form-control" />
+                                                <ValidationMessage For="@(() => conv!.Offence)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3 align-items-center">
+                                            <div class="col-md-4">
+                                                <i class="fa-solid fa-book"></i> <label class="col-form-label">Penalty</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputTextArea @bind-Value="conv!.Penalty" class="form-control" />
+                                                <ValidationMessage For="@(() => conv!.Penalty)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3 align-items-center">
+                                            <div class="col-md-4">
+                                                <i class="fa-solid fa-comment"></i> <label class="col-form-label">Comments</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputTextArea @bind-Value="conv!.Comments" class="form-control" />
+                                                <ValidationMessage For="@(() => conv!.Comments)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3 align-items-center">
+                                            <div class="col-md-4">
+                                                <i class="fa-solid fa-id-card-clip"></i> <label class="col-form-label">Contact Name</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="conv!.ContactName" class="form-control" />
+                                                <ValidationMessage For="@(() => conv!.ContactName)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+
+            <ValidationSummary />
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-md text-end">
+                        <button type="button" class="btn btn-primary mb-3" @onclick="AddAnotherConviction"><i class="fa-solid fa-file-circle-plus"></i> Record Details of Another Offence</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-secondary" role="alert">
+                <div class="row">
+                    <div class="col-md">
+                        <div class="row g-3 justify-content-md-center">
+                            <div class="col-md-auto">
+                                <button type="submit" class="btn btn-success"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+                            </div>
+                            <div class="col-md-auto">
+                                <button type="reset" class="btn btn-warning"><i class="fa-solid fa-eraser"></i> Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
 
 @code {
     [Parameter]
@@ -67,16 +217,26 @@ else {
 
     bool formSubmitted = false;
 
-    [SupplyParameterFromForm]
     public CriminalConvictionModel? criminalConviction { get; set; }
+    public ICollection<CriminalConvictionModel>? criminalConvictionList { get; set; }
+    [SupplyParameterFromForm]
+    public CriminalConvictionsModel? criminalConvictions { get; set; }
+
+    private FluentValidationValidator? _fluentValidationValidator;
 
     public string? loadDataErrorMsg = null;
 
     private StudentModel? student;
     private string? studentEndPoint;
+
     protected override async Task OnInitializedAsync()
     {
-        criminalConviction ??= new();
+        criminalConviction = new CriminalConvictionModel();
+        criminalConvictions = new CriminalConvictionsModel();
+        criminalConvictionList = new List<CriminalConvictionModel>();
+        criminalConvictionList.Add(criminalConviction);
+
+        criminalConvictions.Convictions = criminalConvictionList;
 
         studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
         try {
@@ -104,7 +264,10 @@ else {
     public string? formDataErrorMsg = null;
     private async Task SubmitForm()
     {
+        //Not using this now as submitting many at once (below)
+
         formSubmitted = true;
+        Logger.LogInformation("Id = {Id}", criminalConviction?.CriminalConvictionID);
 
         formEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction";
         try
@@ -134,5 +297,63 @@ else {
             }
             else loadDataErrorMsg = $"Error: {ex.Message}";
         }
+    }
+
+    private async Task SubmitMany()
+    {
+        if (await _fluentValidationValidator!.ValidateAsync())
+        {
+            formSubmitted = true;
+            Logger.LogInformation("Id = {Id}", criminalConviction?.CriminalConvictionID);
+
+            formEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/Many";
+            try
+            {
+                if (criminalConvictions != null)
+                {
+                    HttpResponseMessage formResponse = await Http.PostAsJsonAsync<ICollection<CriminalConvictionModel>>(formEndPoint, criminalConvictions.Convictions!);
+                }
+                else
+                {
+                    formDataErrorMsg = "The form could not be submitted as the form values could not be read";
+                }
+
+            }
+            catch (HttpRequestException ex)
+            {
+                if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+                {
+                    loadDataErrorMsg = $"You are not authorised to view this page";
+                }
+                else if (ex.Message.Contains("404 (Not Found)"))
+                {
+                    loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+                }
+                else if (ex.Message.Contains("400 (Bad Request)"))
+                {
+                    loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+                }
+                else loadDataErrorMsg = $"Error: {ex.Message}";
+            }
+        }
+    }
+
+    private void GoToSHCGHomepage() {
+        NavManager.NavigateTo("https://www.shcg.ac.uk");
+    }
+
+    private void AddAnotherConviction()
+    {
+        CriminalConvictionModel newConviction = new CriminalConvictionModel();
+        criminalConvictions?.Convictions?.Add(newConviction);
+    }
+
+    private void AddMoreConvictions() {
+        formSubmitted = false;
+
+        CriminalConvictionModel newConviction = new CriminalConvictionModel();
+        criminalConvictions = new CriminalConvictionsModel();
+
+        criminalConvictions?.Convictions?.Add(newConviction);
     }
 }

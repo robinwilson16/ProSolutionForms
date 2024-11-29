@@ -21,6 +21,10 @@
       "PackagePath": "staticwebassets\\css\\app.css"
     },
     {
+      "Id": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\css\\callout.css",
+      "PackagePath": "staticwebassets\\css\\callout.css"
+    },
+    {
       "Id": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\favicon.png",
       "PackagePath": "staticwebassets\\favicon.png"
     },
@@ -31,6 +35,10 @@
     {
       "Id": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\icon-512.png",
       "PackagePath": "staticwebassets\\icon-512.png"
+    },
+    {
+      "Id": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\images\\SHCG-Logo-Coloured-RGB.png",
+      "PackagePath": "staticwebassets\\images\\SHCG-Logo-Coloured-RGB.png"
     },
     {
       "Id": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\index.html",

@@ -1,9 +1,17 @@
 self.assetsManifest = {
-  "version": "AyA+jHCy",
+  "version": "uChof0MC",
   "assets": [
     {
       "hash": "sha256-flyJw3lFRitW9ja/e7u/Az2oPojpf7GFlfuxvx4rg0U=",
       "url": "ProSolutionForms.styles.css"
+    },
+    {
+      "hash": "sha256-MSQuUWmw/uBMui2/n4kdEKi0h5j0G+EuO1sM6KK6ltM=",
+      "url": "_framework/Blazored.FluentValidation.x0xsecpmtx.wasm"
+    },
+    {
+      "hash": "sha256-Dt7DBDag97mASqcSTSWerTCmGMiE8QnbGYMRbfGmqvQ=",
+      "url": "_framework/FluentValidation.a26tmul8eq.wasm"
     },
     {
       "hash": "sha256-8hTdrmR59LAJRrDu8LLRlNn641/iWIAjzG1GcCsAhR0=",
@@ -114,12 +122,12 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.Win32.Registry.yqsrs1xmzk.wasm"
     },
     {
-      "hash": "sha256-YvPr70z0I7vKIk0yKjic36m/1IUCMTmi8qWUakMEWHo=",
-      "url": "_framework/ProSolutionForms.23ra155xwr.pdb"
+      "hash": "sha256-yCga1jp6xBv8Z8MJg5ciAiDqR3SjlSj4yu/EX45ayFc=",
+      "url": "_framework/ProSolutionForms.ok5g7kqyua.wasm"
     },
     {
-      "hash": "sha256-PQStzuQfRUAiGMezevfvyIpY2qeU5EX/DrMYbu5WuN8=",
-      "url": "_framework/ProSolutionForms.9h5ykos42x.wasm"
+      "hash": "sha256-Y69CdNxBKxTS5uyZUbbpzlbE2/rK2russhz3vkPsGMQ=",
+      "url": "_framework/ProSolutionForms.phepbcao9f.pdb"
     },
     {
       "hash": "sha256-HbRkDUeB2xv5LFtTNVUn+9DHnbGuihOXCt1EQd2esZc=",
@@ -770,7 +778,7 @@ self.assetsManifest = {
       "url": "_framework/WindowsBase.377bly7twj.wasm"
     },
     {
-      "hash": "sha256-WmNh5XQiY5mTqTwgNY+vjjc3kMcPmJy/KxL79AL+quw=",
+      "hash": "sha256-WxWwR4XkwB+3i+pNfFz3J0x9VwPT//jZa8Z4/aJKqcA=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -826,12 +834,16 @@ self.assetsManifest = {
       "url": "appsettings.json"
     },
     {
-      "hash": "sha256-u4DszuiY1WLPnENub5+KbAlwyJCcCHdKlyaXaKLaRqk=",
+      "hash": "sha256-BHFBnwn1OybUoSnXL5OrTw9rEz/C6sOOFbwO6gqvtic=",
       "url": "css/ProSolutionForms.css"
     },
     {
       "hash": "sha256-vGbjgqEqv4y3q5OB8W2R9LthkuF8mQfHFeNdKSReSmU=",
       "url": "css/app.css"
+    },
+    {
+      "hash": "sha256-cvmH35ojb+LTgQb9n285t8dajNsV/ikXk25Du0yQMmc=",
+      "url": "css/callout.css"
     },
     {
       "hash": "sha256-4mWsDy3aHl36ZbGt8zByK7Pvd4kRUoNgTYzRnwmPHwg=",
@@ -846,7 +858,11 @@ self.assetsManifest = {
       "url": "icon-512.png"
     },
     {
-      "hash": "sha256-rojvbLiKcvXC9LIOKO0tHseGh0HigxKqi2AkWHENbug=",
+      "hash": "sha256-WjoO/Bs0JMowkMFPlrMW0boUX0jzIsRlKLT3zXf4/X8=",
+      "url": "images/SHCG-Logo-Coloured-RGB.png"
+    },
+    {
+      "hash": "sha256-hlMFJENXuVODlXoDei7XQxfOVEEAvKXENYhEC75by+c=",
       "url": "index.html"
     },
     {

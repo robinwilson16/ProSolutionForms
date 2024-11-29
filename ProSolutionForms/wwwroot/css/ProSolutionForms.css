@@ -1,2 +1,40 @@
 ﻿body {
 }
+
+.CollegeLogo {
+    max-width: 300px;
+}
+
+.CollegeLogoHeader {
+    max-width: 100px;
+}
+
+.bd-callout-SHCG-blue {
+    border-left-color: #84b9e5 !important;
+}
+.bd-callout-SHCG-green {
+    border-left-color: #b7d432 !important;
+}
+.bd-callout-SHCG-yellow {
+    border-left-color: #dbca21 !important;
+}
+
+.bd-callout-SHCG-teal {
+    border-left-color: #88cdaa !important;
+}
+
+.bd-callout-SHCG-warning {
+    border-left-color: #FF6F00 !important;
+}
+
+.bd-callout-SHCG-success {
+    border-left-color: #1B5E20 !important;
+}
+
+.WhiteBackground {
+    background-color: #FFFFFF;
+}
+
+.GreyBackground {
+    background-color: #F5F5F5;
+}
