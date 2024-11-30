@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\wwwroot\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\wwwroot\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\pages\\criminalconviction.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\pages\\criminalconviction.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -51,10 +55,6 @@
       "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\wwwroot\\css\\app.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\wwwroot\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\wwwroot\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|c:\\users\\robin.wilson.shcg\\source\\repos\\prosolutionforms\\prosolutionforms\\models\\studentmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{ADC53EA7-15C6-4C1D-AC01-4A92E9A660F4}|ProSolutionForms\\ProSolutionForms.csproj|solutionrelative:prosolutionforms\\models\\studentmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -86,11 +86,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 12,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "CriminalConvictionsModel.cs",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Models\\CriminalConvictionsModel.cs",
               "RelativeDocumentMoniker": "ProSolutionForms\\Models\\CriminalConvictionsModel.cs",
@@ -98,12 +98,11 @@
               "RelativeToolTip": "ProSolutionForms\\Models\\CriminalConvictionsModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-28T20:21:38.134Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-28T20:21:38.134Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "CriminalConvictionSingle.razor",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Pages\\CriminalConvictionSingle.razor",
               "RelativeDocumentMoniker": "ProSolutionForms\\Pages\\CriminalConvictionSingle.razor",
@@ -111,12 +110,11 @@
               "RelativeToolTip": "ProSolutionForms\\Pages\\CriminalConvictionSingle.razor",
               "ViewState": "AgIAAGUAAAAAAAAAAAAAAHYAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2024-11-27T17:43:43.208Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-27T17:43:43.208Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "callout.css",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\css\\callout.css",
               "RelativeDocumentMoniker": "ProSolutionForms\\wwwroot\\css\\callout.css",
@@ -124,12 +122,11 @@
               "RelativeToolTip": "ProSolutionForms\\wwwroot\\css\\callout.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2024-11-27T13:06:57.298Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-27T13:06:57.298Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "app.css",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\css\\app.css",
               "RelativeDocumentMoniker": "ProSolutionForms\\wwwroot\\css\\app.css",
@@ -137,12 +134,11 @@
               "RelativeToolTip": "ProSolutionForms\\wwwroot\\css\\app.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2024-11-27T12:47:40.348Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-27T12:47:40.348Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "_Imports.razor",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\_Imports.razor",
               "RelativeDocumentMoniker": "ProSolutionForms\\_Imports.razor",
@@ -150,8 +146,7 @@
               "RelativeToolTip": "ProSolutionForms\\_Imports.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2024-11-25T13:10:14.203Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-25T13:10:14.203Z"
             },
             {
               "$type": "Document",
@@ -191,7 +186,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "NavMenu.razor",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\NavMenu.razor",
               "RelativeDocumentMoniker": "ProSolutionForms\\Layout\\NavMenu.razor",
@@ -199,12 +194,11 @@
               "RelativeToolTip": "ProSolutionForms\\Layout\\NavMenu.razor",
               "ViewState": "AgIAAA8AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2024-11-25T12:43:04.342Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-25T12:43:04.342Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 0,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\appsettings.json",
               "RelativeDocumentMoniker": "ProSolutionForms\\wwwroot\\appsettings.json",
@@ -212,7 +206,8 @@
               "RelativeToolTip": "ProSolutionForms\\wwwroot\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2024-11-19T16:49:10.817Z"
+              "WhenOpened": "2024-11-19T16:49:10.817Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -228,7 +223,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "CriminalConvictionModel.cs",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Models\\CriminalConvictionModel.cs",
               "RelativeDocumentMoniker": "ProSolutionForms\\Models\\CriminalConvictionModel.cs",
@@ -236,12 +231,11 @@
               "RelativeToolTip": "ProSolutionForms\\Models\\CriminalConvictionModel.cs",
               "ViewState": "AgIAABQAAAAAAAAAAAAzwCcAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T16:43:42.11Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-19T16:43:42.11Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "CriminalConviction.razor",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Pages\\CriminalConviction.razor",
               "RelativeDocumentMoniker": "ProSolutionForms\\Pages\\CriminalConviction.razor",
@@ -254,7 +248,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "ProSolutionForms.css",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\css\\ProSolutionForms.css",
               "RelativeDocumentMoniker": "ProSolutionForms\\wwwroot\\css\\ProSolutionForms.css",
@@ -262,12 +256,11 @@
               "RelativeToolTip": "ProSolutionForms\\wwwroot\\css\\ProSolutionForms.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2024-11-19T16:40:02.169Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-19T16:40:02.169Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "index.html",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\index.html",
               "RelativeDocumentMoniker": "ProSolutionForms\\wwwroot\\index.html",
@@ -275,12 +268,11 @@
               "RelativeToolTip": "ProSolutionForms\\wwwroot\\index.html",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAAAsAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2024-11-19T16:38:54.547Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-19T16:38:54.547Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "MainLayout.razor",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Layout\\MainLayout.razor",
               "RelativeDocumentMoniker": "ProSolutionForms\\Layout\\MainLayout.razor",
@@ -288,12 +280,11 @@
               "RelativeToolTip": "ProSolutionForms\\Layout\\MainLayout.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2024-11-19T16:38:01.618Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-19T16:38:01.618Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\Program.cs",
               "RelativeDocumentMoniker": "ProSolutionForms\\Program.cs",
@@ -301,8 +292,7 @@
               "RelativeToolTip": "ProSolutionForms\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T16:37:57.718Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-19T16:37:57.718Z"
             },
             {
               "$type": "Document",
