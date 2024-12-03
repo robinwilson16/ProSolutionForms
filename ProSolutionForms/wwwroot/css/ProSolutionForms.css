@@ -38,3 +38,8 @@
 .GreyBackground {
     background-color: #F5F5F5;
 }
+
+.ErrorDetails {
+    max-height: 240px;
+    background-color: #CCCCCC;
+}

@@ -68,9 +68,6 @@
                     </div>
                     <div class="alert alert-secondary" role="alert">
                         <div class="row">
-                            <div class="col-md">
-                                <button type="button" class="btn btn-primary" @onclick="AddAnotherConviction"><i class="fa-solid fa-handcuffs"></i> Add Another Criminal Conviction</button>
-                            </div>
                             <div class="col-md text-end">
                                 <button type="button" class="btn btn-success" @onclick="GoToSHCGHomepage"><i class="fa-solid fa-arrow-up-right-from-square"></i> Go To The SHCG Website</button>
                             </div>
@@ -178,14 +175,6 @@
                 </div>
             </div>
 
-            <div class="container">
-                <div class="row">
-                    <div class="col-md text-end">
-                        <button type="button" class="btn btn-primary mb-3" @onclick="AddAnotherConviction"><i class="fa-solid fa-file-circle-plus"></i> Record Details of Another Offence</button>
-                    </div>
-                </div>
-            </div>
-
             <div class="alert alert-secondary" role="alert">
                 <div class="row">
                     <div class="col-md">
@@ -282,10 +271,5 @@
 
     private void GoToSHCGHomepage() {
         NavManager.NavigateTo("https://www.shcg.ac.uk");
-    }
-
-    private async Task AddAnotherConviction()
-    {
-        
     }
 }

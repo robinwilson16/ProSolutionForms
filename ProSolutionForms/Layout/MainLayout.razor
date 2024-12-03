@@ -1,17 +1,42 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+
+<CascadingValue Value="this">
+    <div class="page">
+        @if (ShowNavMenu != false) {
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+        }
+
+        <main>
+            <div class="top-row px-4">
+                @* <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a> *@
+                <img class="img-fluid CollegeLogoHeader" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
     </div>
+</CascadingValue>
 
-    <main>
-        <div class="top-row px-4">
-            @* <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a> *@
-            <img class="img-fluid CollegeLogoHeader" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
-        </div>
+@code {
+    public bool? ShowNavMenu { get; set; }
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    protected override void OnInitialized()
+    {
+        ShowNavMenu = true;
+    }
+
+    public void HideNav() {
+        ShowNavMenu = false;
+        StateHasChanged();
+    }
+
+    public void ShowNav()
+    {
+        ShowNavMenu = true;
+        StateHasChanged();
+    }
+}

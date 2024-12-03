@@ -10,6 +10,31 @@
 
 <PageTitle>Criminal Conviction Form</PageTitle>
 
+<Modal @ref="modalError">
+    <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
+    <Body>
+        <p>
+            @msgError
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalConfirm">
+    <Title><i class="fa-solid fa-circle-question"></i> @msgConfirmTitle</Title>
+    <Body>
+        <p>
+            @msgConfirm
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-danger" @onclick="ClearFormAction"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
+    </Footer>
+</Modal>
+
 <div class="container">
     <div class="row">
         <div class="col-md text-center">
@@ -22,7 +47,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md text-center">
-                <h3 class="mt-3 mb-3"><i class="fa-solid fa-handcuffs"></i> Criminal Conviction Form</h3>
+                <h3 class="mt-3 mb-3"><i class="fa-solid fa-building-shield"></i> Criminal Conviction Form</h3>
             </div>
         </div>
     </div>
@@ -101,15 +126,23 @@
                         <i class="fa-solid fa-user"></i> Name
                     </div>
                     <div class="col-md-8">
-                        @student?.Forename @student?.Surname
+                        <strong>@student?.Forename @student?.Surname</strong>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-briefcase"></i> Curriculum Area
+                    </div>
+                    <div class="col-md-8">
+                        @student?.TeamName
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
                     <div class="col-md-4">
                         <i class="fa-solid fa-graduation-cap"></i> Course
                     </div>
                     <div class="col-md-8">
-                        Course Here
+                        @student?.CourseCode - @student?.CourseTitle
                     </div>
                 </div>
             </div>
@@ -121,12 +154,15 @@
             @if (criminalConvictions != null) {
                 @if (criminalConvictions.Convictions != null)
                 {
+                    int? formEntryRow = 0;
                     foreach (var conv in criminalConvictions.Convictions) {
+                        formEntryRow++;
+
                         <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
                             <div class="container">
                                 <div class="row">
                                     <div class="col-md">
-                                        <div class="row g-3 mb-3 align-items-center">
+                                        <div class="row g-3 mb-3">
                                             <div class="col-md-4">
                                                 <i class="fa-regular fa-calendar-days"></i> <label class="col-form-label">Date of Offence</label>
                                             </div>
@@ -136,7 +172,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row g-3 mb-3 align-items-center">
+                                        <div class="row g-3 mb-3">
                                             <div class="col-md-4">
                                                 <i class="fa-solid fa-handcuffs"></i> <label class="col-form-label">Offence</label>
                                             </div>
@@ -146,7 +182,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row g-3 mb-3 align-items-center">
+                                        <div class="row g-3 mb-3">
                                             <div class="col-md-4">
                                                 <i class="fa-solid fa-book"></i> <label class="col-form-label">Penalty</label>
                                             </div>
@@ -156,7 +192,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row g-3 mb-3 align-items-center">
+                                        <div class="row g-3 mb-3">
                                             <div class="col-md-4">
                                                 <i class="fa-solid fa-comment"></i> <label class="col-form-label">Comments</label>
                                             </div>
@@ -166,13 +202,18 @@
                                             </div>
                                         </div>
 
-                                        <div class="row g-3 mb-3 align-items-center">
+                                        <div class="row g-3 mb-3">
                                             <div class="col-md-4">
                                                 <i class="fa-solid fa-id-card-clip"></i> <label class="col-form-label">Contact Name</label>
                                             </div>
                                             <div class="col-md-8">
                                                 <InputText @bind-Value="conv!.ContactName" class="form-control" />
                                                 <ValidationMessage For="@(() => conv!.ContactName)" />
+                                            </div>
+                                        </div>
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md text-end">
+                                                <button type="button" class="btn btn-danger" @onclick="() => ClearFormEntryConfirm(conv?.CriminalConvictionID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Offence</button>
                                             </div>
                                         </div>
                                     </div>
@@ -201,7 +242,8 @@
                                 <button type="submit" class="btn btn-success"><i class="fa-solid fa-paper-plane"></i> Submit</button>
                             </div>
                             <div class="col-md-auto">
-                                <button type="reset" class="btn btn-warning"><i class="fa-solid fa-eraser"></i> Clear</button>
+                                @* <button type="reset" class="btn btn-warning"><i class="fa-solid fa-eraser"></i> Clear</button> *@
+                                <button type="button" class="btn btn-warning" @onclick="ClearFormConfirm"><i class="fa-solid fa-eraser"></i> Clear</button>
                             </div>
                         </div>
                     </div>
@@ -217,6 +259,27 @@
 
     bool formSubmitted = false;
 
+    //Hide navbar in layout component
+    [CascadingParameter]
+    public MainLayout? Layout { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Layout != null) {
+            Layout.HideNav();
+        }
+    }
+
+    public int? recordID { get; set; }
+    public string? action { get; set; }
+    public string? msgErrorTitle = null;
+    public MarkupString? msgError = null;
+    private Modal? modalError { get; set; }
+
+    public string? msgConfirmTitle = null;
+    public string? msgConfirm = null;
+    private Modal? modalConfirm { get; set; }
+
     public CriminalConvictionModel? criminalConviction { get; set; }
     public ICollection<CriminalConvictionModel>? criminalConvictionList { get; set; }
     [SupplyParameterFromForm]
@@ -231,32 +294,38 @@
 
     protected override async Task OnInitializedAsync()
     {
-        criminalConviction = new CriminalConvictionModel();
-        criminalConvictions = new CriminalConvictionsModel();
-        criminalConvictionList = new List<CriminalConvictionModel>();
-        criminalConvictionList.Add(criminalConviction);
-
-        criminalConvictions.Convictions = criminalConvictionList;
-
-        studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
-        try {
-            student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
+        if (StudentGUID == null) {
+            loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
         }
-        catch (HttpRequestException ex)
-        {
-            if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+        else {
+            studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+            try
             {
-                loadDataErrorMsg = $"You are not authorised to view this page";
+                student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
+
+                criminalConviction = CreateNewConviction();
+                criminalConvictions = new CriminalConvictionsModel();
+                criminalConvictionList = new List<CriminalConvictionModel>();
+                criminalConvictionList.Add(criminalConviction);
+
+                criminalConvictions.Convictions = criminalConvictionList;
             }
-            else if (ex.Message.Contains("404 (Not Found)"))
+            catch (HttpRequestException ex)
             {
-                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+                if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+                {
+                    loadDataErrorMsg = $"You are not authorised to view this page";
+                }
+                else if (ex.Message.Contains("404 (Not Found)"))
+                {
+                    loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
+                }
+                else if (ex.Message.Contains("400 (Bad Request)"))
+                {
+                    loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
+                }
+                else loadDataErrorMsg = $"Error: {ex.Message}";
             }
-            else if (ex.Message.Contains("400 (Bad Request)"))
-            {
-                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
-            }
-            else loadDataErrorMsg = $"Error: {ex.Message}";
         }
     }
 
@@ -272,12 +341,24 @@
         formEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction";
         try
         {
-            if (criminalConviction != null) {
+            if (criminalConviction != null)
+            {
                 HttpResponseMessage formResponse = await Http.PostAsJsonAsync<CriminalConvictionModel>(formEndPoint, criminalConviction);
+
+                if (formResponse.IsSuccessStatusCode != true)
+                {
+                    string responseBody = await formResponse.Content.ReadAsStringAsync();
+                    action = "Error";
+
+                    msgErrorTitle = $"Cannot Submit Form";
+                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />The error recieved was:<pre class=\"pre-scrollable ErrorDetails\">{responseBody}</pre>";
+
+                    modalError!.Open();
+                }
             }
             else
             {
-                formDataErrorMsg = "The form could not be submitted as the form values could not be read";
+                formDataErrorMsg = $"The form could not be submitted as the form values could not be read";
             }
 
         }
@@ -309,9 +390,25 @@
             formEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/Many";
             try
             {
-                if (criminalConvictions != null)
+                if (criminalConvictions?.Convictions?.Count > 0)
                 {
+                    //Clear out IDs set earlier as database will set these
+                    foreach (var conv in criminalConvictions?.Convictions!)
+                    {
+                        conv.CriminalConvictionID = 0;
+                    }
+
                     HttpResponseMessage formResponse = await Http.PostAsJsonAsync<ICollection<CriminalConvictionModel>>(formEndPoint, criminalConvictions.Convictions!);
+
+                    if (formResponse.IsSuccessStatusCode != true) {
+                        string responseBody = await formResponse.Content.ReadAsStringAsync();
+                        action = "Error";
+
+                        msgErrorTitle = $"Cannot Submit Form";
+                        msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />The error recieved was:<pre class=\"pre-scrollable ErrorDetails\">{responseBody}</pre>";
+
+                        modalError!.Open();
+                    }
                 }
                 else
                 {
@@ -342,18 +439,106 @@
         NavManager.NavigateTo("https://www.shcg.ac.uk");
     }
 
+    private CriminalConvictionModel CreateNewConviction() {
+        CriminalConvictionModel newConviction = new CriminalConvictionModel();
+        newConviction.CriminalConvictionID = criminalConvictions?.Convictions?.Count + 1 ?? 1;
+        newConviction.CreatedBy = student?.Email;
+        newConviction.CreatedDate = DateTime.Now;
+        newConviction.StudentDetailID = student?.StudentDetailID;
+        newConviction.AcademicYearID = student?.AcademicYearID;
+        newConviction.StudentRef = student?.StudentRef;
+
+        return newConviction;
+    }
+
     private void AddAnotherConviction()
     {
-        CriminalConvictionModel newConviction = new CriminalConvictionModel();
+        CriminalConvictionModel newConviction = CreateNewConviction();
         criminalConvictions?.Convictions?.Add(newConviction);
     }
 
     private void AddMoreConvictions() {
+        //Reset form
+        ClearForm();
         formSubmitted = false;
+    }
 
-        CriminalConvictionModel newConviction = new CriminalConvictionModel();
+    private void ClearFormAction() {
+        //Determine what clear form button should do on dialog box
+
+        if (action == "ClearFormConfirm") {
+            ClearForm();
+        }
+        else {
+            ClearFormEntry();
+        }
+    }
+
+    private void ClearFormConfirm() {
+        action = "ClearFormConfirm";
+
+        msgConfirmTitle = $"Clear Form?";
+        msgConfirm = $"Are you sure you want to clear all {criminalConvictions?.Convictions?.Count ?? 0} entries?";
+
+        modalConfirm!.Open();
+    }
+
+    private void ClearForm() {
+        action = "ClearForm";
+
+        criminalConviction = new CriminalConvictionModel();
         criminalConvictions = new CriminalConvictionsModel();
+        criminalConvictionList = new List<CriminalConvictionModel>();
+        criminalConvictionList.Add(criminalConviction);
 
-        criminalConvictions?.Convictions?.Add(newConviction);
+        criminalConvictions.Convictions = criminalConvictionList;
+
+        modalConfirm!.Close();
+    }
+
+    private void ClearFormEntryConfirm(int criminalConvictionID)
+    {
+        recordID = criminalConvictionID;
+        action = "ClearFormEntryConfirm";
+
+        msgConfirmTitle = $"Clear Form Entry?";
+        msgConfirm = $"Are you sure you want to clear this entry?";
+
+        modalConfirm!.Open();
+    }
+
+    private void ClearFormEntry()
+    {
+        action = "ClearFormEntry";
+
+        modalConfirm!.Close();
+
+        if (criminalConvictions?.Convictions?.Count > 1) {
+            var criminalConvictionToDelete = criminalConvictionList?
+                .Where(c => c.CriminalConvictionID == recordID).FirstOrDefault();
+
+            if (criminalConvictionToDelete != null) {
+                criminalConvictionList?
+                .Remove(criminalConvictionToDelete);
+            }
+            else {
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Remove This Offence";
+                msgError = (MarkupString)$"There was an error removing the offence. Please try again.";
+
+                modalError!.Open();
+            }
+        }
+        else {
+            action = "Error";
+
+            msgErrorTitle = $"Cannot Remove Last Offence";
+            msgError = (MarkupString)$"This offence cannot be removed as you must send us details of at least one offence.";
+
+            modalError!.Open();
+        }
+        
+        
     }
 }

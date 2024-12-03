@@ -35,6 +35,8 @@ namespace ProSolutionForms.Models
     {
         public CriminalConvictionValidator()
         {
+            RuleFor(c => c.DateOfOffence).NotNull().WithMessage("You must provide details of the offence");
+            RuleFor(c => c.DateOfOffence).LessThanOrEqualTo(DateTime.Today).WithMessage("The date of the offence must not be in the future");
             RuleFor(c => c.Offence).NotEmpty();
         }
     }
