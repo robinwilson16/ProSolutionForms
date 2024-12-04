@@ -10,6 +10,48 @@
 
 <PageTitle>Criminal Conviction Form</PageTitle>
 
+<Modal @ref="modalInfo">
+    <Title><i class="fa-solid fa-circle-info"></i> @msgInfoTitle</Title>
+    <Body>
+        <p>
+            @msgInfo
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalError">
+    <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
+    <Body>
+        <div class="alert alert-danger" role="alert">
+            @msgError
+        </div>
+        @if (msgErrorStackTrace != null) 
+        {
+            <p><i class="fa-solid fa-bug"></i> Stack Trace:</p>
+            <pre class="pre-scrollable ErrorDetails">@msgErrorStackTrace</pre>
+        }
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalConfirm">
+    <Title><i class="fa-solid fa-circle-question"></i> @msgConfirmTitle</Title>
+    <Body>
+        <p>
+            @msgConfirm
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-danger" @onclick="ClearFormConfirm"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
+    </Footer>
+</Modal>
+
 <div class="container">
     <div class="row">
         <div class="col-md text-center">
@@ -22,7 +64,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md text-center">
-                <h3 class="mt-3 mb-3"><i class="fa-solid fa-handcuffs"></i> Criminal Conviction Form</h3>
+                <h3 class="mt-3 mb-3"><i class="fa-solid fa-building-shield"></i> Criminal Conviction Form</h3>
             </div>
         </div>
     </div>
@@ -56,10 +98,10 @@
                             <h1><i class="fa-solid fa-clipboard-check"></i></h1>
                         </div>
                         <div class="me-auto">
-                            <h4 class="alert-heading">Criminal Convictions Successfully Submitted</h4>
+                            <h4 class="alert-heading">Criminal Conviction Successfully Submitted</h4>
                             <hr>
                             <p>
-                                Thank you for declaring your Criminal Convictions.
+                                Thank you for declaring your Criminal Conviction.
                             </p>
                             <p>
                                 We will be in touch with you soon to discuss the next steps.
@@ -91,22 +133,30 @@
         </div>
     }
     else {
-        <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey">
+        <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
             <div class="container">
                 <div class="row mb-3 align-items-center">
                     <div class="col-md-4">
                         <i class="fa-solid fa-user"></i> Name
                     </div>
                     <div class="col-md-8">
-                        @student?.Forename @student?.Surname
+                        <strong>@student?.Forename @student?.Surname</strong>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-briefcase"></i> Curriculum Area
+                    </div>
+                    <div class="col-md-8">
+                        @student?.TeamName
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
                     <div class="col-md-4">
                         <i class="fa-solid fa-graduation-cap"></i> Course
                     </div>
                     <div class="col-md-8">
-                        Course Here
+                        @student?.CourseCode - @student?.CourseTitle
                     </div>
                 </div>
             </div>
@@ -199,6 +249,32 @@
 
     bool formSubmitted = false;
 
+    //Hide navbar in layout component
+    [CascadingParameter]
+    public MainLayout? Layout { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Layout != null) {
+            Layout.HideNav();
+        }
+    }
+
+    public string? action { get; set; }
+
+    private Modal? modalInfo { get; set; }
+    public string? msgInfoTitle = null;
+    public MarkupString? msgInfo = null;
+
+    private Modal? modalError { get; set; }
+    public string? msgErrorTitle = null;
+    public MarkupString? msgError = null;
+    public string? msgErrorStackTrace = null;
+
+    private Modal? modalConfirm { get; set; }
+    public string? msgConfirmTitle = null;
+    public MarkupString? msgConfirm = null;
+
     [SupplyParameterFromForm]
     public CriminalConvictionModel? criminalConviction { get; set; }
 
@@ -234,20 +310,61 @@
 
     private string? formEndPoint;
     public string? formDataErrorMsg = null;
+
+    private void ClearFormConfirm()
+    {
+        action = "ClearFormConfirm";
+
+        msgConfirmTitle = $"Clear Form?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear all information on this form?";
+
+        modalConfirm!.Open();
+    }
+
+    private void ClearForm()
+    {
+        action = "ClearForm";
+
+        criminalConviction ??= new();
+
+        modalConfirm!.Close();
+    }
+
     private async Task SubmitForm()
     {
+        //Not using this now as submitting many at once (below)
+
         formSubmitted = true;
         Logger.LogInformation("Id = {Id}", criminalConviction?.CriminalConvictionID);
 
         formEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction";
         try
         {
-            if (criminalConviction != null) {
+            if (criminalConviction != null)
+            {
                 HttpResponseMessage formResponse = await Http.PostAsJsonAsync<CriminalConvictionModel>(formEndPoint, criminalConviction);
+
+                if (formResponse.IsSuccessStatusCode != true)
+                {
+                    string responseBody = await formResponse.Content.ReadAsStringAsync();
+                    action = "Error";
+
+                    msgErrorTitle = $"Cannot Submit Form";
+                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                    msgErrorStackTrace = responseBody;
+
+                    modalError!.Open();
+                }
             }
             else
             {
-                formDataErrorMsg = "The form could not be submitted as the form values could not be read";
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Submit Form";
+                msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
             }
 
         }

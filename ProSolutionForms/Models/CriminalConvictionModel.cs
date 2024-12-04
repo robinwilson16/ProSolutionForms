@@ -6,6 +6,7 @@ namespace ProSolutionForms.Models
 {
     public class CriminalConvictionModel
     {
+        [Key]
         public int CriminalConvictionID { get; set; }
         public DateTime? DateOfOffence { get; set; }
 
@@ -35,9 +36,9 @@ namespace ProSolutionForms.Models
     {
         public CriminalConvictionValidator()
         {
-            RuleFor(c => c.DateOfOffence).NotNull().WithMessage("You must provide details of the offence");
+            RuleFor(c => c.DateOfOffence).NotNull().WithMessage("You must provide the date of the offence");
             RuleFor(c => c.DateOfOffence).LessThanOrEqualTo(DateTime.Today).WithMessage("The date of the offence must not be in the future");
-            RuleFor(c => c.Offence).NotEmpty();
+            RuleFor(c => c.Offence).NotEmpty().WithMessage("You must provide details of the offence");
         }
     }
 }

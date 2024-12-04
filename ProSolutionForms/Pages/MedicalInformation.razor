@@ -1,0 +1,646 @@
+﻿@page "/MedicalInformation"
+@page "/MedicalInformation/{StudentGUID}"
+
+@using ProSolutionForms.Models
+@using System.Net
+@inject HttpClient Http
+@inject IConfiguration configuration
+@inject NavigationManager NavManager
+@inject ILogger<MedicalInformation> Logger
+
+<PageTitle>Medical Information Form</PageTitle>
+
+<Modal @ref="modalInfo">
+    <Title><i class="fa-solid fa-circle-info"></i> @msgInfoTitle</Title>
+    <Body>
+        <p>
+            @msgInfo
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalError">
+    <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
+    <Body>
+        <div class="alert alert-danger" role="alert">
+            @msgError
+        </div>
+        @if (msgErrorStackTrace != null) 
+        {
+            <p><i class="fa-solid fa-bug"></i> Stack Trace:</p>
+            <pre class="pre-scrollable ErrorDetails">@msgErrorStackTrace</pre>
+        }
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalConfirm">
+    <Title><i class="fa-solid fa-circle-question"></i> @msgConfirmTitle</Title>
+    <Body>
+        <p>
+            @msgConfirm
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-danger" @onclick="ClearFormConfirm"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
+    </Footer>
+</Modal>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md text-center">
+            <img class="img-fluid CollegeLogo" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+        </div>
+    </div>
+</div>
+
+<div class="bd-callout bd-callout-SHCG-blue bd-callout-grey">
+    <div class="container">
+        <div class="row">
+            <div class="col-md text-center">
+                <h3 class="mt-3 mb-3"><i class="fa-solid fa-notes-medical"></i> Medical Information Form</h3>
+            </div>
+        </div>
+    </div>
+
+    @if (loadDataErrorMsg != null) 
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                @loadDataErrorMsg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (formSubmitted == true)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-success hstack gap-3" role="alert">
+                        <div class="ms-auto me-3">
+                            <h1><i class="fa-solid fa-clipboard-check"></i></h1>
+                        </div>
+                        <div class="me-auto">
+                            <h4 class="alert-heading">Medical Information Successfully Submitted</h4>
+                            <hr>
+                            <p>
+                                Thank you for declaring your Medical Information.
+                            </p>
+                            <p>
+                                We will be in touch with you soon to discuss the next steps.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="row">
+                            <div class="col-md text-end">
+                                <button type="button" class="btn btn-success" @onclick="GoToSHCGHomepage"><i class="fa-solid fa-arrow-up-right-from-square"></i> Go To The SHCG Website</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if(student == null) {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-primary text-center" role="alert">
+                        <h1>
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else {
+        <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
+            <div class="container">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-user"></i> Name
+                    </div>
+                    <div class="col-md-8">
+                        <strong>@student?.Forename @student?.Surname</strong>
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-briefcase"></i> Curriculum Area
+                    </div>
+                    <div class="col-md-8">
+                        @student?.TeamName
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-graduation-cap"></i> Course
+                    </div>
+                    <div class="col-md-8">
+                        @student?.CourseCode - @student?.CourseTitle
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <EditForm FormName="MedicalInformation" Model="medicalInformation" OnValidSubmit="SubmitForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                        
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Requires Risk Assesment</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.RequiresRiskAssesment" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.RequiresRiskAssesment)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Has Been Hospitalised In Last Year</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.HasBeenHospitalisedInLastYear" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasBeenHospitalisedInLastYear)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-note-sticky"></i> <label class="col-form-label">Hospitalisation Notes</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputTextArea @bind-Value="medicalInformation!.HospitalisationNotes" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalInformation!.HospitalisationNotes)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Requires Learning Support</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.RequiresLearningSupport" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.RequiresLearningSupport)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Has EHCP</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.HasEHCP" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasEHCP)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Is LAC</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.IsLAC" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.IsLAC)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Is Care Leaver</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.IsCareLeaver" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.IsCareLeaver)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Has FSM</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.HasFSM" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasFSM)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Is From Military Service Family</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.IsFromMilitaryServiceFamily" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.IsFromMilitaryServiceFamily)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Has Access Arrangements</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.HasAccessArrangements" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasAccessArrangements)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-note-sticky"></i> <label class="col-form-label">Access Requirement Details</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputTextArea @bind-Value="medicalInformation!.AccessRequirementDetails" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalInformation!.AccessRequirementDetails)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-note-sticky"></i> <label class="col-form-label">Support In Place At Prior School Or College</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputTextArea @bind-Value="medicalInformation!.SupportInPlaceAtPriorSchoolOrCollege" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalInformation!.SupportInPlaceAtPriorSchoolOrCollege)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Can Contact Prior School Or College</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.CanContactPriorSchoolOrCollege" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.CanContactPriorSchoolOrCollege)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Has Criminal Convictions</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.HasCriminalConvictions" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasCriminalConvictions)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-note-sticky"></i> <label class="col-form-label">Criminal Conviction Details</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputTextArea @bind-Value="medicalInformation!.CriminalConvictionDetails" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalInformation!.CriminalConvictionDetails)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Can Share Information With Potential Employers</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.CanShareInformationWithPotentialEmployers" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.CanShareInformationWithPotentialEmployers)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Agree Info Is Correct</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.AgreeInfoIsCorrect" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.AgreeInfoIsCorrect)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-file-contract"></i> <label class="col-form-label">Signed Student</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputText @bind-Value="medicalInformation!.SignedStudent" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalInformation!.SignedStudent)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-regular fa-calendar-days"></i> <label class="col-form-label">Signed Student Date</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputDate @bind-Value="medicalInformation!.SignedStudentDate" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalInformation!.SignedStudentDate)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-file-contract"></i> <label class="col-form-label">Signed Parent/Carer</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputText @bind-Value="medicalInformation!.SignedParentCarer" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalInformation!.SignedParentCarer)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-regular fa-calendar-days"></i> <label class="col-form-label">Signed Parent/Carer Date</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputDate @bind-Value="medicalInformation!.SignedParentCarerDate" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalInformation!.SignedParentCarerDate)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Has Given Trip Consent Student</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.HasGivenTripConsentStudent" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasGivenTripConsentStudent)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Has Given Trip Consent Parent/Carer</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.HasGivenTripConsentParentCarer" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasGivenTripConsentParentCarer)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3 align-items-center">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Has Given Photographic Images Consent</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputSelect @bind-Value="medicalInformation!.HasGivenPhotographicImagesConsent" class="form-select">
+                                        <option value=null>-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasGivenPhotographicImagesConsent)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-secondary" role="alert">
+                <div class="row">
+                    <div class="col-md">
+                        <div class="row g-3 justify-content-md-center">
+                            <div class="col-md-auto">
+                                <button type="submit" class="btn btn-success"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+                            </div>
+                            <div class="col-md-auto">
+                                <button type="reset" class="btn btn-warning"><i class="fa-solid fa-eraser"></i> Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? StudentGUID { get; set; }
+
+    bool formSubmitted = false;
+
+    //Hide navbar in layout component
+    [CascadingParameter]
+    public MainLayout? Layout { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Layout != null) {
+            Layout.HideNav();
+        }
+    }
+
+    public string? action { get; set; }
+
+    private Modal? modalInfo { get; set; }
+    public string? msgInfoTitle = null;
+    public MarkupString? msgInfo = null;
+
+    private Modal? modalError { get; set; }
+    public string? msgErrorTitle = null;
+    public MarkupString? msgError = null;
+    public string? msgErrorStackTrace = null;
+
+    private Modal? modalConfirm { get; set; }
+    public string? msgConfirmTitle = null;
+    public MarkupString? msgConfirm = null;
+
+    [SupplyParameterFromForm]
+    public MedicalInformationModel? medicalInformation { get; set; }
+
+    public string? loadDataErrorMsg = null;
+
+    private StudentModel? student;
+    private string? studentEndPoint;
+    protected override async Task OnInitializedAsync()
+    {
+        medicalInformation ??= new();
+
+        studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+        try {
+            student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+            {
+                loadDataErrorMsg = $"You are not authorised to view this page";
+            }
+            else if (ex.Message.Contains("404 (Not Found)"))
+            {
+                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+            }
+            else if (ex.Message.Contains("400 (Bad Request)"))
+            {
+                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+            }
+            else loadDataErrorMsg = $"Error: {ex.Message}";
+        }
+    }
+
+    private string? formEndPoint;
+    public string? formDataErrorMsg = null;
+
+    private void ClearFormConfirm()
+    {
+        action = "ClearFormConfirm";
+
+        msgConfirmTitle = $"Clear Form?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear all information on this form?";
+
+        modalConfirm!.Open();
+    }
+
+    private void ClearForm()
+    {
+        action = "ClearForm";
+
+        medicalInformation ??= new();
+
+        modalConfirm!.Close();
+    }
+
+    private async Task SubmitForm()
+    {
+        //Not using this now as submitting many at once (below)
+
+        formSubmitted = true;
+        Logger.LogInformation("Id = {Id}", medicalInformation?.MedicalInformationID);
+
+        formEndPoint = $"{configuration["APIEndpoint"]}/MedicalInformation";
+        try
+        {
+            if (medicalInformation != null)
+            {
+                HttpResponseMessage formResponse = await Http.PostAsJsonAsync<MedicalInformationModel>(formEndPoint, medicalInformation);
+
+                if (formResponse.IsSuccessStatusCode != true)
+                {
+                    string responseBody = await formResponse.Content.ReadAsStringAsync();
+                    action = "Error";
+
+                    msgErrorTitle = $"Cannot Submit Form";
+                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                    msgErrorStackTrace = responseBody;
+
+                    modalError!.Open();
+                }
+            }
+            else
+            {
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Submit Form";
+                msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
+            }
+
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+            {
+                loadDataErrorMsg = $"You are not authorised to view this page";
+            }
+            else if (ex.Message.Contains("404 (Not Found)"))
+            {
+                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+            }
+            else if (ex.Message.Contains("400 (Bad Request)"))
+            {
+                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
+            }
+            else loadDataErrorMsg = $"Error: {ex.Message}";
+        }
+    }
+
+    private void GoToSHCGHomepage() {
+        NavManager.NavigateTo("https://www.shcg.ac.uk");
+    }
+}

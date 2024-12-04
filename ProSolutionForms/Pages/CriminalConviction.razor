@@ -10,12 +10,29 @@
 
 <PageTitle>Criminal Conviction Form</PageTitle>
 
+<Modal @ref="modalInfo">
+    <Title><i class="fa-solid fa-circle-info"></i> @msgInfoTitle</Title>
+    <Body>
+        <p>
+            @msgInfo
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+    </Footer>
+</Modal>
+
 <Modal @ref="modalError">
     <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
     <Body>
-        <p>
+        <div class="alert alert-danger" role="alert">
             @msgError
-        </p>
+        </div>
+        @if (msgErrorStackTrace != null) 
+        {
+            <p><i class="fa-solid fa-bug"></i> Stack Trace:</p>
+            <pre class="pre-scrollable ErrorDetails">@msgErrorStackTrace</pre>
+        }
     </Body>
     <Footer>
         <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
@@ -272,13 +289,20 @@
 
     public int? recordID { get; set; }
     public string? action { get; set; }
+
+    private Modal? modalInfo { get; set; }
+    public string? msgInfoTitle = null;
+    public MarkupString? msgInfo = null;
+
+    private Modal? modalError { get; set; }
     public string? msgErrorTitle = null;
     public MarkupString? msgError = null;
-    private Modal? modalError { get; set; }
+    public string? msgErrorStackTrace = null;
 
-    public string? msgConfirmTitle = null;
-    public string? msgConfirm = null;
     private Modal? modalConfirm { get; set; }
+    public string? msgConfirmTitle = null;
+    public MarkupString? msgConfirm = null;
+
 
     public CriminalConvictionModel? criminalConviction { get; set; }
     public ICollection<CriminalConvictionModel>? criminalConvictionList { get; set; }
@@ -330,7 +354,6 @@
     }
 
     private string? formEndPoint;
-    public string? formDataErrorMsg = null;
     private async Task SubmitForm()
     {
         //Not using this now as submitting many at once (below)
@@ -351,14 +374,21 @@
                     action = "Error";
 
                     msgErrorTitle = $"Cannot Submit Form";
-                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />The error recieved was:<pre class=\"pre-scrollable ErrorDetails\">{responseBody}</pre>";
+                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                    msgErrorStackTrace = responseBody;
 
                     modalError!.Open();
                 }
             }
             else
             {
-                formDataErrorMsg = $"The form could not be submitted as the form values could not be read";
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Submit Form";
+                msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
             }
 
         }
@@ -405,14 +435,21 @@
                         action = "Error";
 
                         msgErrorTitle = $"Cannot Submit Form";
-                        msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />The error recieved was:<pre class=\"pre-scrollable ErrorDetails\">{responseBody}</pre>";
+                        msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                        msgErrorStackTrace = responseBody;
 
                         modalError!.Open();
                     }
                 }
                 else
                 {
-                    formDataErrorMsg = "The form could not be submitted as the form values could not be read";
+                    action = "Error";
+
+                    msgErrorTitle = $"Cannot Submit Form";
+                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
+                    msgErrorStackTrace = null;
+
+                    modalError!.Open();
                 }
 
             }
@@ -478,7 +515,7 @@
         action = "ClearFormConfirm";
 
         msgConfirmTitle = $"Clear Form?";
-        msgConfirm = $"Are you sure you want to clear all {criminalConvictions?.Convictions?.Count ?? 0} entries?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear all {criminalConvictions?.Convictions?.Count ?? 0} entries?";
 
         modalConfirm!.Open();
     }
@@ -502,7 +539,7 @@
         action = "ClearFormEntryConfirm";
 
         msgConfirmTitle = $"Clear Form Entry?";
-        msgConfirm = $"Are you sure you want to clear this entry?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear this entry?";
 
         modalConfirm!.Open();
     }
@@ -526,6 +563,7 @@
 
                 msgErrorTitle = $"Cannot Remove This Offence";
                 msgError = (MarkupString)$"There was an error removing the offence. Please try again.";
+                msgErrorStackTrace = null;
 
                 modalError!.Open();
             }
@@ -535,10 +573,9 @@
 
             msgErrorTitle = $"Cannot Remove Last Offence";
             msgError = (MarkupString)$"This offence cannot be removed as you must send us details of at least one offence.";
+            msgErrorStackTrace = null;
 
             modalError!.Open();
         }
-        
-        
     }
 }
