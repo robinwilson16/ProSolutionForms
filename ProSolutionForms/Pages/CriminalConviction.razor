@@ -316,6 +316,8 @@
     private StudentModel? student;
     private string? studentEndPoint;
 
+    private string? submitEndPoint;
+
     protected override async Task OnInitializedAsync()
     {
         if (StudentGUID == null) {
@@ -327,12 +329,8 @@
             {
                 student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
 
-                criminalConviction = CreateNewConviction();
-                criminalConvictions = new CriminalConvictionsModel();
-                criminalConvictionList = new List<CriminalConvictionModel>();
-                criminalConvictionList.Add(criminalConviction);
-
-                criminalConvictions.Convictions = criminalConvictionList;
+                //Create objects to hold form entries
+                CreateNewObjects();
             }
             catch (HttpRequestException ex)
             {
@@ -353,7 +351,46 @@
         }
     }
 
-    private string? formEndPoint;
+    public void CreateNewObjects()
+    {
+        //Main Model
+        criminalConviction = CreateNewConviction();
+
+        //Parent Model
+        criminalConvictions = new CriminalConvictionsModel();
+
+        criminalConvictionList = new List<CriminalConvictionModel>();
+        criminalConvictionList.Add(criminalConviction);
+
+        criminalConvictions.Convictions = criminalConvictionList;
+    }
+
+    private CriminalConvictionModel CreateNewConviction()
+    {
+        CriminalConvictionModel newConviction = new CriminalConvictionModel();
+        newConviction.CriminalConvictionID = criminalConvictions?.Convictions?.Count + 1 ?? 1;
+        newConviction.CreatedBy = student?.Email;
+        newConviction.CreatedDate = DateTime.Now;
+        newConviction.StudentDetailID = student?.StudentDetailID;
+        newConviction.AcademicYearID = student?.AcademicYearID;
+        newConviction.StudentRef = student?.StudentRef;
+
+        return newConviction;
+    }
+
+    private void AddAnotherConviction()
+    {
+        CriminalConvictionModel newConviction = CreateNewConviction();
+        criminalConvictions?.Convictions?.Add(newConviction);
+    }
+
+    private void AddMoreConvictions()
+    {
+        //Reset form
+        ClearForm();
+        formSubmitted = false;
+    }
+
     private async Task SubmitForm()
     {
         //Not using this now as submitting many at once (below)
@@ -361,12 +398,12 @@
         formSubmitted = true;
         Logger.LogInformation("Id = {Id}", criminalConviction?.CriminalConvictionID);
 
-        formEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction";
+        submitEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction";
         try
         {
             if (criminalConviction != null)
             {
-                HttpResponseMessage formResponse = await Http.PostAsJsonAsync<CriminalConvictionModel>(formEndPoint, criminalConviction);
+                HttpResponseMessage formResponse = await Http.PostAsJsonAsync<CriminalConvictionModel>(submitEndPoint, criminalConviction);
 
                 if (formResponse.IsSuccessStatusCode != true)
                 {
@@ -394,19 +431,7 @@
         }
         catch (HttpRequestException ex)
         {
-            if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
-            {
-                loadDataErrorMsg = $"You are not authorised to view this page";
-            }
-            else if (ex.Message.Contains("404 (Not Found)"))
-            {
-                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
-            }
-            else if (ex.Message.Contains("400 (Bad Request)"))
-            {
-                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
-            }
-            else loadDataErrorMsg = $"Error: {ex.Message}";
+            HandleJsonException(ex, "GUID");
         }
     }
 
@@ -417,7 +442,7 @@
             formSubmitted = true;
             Logger.LogInformation("Id = {Id}", criminalConviction?.CriminalConvictionID);
 
-            formEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/Many";
+            submitEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/Many";
             try
             {
                 if (criminalConvictions?.Convictions?.Count > 0)
@@ -428,7 +453,7 @@
                         conv.CriminalConvictionID = 0;
                     }
 
-                    HttpResponseMessage formResponse = await Http.PostAsJsonAsync<ICollection<CriminalConvictionModel>>(formEndPoint, criminalConvictions.Convictions!);
+                    HttpResponseMessage formResponse = await Http.PostAsJsonAsync<ICollection<CriminalConvictionModel>>(submitEndPoint, criminalConvictions.Convictions!);
 
                     if (formResponse.IsSuccessStatusCode != true) {
                         string responseBody = await formResponse.Content.ReadAsStringAsync();
@@ -455,49 +480,13 @@
             }
             catch (HttpRequestException ex)
             {
-                if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
-                {
-                    loadDataErrorMsg = $"You are not authorised to view this page";
-                }
-                else if (ex.Message.Contains("404 (Not Found)"))
-                {
-                    loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
-                }
-                else if (ex.Message.Contains("400 (Bad Request)"))
-                {
-                    loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
-                }
-                else loadDataErrorMsg = $"Error: {ex.Message}";
+                HandleJsonException(ex, "GUID");
             }
         }
     }
 
     private void GoToSHCGHomepage() {
         NavManager.NavigateTo("https://www.shcg.ac.uk");
-    }
-
-    private CriminalConvictionModel CreateNewConviction() {
-        CriminalConvictionModel newConviction = new CriminalConvictionModel();
-        newConviction.CriminalConvictionID = criminalConvictions?.Convictions?.Count + 1 ?? 1;
-        newConviction.CreatedBy = student?.Email;
-        newConviction.CreatedDate = DateTime.Now;
-        newConviction.StudentDetailID = student?.StudentDetailID;
-        newConviction.AcademicYearID = student?.AcademicYearID;
-        newConviction.StudentRef = student?.StudentRef;
-
-        return newConviction;
-    }
-
-    private void AddAnotherConviction()
-    {
-        CriminalConvictionModel newConviction = CreateNewConviction();
-        criminalConvictions?.Convictions?.Add(newConviction);
-    }
-
-    private void AddMoreConvictions() {
-        //Reset form
-        ClearForm();
-        formSubmitted = false;
     }
 
     private void ClearFormAction() {
@@ -576,6 +565,26 @@
             msgErrorStackTrace = null;
 
             modalError!.Open();
+        }
+    }
+
+    private void HandleJsonException(HttpRequestException ex, string objectName)
+    {
+        if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+        {
+            loadDataErrorMsg = $"You are not authorised to view this page";
+        }
+        else if (ex.Message.Contains("404 (Not Found)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+        }
+        else if (ex.Message.Contains("400 (Bad Request)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+        }
+        else
+        {
+            loadDataErrorMsg = $"Error: {ex.Message}";
         }
     }
 }

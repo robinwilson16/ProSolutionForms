@@ -12,16 +12,27 @@
 .bd-callout-SHCG-blue {
     border-left-color: #84b9e5 !important;
 }
+    .bd-callout-SHCG-blue h4 {
+        color: #84b9e5;
+    }
 .bd-callout-SHCG-green {
     border-left-color: #b7d432 !important;
 }
+    .bd-callout-SHCG-green h4 {
+        color: #b7d432;
+    }
 .bd-callout-SHCG-yellow {
     border-left-color: #dbca21 !important;
 }
-
+    .bd-callout-SHCG-yellow h4 {
+        color: #dbca21;
+    }
 .bd-callout-SHCG-teal {
     border-left-color: #88cdaa !important;
 }
+    .bd-callout-SHCG-teal h4 {
+        color: #88cdaa;
+    }
 
 .bd-callout-SHCG-warning {
     border-left-color: #FF6F00 !important;
@@ -42,4 +53,8 @@
 .ErrorDetails {
     max-height: 240px;
     background-color: #CCCCCC;
+}
+
+.YesNoButton {
+    min-width: 100px;
 }

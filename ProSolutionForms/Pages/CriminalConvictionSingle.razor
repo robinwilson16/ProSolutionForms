@@ -292,19 +292,7 @@
         }
         catch (HttpRequestException ex)
         {
-            if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
-            {
-                loadDataErrorMsg = $"You are not authorised to view this page";
-            }
-            else if (ex.Message.Contains("404 (Not Found)"))
-            {
-                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
-            }
-            else if (ex.Message.Contains("400 (Bad Request)"))
-            {
-                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
-            }
-            else loadDataErrorMsg = $"Error: {ex.Message}";
+            HandleJsonException(ex, "GUID");
         }
     }
 
@@ -370,23 +358,31 @@
         }
         catch (HttpRequestException ex)
         {
-            if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
-            {
-                loadDataErrorMsg = $"You are not authorised to view this page";
-            }
-            else if (ex.Message.Contains("404 (Not Found)"))
-            {
-                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
-            }
-            else if (ex.Message.Contains("400 (Bad Request)"))
-            {
-                loadDataErrorMsg = $"The GUID \"{StudentGUID}\" does not exist";
-            }
-            else loadDataErrorMsg = $"Error: {ex.Message}";
+            HandleJsonException(ex, "GUID");
         }
     }
 
     private void GoToSHCGHomepage() {
         NavManager.NavigateTo("https://www.shcg.ac.uk");
+    }
+
+    private void HandleJsonException(HttpRequestException ex, string objectName)
+    {
+        if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+        {
+            loadDataErrorMsg = $"You are not authorised to view this page";
+        }
+        else if (ex.Message.Contains("404 (Not Found)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+        }
+        else if (ex.Message.Contains("400 (Bad Request)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+        }
+        else
+        {
+            loadDataErrorMsg = $"Error: {ex.Message}";
+        }
     }
 }
