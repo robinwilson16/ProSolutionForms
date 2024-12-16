@@ -9,8 +9,10 @@ namespace ProSolutionForms.Models
         [Key]
         public int MedicalInformationID { get; set; }
         public ICollection<MedicalInformationEmergencyContactModel>? EmergencyContacts { get; set; }
+        public bool? HasMedicalCondition { get; set; }
         public ICollection<MedicalInformationMedicalConditionModel>? MedicalConditions { get; set; }
-        public ICollection<MedicalInformationDisabilityDifficultyModel>? DisabilitiesDifficulties { get; set; }
+        public bool? HasDifficultyDisability { get; set; }
+        public ICollection<MedicalInformationDifficultyDisabilityModel>? DifficultiesDisabilities { get; set; }
         public bool? RequiresRiskAssesment { get; set; }
         public bool? HasBeenHospitalisedInLastYear { get; set; }
         public string? HospitalisationNotes { get; set; }

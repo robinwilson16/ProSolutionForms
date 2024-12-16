@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "ZXGHT/kr",
+  "version": "pQdN48SR",
   "assets": [
     {
       "hash": "sha256-flyJw3lFRitW9ja/e7u/Az2oPojpf7GFlfuxvx4rg0U=",
@@ -40,6 +40,10 @@ self.assetsManifest = {
     {
       "hash": "sha256-fpFq3tiKl2KyIwwxqx00V0KgBM6xAe3+4MacTs9d0c0=",
       "url": "_framework/Microsoft.CSharp.mnvthyn9ga.wasm"
+    },
+    {
+      "hash": "sha256-rSAeMm0pOMtQzfvBLoxEhvWxA7kNZL/jbx8DIMqcDd0=",
+      "url": "_framework/Microsoft.EntityFrameworkCore.Abstractions.l68t6vbs1c.wasm"
     },
     {
       "hash": "sha256-Be4qQkqKq9ZefQTu5oOnkHxOzbKy0D4XKHTLiRLKG5E=",
@@ -122,12 +126,12 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.Win32.Registry.yqsrs1xmzk.wasm"
     },
     {
-      "hash": "sha256-Kqqu4eIkzZbnNX2OcFknSV0SpSDRyuI8MU3VHqBp5j8=",
-      "url": "_framework/ProSolutionForms.itn1n0bsyn.wasm"
+      "hash": "sha256-FdatAG9vCGdwR/bfE0v0vZ5RhbJ498ZOXrMMfCmfnJk=",
+      "url": "_framework/ProSolutionForms.dup9b04bw9.wasm"
     },
     {
-      "hash": "sha256-m9RRaKX50TK9LLKhcE8yjQkJT8O4wgDwFLpHLxXSdGA=",
-      "url": "_framework/ProSolutionForms.xl1pb73jki.pdb"
+      "hash": "sha256-GnVT4MkVdFzUFEUYtYfypoN9YwaP4a0VDCgBcjPqhG4=",
+      "url": "_framework/ProSolutionForms.m8rwhelps0.pdb"
     },
     {
       "hash": "sha256-HbRkDUeB2xv5LFtTNVUn+9DHnbGuihOXCt1EQd2esZc=",
@@ -778,7 +782,7 @@ self.assetsManifest = {
       "url": "_framework/WindowsBase.377bly7twj.wasm"
     },
     {
-      "hash": "sha256-nDnCDrObe5+ZcPXH7uIs18QoMw5T9BN8H264FhYZBaA=",
+      "hash": "sha256-KpXZCusk5Zq0pxTpz0jSrWwUXAN+HPIHVTPj6OX0Dgc=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -830,11 +834,11 @@ self.assetsManifest = {
       "url": "_framework/netstandard.hb3h2rr8mk.wasm"
     },
     {
-      "hash": "sha256-p6FEwfSPm1cGmrnj3Hm3F/OPcVHR/ftmtD0m6SaEqx8=",
+      "hash": "sha256-EhNh9FIvoEvV7Hv5SSzxaDQ6OaNuCIalR96urM6pntQ=",
       "url": "appsettings.json"
     },
     {
-      "hash": "sha256-hCMqkAiTGzPQXFsjdUGaVn+1IJ7GcEWQAi+1l2kCnVI=",
+      "hash": "sha256-vjviBtZDKe5i9gB0Q8KjU06elHGeMqqvC6bby2tA6Mg=",
       "url": "css/ProSolutionForms.css"
     },
     {

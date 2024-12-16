@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ProSolutionForms")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+196cb57ba8649f496407497d9ea6ddc49ebd616e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+82ddf2a27522bee343a13fc3ced2972280b5201b")]
 [assembly: System.Reflection.AssemblyProductAttribute("ProSolutionForms")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ProSolutionForms")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

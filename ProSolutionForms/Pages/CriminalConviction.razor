@@ -47,7 +47,7 @@
         </p>
     </Body>
     <Footer>
-        <button type="button" class="btn btn-danger" @onclick="ClearFormAction"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-danger" @onclick="FormAction"><i class="fa-solid fa-trash"></i> Yes</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
     </Footer>
 </Modal>
@@ -111,7 +111,7 @@
                     <div class="alert alert-secondary" role="alert">
                         <div class="row">
                             <div class="col-md">
-                                <button type="button" class="btn btn-primary" @onclick="AddMoreConvictions"><i class="fa-solid fa-handcuffs"></i> Add Another Criminal Conviction</button>
+                                <button type="button" class="btn btn-primary" @onclick="ResetForm"><i class="fa-solid fa-handcuffs"></i> Add Another Criminal Conviction</button>
                             </div>
                             <div class="col-md text-end">
                                 <button type="button" class="btn btn-success" @onclick="GoToSHCGHomepage"><i class="fa-solid fa-arrow-up-right-from-square"></i> Go To The SHCG Website</button>
@@ -168,12 +168,13 @@
         <EditForm FormName="CriminalConvictions" Model="criminalConvictions" OnSubmit="SubmitMany">
             <FluentValidationValidator @ref="_fluentValidationValidator" />
 
-            @if (criminalConvictions != null) {
+            @if (criminalConvictions != null) 
+            {
                 @if (criminalConvictions.Convictions != null)
                 {
-                    int? formEntryRow = 0;
+                    int? criminalConvictionRow = 0;
                     foreach (var conv in criminalConvictions.Convictions) {
-                        formEntryRow++;
+                        criminalConvictionRow++;
 
                         <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
                             <div class="container">
@@ -229,8 +230,10 @@
                                             </div>
                                         </div>
                                         <div class="row g-3 mb-3">
-                                            <div class="col-md text-end">
-                                                <button type="button" class="btn btn-danger" @onclick="() => ClearFormEntryConfirm(conv?.CriminalConvictionID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Offence</button>
+                                            <div class="col-md">
+                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveCriminalConvictionConfirm(conv?.CriminalConvictionID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Offence</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -245,8 +248,10 @@
 
             <div class="container">
                 <div class="row">
-                    <div class="col-md text-end">
-                        <button type="button" class="btn btn-primary mb-3" @onclick="AddAnotherConviction"><i class="fa-solid fa-file-circle-plus"></i> Record Details of Another Offence</button>
+                    <div class="col-md">
+                        <div class="d-grid gap-2 d-md-block text-end">
+                            <button type="button" class="btn btn-primary mb-3" @onclick="AddAnotherConviction"><i class="fa-solid fa-file-circle-plus"></i> Record Details of Another Offence</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -254,14 +259,9 @@
             <div class="alert alert-secondary" role="alert">
                 <div class="row">
                     <div class="col-md">
-                        <div class="row g-3 justify-content-md-center">
-                            <div class="col-md-auto">
-                                <button type="submit" class="btn btn-success"><i class="fa-solid fa-paper-plane"></i> Submit</button>
-                            </div>
-                            <div class="col-md-auto">
-                                @* <button type="reset" class="btn btn-warning"><i class="fa-solid fa-eraser"></i> Clear</button> *@
-                                <button type="button" class="btn btn-warning" @onclick="ClearFormConfirm"><i class="fa-solid fa-eraser"></i> Clear</button>
-                            </div>
+                        <div class="d-grid gap-2 d-md-block text-center">
+                            <button type="submit" class="btn btn-success me-md-3"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+                            <button type="button" class="btn btn-warning" @onclick="ClearFormConfirm"><i class="fa-solid fa-eraser"></i> Clear</button>
                         </div>
                     </div>
                 </div>
@@ -287,7 +287,7 @@
         }
     }
 
-    public int? recordID { get; set; }
+    public int? criminalConvictionID { get; set; }
     public string? action { get; set; }
 
     private Modal? modalInfo { get; set; }
@@ -354,7 +354,7 @@
     public void CreateNewObjects()
     {
         //Main Model
-        criminalConviction = CreateNewConviction();
+        criminalConviction = AddConviction();
 
         //Parent Model
         criminalConvictions = new CriminalConvictionsModel();
@@ -365,7 +365,7 @@
         criminalConvictions.Convictions = criminalConvictionList;
     }
 
-    private CriminalConvictionModel CreateNewConviction()
+    private CriminalConvictionModel AddConviction()
     {
         CriminalConvictionModel newConviction = new CriminalConvictionModel();
         newConviction.CriminalConvictionID = criminalConvictions?.Convictions?.Count + 1 ?? 1;
@@ -380,11 +380,11 @@
 
     private void AddAnotherConviction()
     {
-        CriminalConvictionModel newConviction = CreateNewConviction();
+        CriminalConvictionModel newConviction = AddConviction();
         criminalConvictions?.Convictions?.Add(newConviction);
     }
 
-    private void AddMoreConvictions()
+    private void ResetForm()
     {
         //Reset form
         ClearForm();
@@ -489,14 +489,24 @@
         NavManager.NavigateTo("https://www.shcg.ac.uk");
     }
 
-    private void ClearFormAction() {
+    private void FormAction() {
         //Determine what clear form button should do on dialog box
 
         if (action == "ClearFormConfirm") {
             ClearForm();
         }
+        else if (action == "RemoveCriminalConvictionConfirm")
+        {
+            RemoveCriminalConviction();
+        }
         else {
-            ClearFormEntry();
+            action = "Error";
+
+            msgErrorTitle = $"Invalid Action";
+            msgError = (MarkupString)$"An invalid option was specified. Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
         }
     }
 
@@ -522,30 +532,30 @@
         modalConfirm!.Close();
     }
 
-    private void ClearFormEntryConfirm(int criminalConvictionID)
+    private void RemoveCriminalConvictionConfirm(int recordID)
     {
-        recordID = criminalConvictionID;
-        action = "ClearFormEntryConfirm";
+        criminalConvictionID = recordID;
+        action = "RemoveCriminalConvictionConfirm";
 
-        msgConfirmTitle = $"Clear Form Entry?";
-        msgConfirm = (MarkupString)$"Are you sure you want to clear this entry?";
+        msgConfirmTitle = $"Remove Criminal Conviction?";
+        msgConfirm = (MarkupString)$"Are you sure you want to remove this criminal conviction?";
 
         modalConfirm!.Open();
     }
 
-    private void ClearFormEntry()
+    private void RemoveCriminalConviction()
     {
-        action = "ClearFormEntry";
+        action = "RemoveCriminalConviction";
 
         modalConfirm!.Close();
 
         if (criminalConvictions?.Convictions?.Count > 1) {
-            var criminalConvictionToDelete = criminalConvictionList?
-                .Where(c => c.CriminalConvictionID == recordID).FirstOrDefault();
+            var recordToDelete = criminalConvictionList?
+                .Where(c => c.CriminalConvictionID == criminalConvictionID).FirstOrDefault();
 
-            if (criminalConvictionToDelete != null) {
+            if (recordToDelete != null) {
                 criminalConvictionList?
-                .Remove(criminalConvictionToDelete);
+                .Remove(recordToDelete);
             }
             else {
                 action = "Error";

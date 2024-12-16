@@ -66,8 +66,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>kkp1frdq33</Fingerprint>
-      <Integrity>TL2po2h7okepXp18mRWFIMero/A3be62HVS7Y5RlYnQ=</Integrity>
+      <Fingerprint>e812t75z10</Fingerprint>
+      <Integrity>vjviBtZDKe5i9gB0Q8KjU06elHGeMqqvC6bby2tA6Mg=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ProSolutionForms.css'))</OriginalItemSpec>

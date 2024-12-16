@@ -12,8 +12,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName>WasmResource</AssetTraitName>
       <AssetTraitValue>settings</AssetTraitValue>
-      <Fingerprint>fy9t6dn5iy</Fingerprint>
-      <Integrity>p6FEwfSPm1cGmrnj3Hm3F/OPcVHR/ftmtD0m6SaEqx8=</Integrity>
+      <Fingerprint>u0lao3yh6a</Fingerprint>
+      <Integrity>EhNh9FIvoEvV7Hv5SSzxaDQ6OaNuCIalR96urM6pntQ=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\appsettings.json'))</OriginalItemSpec>
@@ -66,8 +66,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>8l0abw9n1g</Fingerprint>
-      <Integrity>hCMqkAiTGzPQXFsjdUGaVn+1IJ7GcEWQAi+1l2kCnVI=</Integrity>
+      <Fingerprint>e812t75z10</Fingerprint>
+      <Integrity>vjviBtZDKe5i9gB0Q8KjU06elHGeMqqvC6bby2tA6Mg=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ProSolutionForms.css'))</OriginalItemSpec>

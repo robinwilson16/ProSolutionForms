@@ -48,7 +48,7 @@
         </p>
     </Body>
     <Footer>
-        <button type="button" class="btn btn-danger" @onclick="ClearFormAction"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-danger" @onclick="FormAction"><i class="fa-solid fa-trash"></i> Yes</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
     </Footer>
 </Modal>
@@ -61,7 +61,7 @@
     </div>
 </div>
 
-<div class="bd-callout bd-callout-SHCG-blue bd-callout-grey">
+<div class="bd-callout bd-callout-SHCG-blue bd-callout-grey GreyBackground">
     <div class="container">
         <div class="row">
             <div class="col-md text-center">
@@ -181,7 +181,7 @@
                     {
                         emergencyContactRow++;
 
-                        <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey">
+                        <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
                             <div class="container">
                                 <div class="row">
                                     <div class="col-md">
@@ -228,8 +228,8 @@
                                                 </InputSelect>
                                                 <ValidationMessage For="@(() => contact!.Title)" /> *@
 
-                                                <InputText @bind-Value="contact!.Title" class="form-control" list="Titles" />
-                                                <datalist class="col-4" id="Titles">
+                                                <InputText @bind-Value="contact!.Title" class="form-control" list="TitlesList" />
+                                                <datalist class="col-4" id="TitlesList">
                                                     @if (Titles != null)
                                                     {
                                                         @foreach (var option in Titles)
@@ -247,8 +247,8 @@
                                                 <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Relationship</label>
                                             </div>
                                             <div class="col-md-8">
-                                                <InputNumber @bind-Value="contact!.RelationshipToStudent" class="form-control" list="Relationships" />
-                                                <datalist class="col-4" id="Relationships">
+                                                <InputNumber @bind-Value="contact!.RelationshipToStudent" class="form-control" list="RelationshipsList" />
+                                                <datalist class="col-4" id="RelationshipsList">
                                                     @if (Relationships != null)
                                                     {
                                                         @foreach (var option in Relationships)
@@ -354,13 +354,128 @@
                 }
             }
 
-            <div class="bd-callout bd-callout-SHCG-green bd-callout-grey">
+            <div class="bd-callout bd-callout-SHCG-green bd-callout-grey WhiteBackground">
                 <div class="container">
                     <div class="row">
                         <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Medical Information</h4>
+                                </div>
+                            </div>
+
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
-                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Do you (or your parent/guardian) believe your medical condition/s requires a risk assessment to be completed?’</label>
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Do you have any medical conditions?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalInformation!.HasMedicalCondition" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalInformation!.HasMedicalCondition == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasMedicalConditionToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalInformation!.HasMedicalCondition == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasMedicalConditionToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasMedicalCondition)" />
+                                </div>
+                            </div>
+
+                            @* Medical Conditions List *@
+
+                            @if (medicalInformation?.MedicalConditions != null)
+                            {
+                                int? medicalInformationRow = 0;
+                                <div class="alert alert-warning" role="alert">
+                                    <h4 class="alert-heading"><i class="fa-solid fa-notes-medical"></i> Medical Conditions</h4>
+
+                                    <datalist class="col-4" id="MedicalConditionTypesList">
+                                        @if (MedicalConditionTypes != null)
+                                        {
+                                            @foreach (var option in MedicalConditionTypes)
+                                            {
+                                                <option value="@option.Code">@option.Description</option>
+                                            }
+                                        }
+                                    </datalist>
+
+                                    @foreach (var condition in medicalInformation!.MedicalConditions)
+                                    {
+                                        medicalInformationRow++;
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md">
+                                                <div class="card">
+                                                    <div class="card-body">
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Medical Condition</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputNumber @bind-Value="condition!.MedicalConditionTypeID" class="form-control" list="MedicalConditionTypesList" />
+                                                                <ValidationMessage For="@(() => condition!.MedicalConditionTypeID)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Medication Details</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputTextArea @bind-Value="condition!.MedicationDetails" class="form-control" />
+                                                                <ValidationMessage For="@(() => condition!.MedicationDetails)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Medication Schedule</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputTextArea @bind-Value="condition!.MedicationSchedule" class="form-control" />
+                                                                <ValidationMessage For="@(() => condition!.MedicationSchedule)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Notes</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputTextArea @bind-Value="condition!.Notes" class="form-control" />
+                                                                <ValidationMessage For="@(() => condition!.Notes)" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md">
+                                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveMedicalConditionConfirm(condition?.MedicalInformationMedicalConditionID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Medical Condition</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="alert alert-secondary" role="alert">
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                    <button type="submit" class="btn btn-warning me-md-3" @onclick="AddMedicalCondition"><i class="fa-solid fa-notes-medical"></i> Add Another Medical Condition</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Do you (or your parent/guardian) believe any medical conditions you have (if any) require a risk assessment to be completed? If you have none then please select No</label>
                                 </div>
                                 <div class="col-md-8">
                                     <CustomBoolInputSelect @bind-Value="medicalInformation!.RequiresRiskAssesment" class="form-select d-none">
@@ -444,7 +559,136 @@
                                     <ValidationMessage For="@(() => medicalInformation!.HasEHCP)" />
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="bd-callout bd-callout-SHCG-blue bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Difficulties and Disabilities</h4>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Do you have any difficulties and/or disabilities?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalInformation!.HasDifficultyDisability" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalInformation!.HasDifficultyDisability == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasDifficultyDisabilityToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalInformation!.HasDifficultyDisability == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasDifficultyDisabilityToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalInformation!.HasDifficultyDisability)" />
+                                </div>
+                            </div>
+
+                            @* Difficulties/Disabilities List *@
+
+                            @if (medicalInformation?.DifficultiesDisabilities != null)
+                            {
+                                int? difficultyDisabilityRow = 0;
+                                <div class="alert alert-warning" role="alert">
+                                    <h4 class="alert-heading"><i class="fa-brands fa-accessible-icon"></i> Difficulties/Disabilities</h4>
+
+                                    <datalist class="col-4" id="DifficultiesDisabilitiesList">
+                                        @if (DisabilityCategories != null)
+                                        {
+                                            @foreach (var option in DisabilityCategories)
+                                            {
+                                                <option value="@option.Code">@option.Description</option>
+                                            }
+                                        }
+                                    </datalist>
+
+                                    @foreach (var difficultyDisability in medicalInformation!.DifficultiesDisabilities)
+                                    {
+                                        difficultyDisabilityRow++;
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md">
+                                                <div class="card">
+                                                    <div class="card-body">
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Difficulties/Disabilities</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputNumber @bind-Value="difficultyDisability!.DisabilityCategoryID" class="form-control" list="DifficultiesDisabilitiesList" />
+                                                                <ValidationMessage For="@(() => difficultyDisability!.DisabilityCategoryID)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Notes</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputTextArea @bind-Value="difficultyDisability!.Notes" class="form-control" />
+                                                                <ValidationMessage For="@(() => difficultyDisability!.Notes)" />
+                                                            </div>
+                                                        </div>
+
+                                                        @{bool isPrimary = difficultyDisability!.IsPrimary ?? false;}
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Is Primary</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputCheckbox @bind-Value="isPrimary" class="form-control" />
+                                                                <ValidationMessage For="@(() => isPrimary)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md">
+                                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveDifficultyDisabilityConfirm(difficultyDisability?.MedicalInformationDifficultyDisabilityID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Difficulty/Disability</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="alert alert-secondary" role="alert">
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                    <button type="submit" class="btn btn-warning me-md-3" @onclick="AddDifficultyDisability"><i class="fa-brands fa-accessible-icon"></i> Add Another Difficulty/Disability</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Home Situation and Support at School</h4>
+                                </div>
+                            </div>
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Are you currently a Looked After Child?*</label>
@@ -564,12 +808,25 @@
                                     <ValidationMessage For="@(() => medicalInformation!.SupportInPlaceAtPriorSchoolOrCollege)" />
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Consents and Delarations</h4>
+                                </div>
+                            </div>
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <label class="col-form-label">
                                         <i class="fa-solid fa-angles-right"></i> Can we contact your school/college/other for details of your learning
-                                        difficulty/disability and obtain copies of any relevant documents?
+                                        difficulties/disabilities (if any) and obtain copies of any relevant documents? If you have none then please select No.
                                     </label>
                                     <div class="text-body-secondary">
                                         Please note that if we are not allowed to obtain information about your learning
@@ -757,17 +1014,13 @@
                     </div>
                 </div>
             </div>
-            Action @action
+
             <div class="alert alert-secondary" role="alert">
                 <div class="row">
                     <div class="col-md">
-                        <div class="row g-3 justify-content-md-center">
-                            <div class="col-md-auto">
-                                <button type="submit" class="btn btn-success"><i class="fa-solid fa-paper-plane"></i> Submit</button>
-                            </div>
-                            <div class="col-md-auto">
-                                <button type="button" class="btn btn-warning" @onclick="ClearFormConfirm"><i class="fa-solid fa-eraser"></i> Clear</button>
-                            </div>
+                        <div class="d-grid gap-2 d-md-block text-center">
+                            <button type="submit" class="btn btn-success me-md-3"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+                            <button type="button" class="btn btn-warning" @onclick="ClearFormConfirm"><i class="fa-solid fa-eraser"></i> Clear</button>
                         </div>
                     </div>
                 </div>
@@ -793,6 +1046,8 @@
         }
     }
 
+    public int? medicalConditionID { get; set; }
+    public int? difficultyDisabilityID { get; set; }
     public string? action { get; set; }
 
     private Modal? modalInfo { get; set; }
@@ -811,6 +1066,8 @@
     [SupplyParameterFromForm]
     public MedicalInformationModel? medicalInformation { get; set; }
     public List<MedicalInformationEmergencyContactModel>? emergencyContacts { get; set; }
+    public List<MedicalInformationMedicalConditionModel>? medicalConditions { get; set; }
+    public List<MedicalInformationDifficultyDisabilityModel>? difficultiesDisabilities { get; set; }
 
     private FluentValidationValidator? _fluentValidationValidator;
 
@@ -837,6 +1094,8 @@
         CreateNewObjects();
 
         //Populate Drop-Downs
+        await LoadDisabilityCategories();
+        await LoadMedicalConditionTypes();
         await LoadTitles();
         await LoadRelationships();
     }
@@ -872,20 +1131,58 @@
     private MedicalInformationEmergencyContactModel CreateNewEmergencyContact()
     {
         MedicalInformationEmergencyContactModel newEmergencyContact = new MedicalInformationEmergencyContactModel();
+        newEmergencyContact.MedicalInformationEmergencyContactID = medicalInformation?.EmergencyContacts?.Count + 1 ?? 1;
         newEmergencyContact.ContactOrder = medicalInformation?.EmergencyContacts?.Count + 1 ?? 1;
 
         return newEmergencyContact;
     }
 
-    private void ClearFormAction() {
+    private MedicalInformationMedicalConditionModel CreateNewMedicalCondition()
+    {
+        MedicalInformationMedicalConditionModel newMedicalCondition = new MedicalInformationMedicalConditionModel();
+        newMedicalCondition.MedicalInformationMedicalConditionID = medicalInformation?.MedicalConditions?.Count + 1 ?? 1;
+
+        return newMedicalCondition;
+    }
+
+    private MedicalInformationDifficultyDisabilityModel CreateNewDifficultyDisability()
+    {
+        MedicalInformationDifficultyDisabilityModel newDifficultyDisability = new MedicalInformationDifficultyDisabilityModel();
+        newDifficultyDisability.MedicalInformationDifficultyDisabilityID = medicalInformation?.DifficultiesDisabilities?.Count + 1 ?? 1;
+
+        return newDifficultyDisability;
+    }
+
+    private void FormAction() {
         //Determine what clear form button should do on dialog box
 
         if (action == "ClearFormConfirm") {
             ClearForm();
         }
+        else if (action == "RemoveMedicalConditionConfirm")
+        {
+            RemoveMedicalCondition();
+        }
+        else if (action == "RemoveAllMedicalConditionsConfirm")
+        {
+            RemoveAllMedicalConditions();
+        }
+        else if (action == "RemoveDifficultyDisabilityConfirm")
+        {
+            RemoveDifficultyDisability();
+        }
+        else if (action == "RemoveAllDifficultiesDisabilitiesConfirm")
+        {
+            RemoveAllDifficultiesDisabilities();
+        }
         else {
-            //To clear a part of the form only
-            //ClearFormEntry();
+            action = "Error";
+
+            msgErrorTitle = $"Invalid Action";
+            msgError = (MarkupString)$"An invalid option was specified. Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
         }
     }
 
@@ -920,6 +1217,20 @@
             {
                 if (medicalInformation != null)
                 {
+                    //Clear out IDs set earlier as database will set these
+                    foreach (var contact in medicalInformation?.EmergencyContacts!)
+                    {
+                        contact.MedicalInformationEmergencyContactID = 0;
+                    }
+                    foreach (var contact in medicalInformation?.MedicalConditions!)
+                    {
+                        contact.MedicalInformationMedicalConditionID = 0;
+                    }
+                    foreach (var contact in medicalInformation?.DifficultiesDisabilities!)
+                    {
+                        contact.MedicalInformationDifficultyDisabilityID = 0;
+                    }
+
                     HttpResponseMessage formResponse = await Http.PostAsJsonAsync<MedicalInformationModel>(submitEndPoint, medicalInformation);
 
                     if (formResponse.IsSuccessStatusCode != true)
@@ -958,10 +1269,34 @@
     }
 
     //Functions to update drop down on button press
+    public void HasMedicalConditionToggle(bool? trueOrFalse) 
+    {
+        if (trueOrFalse == true) 
+        {
+            medicalInformation!.HasMedicalCondition = trueOrFalse;
+            AddMedicalCondition();
+        }
+        else {
+            RemoveAllMedicalConditionsConfirm();
+        }
+    }
     public void RequiresRiskAssesmentToggle(bool? trueOrFalse) => medicalInformation!.RequiresRiskAssesment = trueOrFalse;
     public void HasBeenHospitalisedInLastYearToggle(bool? trueOrFalse) => medicalInformation!.HasBeenHospitalisedInLastYear = trueOrFalse;
     public void RequiresLearningSupportToggle(bool? trueOrFalse) => medicalInformation!.RequiresLearningSupport = trueOrFalse;
     public void HasEHCPToggle(bool? trueOrFalse) => medicalInformation!.HasEHCP = trueOrFalse;
+    public void HasDifficultyDisabilityToggle(bool? trueOrFalse)
+    {
+        medicalInformation!.HasDifficultyDisability = trueOrFalse;
+
+        if (trueOrFalse == true)
+        {
+            AddDifficultyDisability();
+        }
+        else
+        {
+            RemoveAllDifficultiesDisabilitiesConfirm();
+        }
+    }
     public void IsLACToggle(bool? trueOrFalse) => medicalInformation!.IsLAC = trueOrFalse;
     public void IsCareLeaverToggle(bool? trueOrFalse) => medicalInformation!.IsCareLeaver = trueOrFalse;
     public void HasFSMToggle(bool? trueOrFalse) => medicalInformation!.HasFSM = trueOrFalse;
@@ -975,6 +1310,178 @@
     public void HasGivenTripConsentParentCarerToggle(bool? trueOrFalse) => medicalInformation!.HasGivenTripConsentParentCarer = trueOrFalse;
     public void HasGivenPhotographicImagesConsentToggle(bool? trueOrFalse) => medicalInformation!.HasGivenPhotographicImagesConsent = trueOrFalse;
 
+    //Medical condition actions
+    public void AddMedicalCondition() 
+    {
+        medicalConditions ??= new();
+        medicalConditions?.Add(CreateNewMedicalCondition());
+
+        if (medicalInformation != null) {
+            medicalInformation!.MedicalConditions ??= medicalConditions;
+        }
+    }
+
+    private void RemoveMedicalConditionConfirm(int recordID)
+    {
+        medicalConditionID = recordID;
+        action = "RemoveMedicalConditionConfirm";
+
+        msgConfirmTitle = $"Remove Medical Condition?";
+        msgConfirm = (MarkupString)$"Are you sure you want to remove this medical condition?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveMedicalCondition()
+    {
+        action = "RemoveMedicalCondition";
+
+        modalConfirm!.Close();
+
+        if (medicalInformation?.MedicalConditions?.Count > 1)
+        {
+            var recordToDelete = medicalInformation.MedicalConditions?
+                .Where(c => c.MedicalInformationMedicalConditionID == medicalConditionID).FirstOrDefault();
+
+            if (recordToDelete != null)
+            {
+                medicalInformation.MedicalConditions?
+                .Remove(recordToDelete);
+            }
+            else
+            {
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Remove This Medical Condition";
+                msgError = (MarkupString)$"There was an error removing the medical condition. Please try again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
+            }
+        }
+        else
+        {
+            action = "Error";
+
+            msgErrorTitle = $"Cannot Remove Last Medical Condition";
+            msgError = (MarkupString)$"This medical condition cannot be removed as you must send us details of at least one. If you do not have any please select No to the question above";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void RemoveAllMedicalConditionsConfirm()
+    {
+        action = "RemoveAllMedicalConditionsConfirm";
+
+        msgConfirmTitle = $"Remove All Medical Conditions?";
+        msgConfirm = (MarkupString)$"Setting this to no will clear the {medicalInformation?.MedicalConditions?.Count ?? 0} medical conditions entered below. Are you sure you wish to clear these?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveAllMedicalConditions()
+    {
+        action = "RemoveAllMedicalConditions";
+
+        medicalInformation!.HasMedicalCondition = false;
+        medicalConditions = new List<MedicalInformationMedicalConditionModel>();
+
+        modalConfirm!.Close();
+
+        if (medicalInformation != null)
+        {
+            medicalInformation!.MedicalConditions = null;
+        }
+    }
+
+    public void AddDifficultyDisability()
+    {
+        difficultiesDisabilities ??= new();
+        difficultiesDisabilities?.Add(CreateNewDifficultyDisability());
+
+        if (difficultiesDisabilities != null)
+        {
+            medicalInformation!.DifficultiesDisabilities ??= difficultiesDisabilities;
+        }
+    }
+
+    private void RemoveDifficultyDisabilityConfirm(int recordID)
+    {
+        difficultyDisabilityID = recordID;
+        action = "RemoveDifficultyDisabilityConfirm";
+
+        msgConfirmTitle = $"Remove Difficulty/Disability?";
+        msgConfirm = (MarkupString)$"Are you sure you want to remove this difficulty/disability?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveDifficultyDisability()
+    {
+        action = "RemoveDifficultyDisability";
+
+        modalConfirm!.Close();
+
+        if (medicalInformation?.DifficultiesDisabilities?.Count > 1)
+        {
+            var recordToDelete = medicalInformation.DifficultiesDisabilities?
+                .Where(d => d.MedicalInformationDifficultyDisabilityID == difficultyDisabilityID).FirstOrDefault();
+
+            if (recordToDelete != null)
+            {
+                medicalInformation.DifficultiesDisabilities?
+                .Remove(recordToDelete);
+            }
+            else
+            {
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Remove This Difficulty/Disability";
+                msgError = (MarkupString)$"There was an error removing the difficulty/disability. Please try again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
+            }
+        }
+        else
+        {
+            action = "Error";
+
+            msgErrorTitle = $"Cannot Remove Last Difficulty/Disability";
+            msgError = (MarkupString)$"This difficulty/disability cannot be removed as you must send us details of at least one. If you do not have any please select No to the question above";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void RemoveAllDifficultiesDisabilitiesConfirm()
+    {
+        action = "RemoveAllDifficultiesDisabilitiesConfirm";
+
+        msgConfirmTitle = $"Remove All Difficulties/Disabilities?";
+        msgConfirm = (MarkupString)$"Setting this to no will clear the {medicalInformation?.DifficultiesDisabilities?.Count ?? 0} difficulties/disabilities entered below. Are you sure you wish to clear these?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveAllDifficultiesDisabilities()
+    {
+        action = "RemoveAllDifficultiesDisabilities";
+
+        medicalInformation!.HasDifficultyDisability = false;
+        difficultiesDisabilities = new List<MedicalInformationDifficultyDisabilityModel>();
+
+        modalConfirm!.Close();
+
+        if (medicalInformation != null)
+        {
+            medicalInformation!.DifficultiesDisabilities = null;
+        }
+    }
+
     //DropDowns
     // public List<DropDownModel> Titles { get; } = new List<DropDownModel>
     // {
@@ -984,6 +1491,38 @@
     // };
 
     //Values for drop-downs
+    public static List<DropDownIntModel>? DisabilityCategories { get; private set; }
+    public async Task LoadDisabilityCategories()
+    {
+        string endPoint = $"{configuration["APIEndpoint"]}/DisabilityCategory";
+        try
+        {
+            DisabilityCategories = await Http.GetFromJsonAsync<List<DropDownIntModel>>(endPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            DisabilityCategories = new List<DropDownIntModel>();
+            HandleJsonException(ex, "DisabilityCategory");
+        }
+    }
+    public static List<DropDownIntModel> GetDisabilityCategories() => DisabilityCategories ?? new List<DropDownIntModel>();
+
+    public static List<DropDownIntModel>? MedicalConditionTypes { get; private set; }
+    public async Task LoadMedicalConditionTypes()
+    {
+        string endPoint = $"{configuration["APIEndpoint"]}/MedicalConditionType";
+        try
+        {
+            MedicalConditionTypes = await Http.GetFromJsonAsync<List<DropDownIntModel>>(endPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            MedicalConditionTypes = new List<DropDownIntModel>();
+            HandleJsonException(ex, "MedicalConditionType");
+        }
+    }
+    public static List<DropDownIntModel> GetMedicalConditionTypes() => MedicalConditionTypes ?? new List<DropDownIntModel>();
+
     public static List<DropDownStringModel>? Titles { get; private set; }
     public async Task LoadTitles()
     {
