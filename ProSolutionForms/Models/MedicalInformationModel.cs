@@ -59,10 +59,18 @@ namespace ProSolutionForms.Models
         public MedicalInformationValidator()
         {
             RuleFor(m => m.EmergencyContacts).ForEach(x => x.SetValidator(new MedicalInformationEmergencyContactValidator()));
+            RuleFor(m => m.MedicalConditions).ForEach(x => x.SetValidator(new MedicalInformationMedicalConditionValidator()));
+            RuleFor(m => m.HasMedicalCondition).NotNull().WithMessage("Please state whether you have any medical conditions");
             RuleFor(m => m.RequiresRiskAssesment).NotNull().WithMessage("Please state whether you require a risk assessment");
             RuleFor(m => m.HasBeenHospitalisedInLastYear).NotNull().WithMessage("Please state whether you have been hospitalised in the last year");
             RuleFor(m => m.RequiresLearningSupport).NotNull().WithMessage("Please state whether you require learning support");
             RuleFor(m => m.HasEHCP).NotNull().WithMessage("Please state whether you have an Educational Health Care Plan");
+            RuleFor(m => m.HasDifficultyDisability).NotNull().WithMessage("Please state whether you have any difficulties and/or disabilities");
+            RuleFor(m => m.DifficultiesDisabilities).ForEach(x => x.SetValidator(new MedicalInformationDifficultyDisabilityValidator()));
+            RuleFor(m => m.DifficultiesDisabilities)
+                .Must(d => d?.Where(d => d.IsPrimary == true).Count() == 1)
+                .WithMessage("Please ensure only one difficulty/disability is set as the primary");
+            RuleForEach(m => m.DifficultiesDisabilities).SetValidator(x => new MedicalInformationDifficultyDisabilityIsPrimaryErrorValidator(x?.DifficultiesDisabilities?.Where(d => d.IsPrimary == true)?.Count()));
             RuleFor(m => m.IsLAC).NotNull().WithMessage("Please state whether you are a looked after child");
             RuleFor(m => m.IsCareLeaver).NotNull().WithMessage("Please state whether you are a care leaver");
             RuleFor(m => m.HasFSM).NotNull().WithMessage("Please state whether you recieve free school meals");
@@ -70,13 +78,29 @@ namespace ProSolutionForms.Models
             RuleFor(m => m.HasCriminalConvictions).NotNull().WithMessage("Please state whether you have any criminal convictions");
             RuleFor(m => m.CanShareInformationWithPotentialEmployers).NotNull().WithMessage("Please state whether we may share your information with potential employers");
             RuleFor(m => m.AgreeInfoIsCorrect).NotNull().WithMessage("Please state whether you agree the information above is correct");
+            RuleFor(m => m.SignedParentCarer)
+                .NotNull()
+                .When(m => m.SignedStudent == null)
+                .WithMessage("Please type your name in the box to confirm the information entered is correct either as a student or parent/carer");
+            RuleFor(m => m.SignedStudent)
+                .NotNull()
+                .When(m => m.SignedParentCarer == null)
+                .WithMessage("Please type your name in the box to confirm the information entered is correct either as a student or parent/carer");
+            RuleFor(m => m.SignedParentCarerDate)
+                .NotNull()
+                .When(m => m.SignedParentCarer != null)
+                .WithMessage("Please enter the date you are confirming the information to be correct");
+            RuleFor(m => m.SignedStudentDate)
+                .NotNull()
+                .When(m => m.SignedStudent != null)
+                .WithMessage("Please enter the date you are confirming the information to be correct");
             RuleFor(m => m.HasGivenTripConsentStudent)
                 .NotNull()
-                .When(m => m.HasGivenTripConsentParentCarer != null)
+                .When(m => m.HasGivenTripConsentParentCarer == null)
                 .WithMessage("Please confirm whether you provide your consent for trips and visits either as a student or parent/carer");
             RuleFor(m => m.HasGivenTripConsentParentCarer)
                 .NotNull()
-                .When(m => m.HasGivenTripConsentStudent != null)
+                .When(m => m.HasGivenTripConsentStudent == null)
                 .WithMessage("Please confirm whether you provide your consent for trips and visits either as a student or parent/carer");
             RuleFor(m => m.HasGivenPhotographicImagesConsent).NotNull().WithMessage("Please state whether you provide consent for the use of any photographic images");
         }

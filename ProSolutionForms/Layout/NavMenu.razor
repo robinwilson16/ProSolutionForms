@@ -1,4 +1,5 @@
-﻿
+﻿@using System.Reflection;
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href=""><i class="fa-solid fa-file-circle-check"></i> ProSolution Forms</a>
@@ -36,6 +37,7 @@
             </NavLink>
         </div>
     </nav>
+    <div class="fixed-bottom VersionText m-3">Version @ProductVersion</div>
 </div>
 
 @code {
@@ -47,4 +49,6 @@
     {
         collapseNavMenu = !collapseNavMenu;
     }
+
+    private string? ProductVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
 }

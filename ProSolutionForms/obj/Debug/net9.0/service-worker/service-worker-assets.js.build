@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "tAvBrPDw",
+  "version": "rthPXKSJ",
   "assets": [
     {
       "hash": "sha256-flyJw3lFRitW9ja/e7u/Az2oPojpf7GFlfuxvx4rg0U=",
@@ -126,12 +126,12 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.Win32.Registry.yqsrs1xmzk.wasm"
     },
     {
-      "hash": "sha256-YCx0yrQkLCEkHtLjop8iVtnfVk7Zk/fFkC4cy2xNWnQ=",
-      "url": "_framework/ProSolutionForms.4ny4cazu4t.pdb"
+      "hash": "sha256-/Y4Vhska4KLGFB+1OPxmNnG3Xmif1NC86+36P6dkOp8=",
+      "url": "_framework/ProSolutionForms.bekrlnyj9k.wasm"
     },
     {
-      "hash": "sha256-1VZoWSMMU5WUAgykX0f3IgCJsR+f/jPlmzyTjthrFL0=",
-      "url": "_framework/ProSolutionForms.rwpsrbnn84.wasm"
+      "hash": "sha256-QxA+HVuYAzHWnwk+UpCBJHdA2lD8OpOQnKU/ayxbtGQ=",
+      "url": "_framework/ProSolutionForms.hbedajzjcd.pdb"
     },
     {
       "hash": "sha256-HbRkDUeB2xv5LFtTNVUn+9DHnbGuihOXCt1EQd2esZc=",
@@ -782,7 +782,7 @@ self.assetsManifest = {
       "url": "_framework/WindowsBase.377bly7twj.wasm"
     },
     {
-      "hash": "sha256-b+qAQKg5ogtUgIGCGiuiGcb+B5KODq40+uZAYcg+0Ww=",
+      "hash": "sha256-w+wwtTauKRhsYRpeHIp2lbOJsYEt++M6m3ImrUqm5vs=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -834,7 +834,7 @@ self.assetsManifest = {
       "url": "_framework/netstandard.hb3h2rr8mk.wasm"
     },
     {
-      "hash": "sha256-p6FEwfSPm1cGmrnj3Hm3F/OPcVHR/ftmtD0m6SaEqx8=",
+      "hash": "sha256-RdNd6b2/hyYMupk7cz0Xc30hLmGs1Blv/PfqHttAF2o=",
       "url": "appsettings.json"
     },
     {

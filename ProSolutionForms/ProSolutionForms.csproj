@@ -5,6 +5,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+    <Title>ProSolution Forms</Title>
+    <Description>Forms for data capture using a secure GUID link to link each entry to a specific student</Description>
+    <Copyright>Robin Wilson</Copyright>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>1.0.2</AssemblyVersion>
+    <FileVersion>1.0.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
