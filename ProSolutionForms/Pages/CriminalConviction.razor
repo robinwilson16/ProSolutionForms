@@ -18,7 +18,7 @@
         </p>
     </Body>
     <Footer>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
     </Footer>
 </Modal>
 
@@ -35,7 +35,7 @@
         }
     </Body>
     <Footer>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
     </Footer>
 </Modal>
 
@@ -180,6 +180,7 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-md">
+
                                         <div class="row g-3 mb-3">
                                             <div class="col-md-4">
                                                 <i class="fa-regular fa-calendar-days"></i> <label class="col-form-label">Date of Offence</label>
@@ -229,6 +230,7 @@
                                                 <ValidationMessage For="@(() => conv!.ContactName)" />
                                             </div>
                                         </div>
+
                                         <div class="row g-3 mb-3">
                                             <div class="col-md">
                                                 <div class="d-grid gap-2 d-md-block text-end">
@@ -236,6 +238,7 @@
                                                 </div>
                                             </div>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>

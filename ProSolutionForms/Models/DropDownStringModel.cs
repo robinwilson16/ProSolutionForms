@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProSolutionForms.Models
 {
+    [NotMapped]
     public class DropDownStringModel
     {
         [Key]

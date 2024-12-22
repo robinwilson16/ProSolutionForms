@@ -58,3 +58,8 @@
 .YesNoButton {
     min-width: 100px;
 }
+
+.VersionText {
+    color: #CCCCCC;
+    font-size: 0.8em;
+}

@@ -1,0 +1,986 @@
+﻿@page "/FundingEligibilityDeclaration"
+@page "/FundingEligibilityDeclaration/{StudentGUID}"
+
+@using ProSolutionForms.Models
+@using ProSolutionForms.Shared
+@using System.Net
+@using Microsoft.JSInterop
+@inject HttpClient Http
+@inject IConfiguration configuration
+@inject NavigationManager NavManager
+@inject ILogger<MedicalInformation> Logger
+
+<PageTitle>Funding Eligibility Declaration Form</PageTitle>
+
+<Modal @ref="modalInfo">
+    <Title><i class="fa-solid fa-circle-info"></i> @msgInfoTitle</Title>
+    <Body>
+        <p>
+            @msgInfo
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalError">
+    <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
+    <Body>
+        <div class="alert alert-danger" role="alert">
+            @msgError
+        </div>
+        @if (msgErrorStackTrace != null) 
+        {
+            <p><i class="fa-solid fa-bug"></i> Stack Trace:</p>
+            <pre class="pre-scrollable ErrorDetails">@msgErrorStackTrace</pre>
+        }
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalConfirm">
+    <Title><i class="fa-solid fa-circle-question"></i> @msgConfirmTitle</Title>
+    <Body>
+        <p>
+            @msgConfirm
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-danger" @onclick="FormAction"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
+    </Footer>
+</Modal>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md text-center">
+            <img class="img-fluid CollegeLogo" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+        </div>
+    </div>
+</div>
+
+<div class="bd-callout bd-callout-SHCG-blue bd-callout-grey GreyBackground">
+    <div class="container">
+        <div class="row">
+            <div class="col-md text-center">
+                <h3 class="mt-3 mb-3"><i class="fa-solid fa-hand-holding-dollar"></i> Funding Eligibility Declaration Form</h3>
+            </div>
+        </div>
+    </div>
+
+    @if (loadDataErrorMsg != null) 
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                @loadDataErrorMsg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (formSubmitted == true)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-success hstack gap-3" role="alert">
+                        <div class="ms-auto me-3">
+                            <h1><i class="fa-solid fa-clipboard-check"></i></h1>
+                        </div>
+                        <div class="me-auto">
+                            <h4 class="alert-heading">Funding Eligibility Declaration Successfully Submitted</h4>
+                            <hr>
+                            <p>
+                                Thank you for declaring your Funding Eligibility.
+                            </p>
+                            <p>
+                                We will be in touch with you soon to discuss the next steps.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="row">
+                            <div class="col-md text-end">
+                                <button type="button" class="btn btn-success" @onclick="GoToSHCGHomepage"><i class="fa-solid fa-arrow-up-right-from-square"></i> Go To The SHCG Website</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if(student == null) {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-primary text-center" role="alert">
+                        <h1>
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else {
+        <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
+            <div class="container">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md text-center">
+                        <h4>Personal Information</h4>
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-user"></i> Name
+                    </div>
+                    <div class="col-md-8">
+                        <strong>@student?.Forename @student?.Surname</strong>
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-briefcase"></i> Curriculum Area
+                    </div>
+                    <div class="col-md-8">
+                        @student?.TeamName
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-graduation-cap"></i> Course
+                    </div>
+                    <div class="col-md-8">
+                        @student?.CourseCode - @student?.CourseTitle
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <EditForm FormName="FundingEligibilityDeclaration" Model="fundingEligibilityDeclaration" OnValidSubmit="SubmitForm">
+            <FluentValidationValidator @ref="_fluentValidationValidator" />
+            <ValidationSummary />
+
+            <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <datalist class="col-4" id="FeeExemptionReasonsList">
+                                @if (FeeExemptionReasons != null)
+                                {
+                                    @foreach (var option in FeeExemptionReasons)
+                                    {
+                                        <option value="@option.Code">@option.Description</option>
+                                    }
+                                }
+                            </datalist>
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Earnings Threshold - Full-Funding Eligibility Self-Declaration</h4>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-primary hstack gap-3" role="alert">
+                                <div>
+                                    <h1><i class="fa-solid fa-circle-info"></i></h1>
+                                </div>
+                                <div>
+                                    <p>
+                                        Learners who meet the residency eligibility and are below the earnings threshold or unemployed criteria can be fully funded for certain qualifications under Adult Skills Fund policy entitlements.
+                                    </p>
+                                    <p>
+                                        <strong>
+                                            Please indicate below which of the statement(s) meets your justification for full-funding eligibility
+                                        </strong>
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bd-callout bd-callout-SHCG-green bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Employed</h4>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-2">
+                                    <div class="input-group mb-3 d-none">
+                                        <InputNumber @bind-Value="fundingEligibilityDeclaration!.FeeExemptionReasonID" class="form-control" list="FeeExemptionReasonsList" />
+                                        <span class="input-group-text w-75">
+                                            @FeeExemptionReasons?.Where(m => m.Code == fundingEligibilityDeclaration!.FeeExemptionReasonID)?.FirstOrDefault()?.Description
+                                        </span>
+                                    </div>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(fundingEligibilityDeclaration!.FeeExemptionReasonID == 12? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => FeeExemptionReasonToggle(12)"><i class="@(fundingEligibilityDeclaration!.FeeExemptionReasonID == 12? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.FeeExemptionReasonID)" />
+                                </div>
+                                <div class="col-md-10">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Employed, or self-employed, and earn below &pound;25,000 annual gross salary</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bd-callout bd-callout-SHCG-blue bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Unemployed</h4>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-2">
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(fundingEligibilityDeclaration!.FeeExemptionReasonID == 15? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => FeeExemptionReasonToggle(15)"><i class="@(fundingEligibilityDeclaration!.FeeExemptionReasonID == 15? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.FeeExemptionReasonID)" />
+                                </div>
+                                <div class="col-md-10">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Receive Jobseeker’s Allowance (JSA), including National Insurance credits only</label>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-2">
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(fundingEligibilityDeclaration!.FeeExemptionReasonID == 2? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => FeeExemptionReasonToggle(2)"><i class="@(fundingEligibilityDeclaration!.FeeExemptionReasonID == 2? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.FeeExemptionReasonID)" />
+                                </div>
+                                <div class="col-md-10">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Receive Employment and Support Allowance (ESA)</label>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-2">
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(fundingEligibilityDeclaration!.FeeExemptionReasonID == 6? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => FeeExemptionReasonToggle(6)"><i class="@(fundingEligibilityDeclaration!.FeeExemptionReasonID == 6? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.FeeExemptionReasonID)" />
+                                </div>
+                                <div class="col-md-10">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Receive Universal Credits (UC), and take-home pay as recorded on UC statement (disregarding UC payments and other benefits) is less than &pound;892 a month (sole adult in benefit claim) or &pound;1,437 a month (joint benefit claim with partner)</label>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-2">
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(fundingEligibilityDeclaration!.FeeExemptionReasonID == 17? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => FeeExemptionReasonToggle(17)"><i class="@(fundingEligibilityDeclaration!.FeeExemptionReasonID == 17? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.FeeExemptionReasonID)" />
+                                </div>
+                                <div class="col-md-10">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Released on temporary licence, studying outside a prison environment, and not funded by the Ministry of Justice</label>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-2">
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(fundingEligibilityDeclaration!.FeeExemptionReasonID == 3? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => FeeExemptionReasonToggle(3)"><i class="@(fundingEligibilityDeclaration!.FeeExemptionReasonID == 3? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.FeeExemptionReasonID)" />
+                                </div>
+                                <div class="col-md-10">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Receives other state benefits (not included in the list above) and take-home pay (disregarding UC payments and other benefits) is less than £892 a month (sole adult in benefit claim) or £1,437 a month (joint benefit claim with partner)</label>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-2">
+
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Please Confirm Other State Benefit</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <InputText @bind-Value="fundingEligibilityDeclaration!.FeeExemptionReasonOther" class="form-control" />
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.FeeExemptionReasonOther)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-2">
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(fundingEligibilityDeclaration!.FeeExemptionReasonID == 98? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => FeeExemptionReasonToggle(98)"><i class="@(fundingEligibilityDeclaration!.FeeExemptionReasonID == 98? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.FeeExemptionReasonID)" />
+                                </div>
+                                <div class="col-md-10">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Not receiving any benefits, wants to be employed and the identified learning is directly relevant to employment prospects and local labour market needs.</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Evidence</h4>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-primary hstack gap-3" role="alert">
+                                <div>
+                                    <h1><i class="fa-solid fa-circle-info"></i></h1>
+                                </div>
+                                <div>
+                                    <p>
+                                        Where applicable please attach evidence of state benefits within 3 months of the learning start date.
+                                    </p>
+                                </div>
+                            </div>
+
+                            @* Evidence List *@
+
+                            @if (fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence != null)
+                            {
+                                int? evidenceRow = 0;
+                                <div class="alert alert-info" role="alert">
+                                    <h4 class="alert-heading"><i class="fa-solid fa-paperclip"></i> Evidence</h4>
+
+                                    @foreach (var evidence in fundingEligibilityDeclaration!.FundingEligibilityDeclarationEvidence)
+                                    {
+                                        evidenceRow++;
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md">
+                                                <div class="card">
+                                                    <div class="card-body">
+
+                                                        <div class="row mb-3">
+                                                            <div class="col-md">
+
+                                                                <div class="row g-3 mb-3">
+                                                                    <div class="col-md-4">
+                                                                        <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Evidence Type</label>
+                                                                    </div>
+                                                                    <div class="col-md-8">
+                                                                        <InputSelect @bind-Value="evidence.EvidenceTypeID" class="form-select">
+                                                                            @foreach (var evidenceType in Enum.GetValues<EvidenceType>())
+                                                                            {
+                                                                                <option value="@evidenceType">@evidenceType.ToString().Replace("_", " ").Replace("HH", "-")</option>
+                                                                            }
+                                                                        </InputSelect>
+
+                                                                        <ValidationMessage For="@(() => evidence!.EvidenceTypeID)" />
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row g-3 mb-3">
+                                                                    <div class="col-md-4">
+                                                                        <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Evidence</label>
+                                                                    </div>
+                                                                    <div class="col-md-8">
+                                                                        <InputFile @bind-Value="evidence!.EvidenceContent" class="form-control" accept="@FileFunctions.GetValidFileTypesAsString()" OnChange="(e) => LoadFile(e, evidence.FundingEligibilityDeclarationEvidenceID)" />
+                                                                        <ValidationMessage For="@(() => evidence!.EvidenceContent)" />
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row g-3 mb-3">
+                                                                    <div class="col-md-4">
+                                                                        <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Notes</label>
+                                                                    </div>
+                                                                    <div class="col-md-8">
+                                                                        <InputTextArea @bind-Value="evidence!.Notes" class="form-control" />
+                                                                        <ValidationMessage For="@(() => evidence!.Notes)" />
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                            @if (evidence.EvidenceContent != null)
+                                                            {
+                                                                if (evidence?.EvidenceContentType?.Contains("image") ?? false)
+                                                                {
+                                                                    <div class="col-md-3">
+                                                                        <div class="card">
+                                                                            <div class="card-body">
+                                                                                <a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(evidence.EvidenceContent ?? new byte[0]), evidence.EvidenceContentType)" type="@evidence.EvidenceContentType" download="@evidence.EvidenceFileName">
+                                                                                    <img src="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(evidence.ImageThumbnail ?? new byte[0]), evidence.EvidenceContentType)" class="img-fluid img-thumbnail" alt="Download @evidence.EvidenceFileName">
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                                else {
+                                                                    <div class="col-md-3">
+                                                                        <div class="card">
+                                                                            <div class="card-body text-center">
+                                                                                <a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(evidence.EvidenceContent ?? new byte[0]), evidence.EvidenceContentType)" type="@evidence.EvidenceContentType" download="@evidence.EvidenceFileName">
+                                                                                    <h1><i class="fa-solid fa-file-lines"></i></h1>
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            }
+                                                            
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md">
+                                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveEvidenceFileConfirm(evidence?.FundingEligibilityDeclarationEvidenceID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Piece of Evidence</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="alert alert-secondary" role="alert">
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                    <button type="button" class="btn btn-warning me-md-3" @onclick="AddEvidenceFile"><i class="fa-solid fa-notes-medical"></i> Add Another Piece of Evidence</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Confirmation</h4>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning hstack gap-3" role="alert">
+                                <div>
+                                    <h1><i class="fa-solid fa-circle-exclamation"></i></h1>
+                                </div>
+                                <div>
+                                    <p>
+                                        I confirm that the information given on this form is true, complete and accurate and no information or other material information has been omitted. I accept that if this is not the case, the College shall have the right to cancel my application and any offer of a place on a course maybe withdrawn. I shall also have no claim against the College (where this data will be recorded for statistical purposes) or any other education institution relation thereto.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-file-contract"></i> Signed Student:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputText @bind-Value="fundingEligibilityDeclaration!.SignedStudent" class="form-control" />
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.SignedStudent)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-regular fa-calendar-days"></i> Date</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputDate @bind-Value="fundingEligibilityDeclaration!.SignedStudentDate" class="form-control" />
+                                    <ValidationMessage For="@(() => fundingEligibilityDeclaration!.SignedStudentDate)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-secondary" role="alert">
+                <div class="row">
+                    <div class="col-md">
+                        <div class="d-grid gap-2 d-md-block text-center">
+                            <button type="submit" class="btn btn-success me-md-3"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+                            <button type="button" class="btn btn-warning" @onclick="ClearFormConfirm"><i class="fa-solid fa-eraser"></i> Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? StudentGUID { get; set; }
+
+    bool formSubmitted = false;
+
+    //Hide navbar in layout component
+    [CascadingParameter]
+    public MainLayout? Layout { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Layout != null) {
+            Layout.HideNav();
+        }
+    }
+
+    public int? evidenceFileID { get; set; }
+    public string? action { get; set; }
+
+    private Modal? modalInfo { get; set; }
+    public string? msgInfoTitle = null;
+    public MarkupString? msgInfo = null;
+
+    private Modal? modalError { get; set; }
+    public string? msgErrorTitle = null;
+    public MarkupString? msgError = null;
+    public string? msgErrorStackTrace = null;
+
+    private Modal? modalConfirm { get; set; }
+    public string? msgConfirmTitle = null;
+    public MarkupString? msgConfirm = null;
+
+    [SupplyParameterFromForm]
+    public FundingEligibilityDeclarationModel? fundingEligibilityDeclaration { get; set; }
+    public List<FundingEligibilityDeclarationEvidenceModel>? evidenceFiles { get; set; }
+
+    private FluentValidationValidator? _fluentValidationValidator;
+
+    public string? loadDataErrorMsg = null;
+
+    private StudentModel? student;
+    private string? studentEndPoint;
+
+    private string? submitEndPoint;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (StudentGUID == null)
+        {
+            loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
+        }
+        else
+        {
+            studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+            try
+            {
+                student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
+            }
+            catch (HttpRequestException ex)
+            {
+                HandleJsonException(ex, "GUID");
+            }
+
+            //Create objects to hold form entries
+            CreateNewObjects();
+
+            //Populate Drop-Downs
+            await LoadFeeExemptionReasons();
+        }
+    }
+
+    public void CreateNewObjects() 
+    {
+        //Main Model
+        //fundingEligibilityDeclaration ??= new();
+        fundingEligibilityDeclaration = CreateNewFundingEligibilityDeclaration();
+
+        //Create 1 evidence files
+        //evidenceFiles ??= new();
+        evidenceFiles = new List<FundingEligibilityDeclarationEvidenceModel>();
+        evidenceFiles?.Add(CreateNewEvidenceFile());
+
+        //Add emergency contacts to main model
+        fundingEligibilityDeclaration.FundingEligibilityDeclarationEvidence ??= evidenceFiles;
+    }
+
+    private FundingEligibilityDeclarationModel CreateNewFundingEligibilityDeclaration()
+    {
+        FundingEligibilityDeclarationModel newDeclaration = new FundingEligibilityDeclarationModel();
+        newDeclaration.CreatedBy = student?.Email;
+        newDeclaration.CreatedDate = DateTime.Now;
+        newDeclaration.StudentDetailID = student?.StudentDetailID;
+        newDeclaration.AcademicYearID = student?.AcademicYearID;
+        newDeclaration.StudentRef = student?.StudentRef;
+
+        return newDeclaration;
+    }
+
+    private FundingEligibilityDeclarationEvidenceModel CreateNewEvidenceFile()
+    {
+        FundingEligibilityDeclarationEvidenceModel newEvidenceFile = new FundingEligibilityDeclarationEvidenceModel();
+        newEvidenceFile.FundingEligibilityDeclarationEvidenceID = fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence?.Count + 1 ?? 1;
+
+        return newEvidenceFile;
+    }
+
+    private void FormAction() {
+        //Determine what clear form button should do on dialog box
+
+        if (action == "ClearFormConfirm") {
+            ClearForm();
+        }
+        else if (action == "RemoveEvidenceFileConfirm")
+        {
+            RemoveEvidenceFile();
+        }
+        else {
+            action = "Error";
+
+            msgErrorTitle = $"Invalid Action";
+            msgError = (MarkupString)$"An invalid option was specified. Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void ClearFormConfirm()
+    {
+        action = "ClearFormConfirm";
+
+        msgConfirmTitle = $"Clear Form?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear all information on this form?";
+
+        modalConfirm!.Open();
+    }
+
+    private void ClearForm()
+    {
+        action = "ClearForm";
+
+        CreateNewObjects();
+
+        modalConfirm!.Close();
+    }
+
+    private async Task SubmitForm()
+    {
+        if (await _fluentValidationValidator!.ValidateAsync())
+        {
+            formSubmitted = true;
+            Logger.LogInformation("Id = {Id}", fundingEligibilityDeclaration?.FundingEligibilityDeclarationID);
+
+            submitEndPoint = $"{configuration["APIEndpoint"]}/FundingEligibilityDeclaration";
+            try
+            {
+                if (fundingEligibilityDeclaration != null)
+                {
+                    //Clear out IDs set earlier as database will set these
+                    foreach (var evidenceFile in fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence!)
+                    {
+                        evidenceFile.FundingEligibilityDeclarationEvidenceID = 0;
+                    }
+
+                    HttpResponseMessage formResponse = await Http.PostAsJsonAsync<FundingEligibilityDeclarationModel>(submitEndPoint, fundingEligibilityDeclaration);
+
+                    if (formResponse.IsSuccessStatusCode != true)
+                    {
+                        string responseBody = await formResponse.Content.ReadAsStringAsync();
+                        action = "Error";
+
+                        msgErrorTitle = $"Cannot Submit Form";
+                        msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                        msgErrorStackTrace = responseBody;
+
+                        modalError!.Open();
+                    }
+                }
+                else
+                {
+                    action = "Error";
+
+                    msgErrorTitle = $"Cannot Submit Form";
+                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
+                    msgErrorStackTrace = null;
+
+                    modalError!.Open();
+                }
+
+                if (fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence != null)
+                {
+                    List<SystemFileModel> systemFiles = new List<SystemFileModel>();
+
+                    int evidenceRow = 0;
+                    foreach (var evidenceFile in fundingEligibilityDeclaration.FundingEligibilityDeclarationEvidence)
+                    {
+                        if (evidenceFile.EvidenceContent != null)
+                        {
+                            evidenceRow++;
+                            SystemFileModel systemFile = new SystemFileModel() { 
+                                SystemFileID = evidenceRow,
+                                FileContent = evidenceFile.EvidenceContent,
+                                FileName = evidenceFile.EvidenceFileName,
+                                FilePath = evidenceFile.EvidenceFilePath,
+                                FileSize = evidenceFile.EvidenceFileSize,
+                                FileExtension = evidenceFile.EvidenceFileExtension,
+                                FileContentType = evidenceFile.EvidenceContentType
+                            };
+
+                            systemFiles.Add(systemFile);
+                        }
+                    }
+
+                    if (systemFiles.Count > 0) {
+                        string systemFilesEndPoint = $"{configuration["APIEndpoint"]}/SystemFile/Many";
+                        HttpResponseMessage systemFilesResponse = await Http.PostAsJsonAsync<List<SystemFileModel>>(systemFilesEndPoint, systemFiles);
+                        if (systemFilesResponse.IsSuccessStatusCode != true)
+                        {
+                            string responseBody = await systemFilesResponse.Content.ReadAsStringAsync();
+                            action = "Error";
+                            msgErrorTitle = $"Cannot Submit Form";
+                            msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                            msgErrorStackTrace = responseBody;
+                            modalError!.Open();
+                        }
+                    }
+                }
+
+            }
+            catch (HttpRequestException ex)
+            {
+                HandleJsonException(ex, "GUID");
+            }
+        }
+    }
+
+    private void GoToSHCGHomepage() {
+        NavManager.NavigateTo("https://www.shcg.ac.uk");
+    }
+
+    public void FeeExemptionReasonToggle(int? feeExemptionReason)
+    {
+        if (fundingEligibilityDeclaration != null && feeExemptionReason != null)
+        {
+            fundingEligibilityDeclaration.FeeExemptionReasonID = feeExemptionReason;
+        }
+    }
+
+    public void AddEvidenceFile()
+    {
+        evidenceFiles ??= new();
+        evidenceFiles?.Add(CreateNewEvidenceFile());
+
+        if (evidenceFiles != null)
+        {
+            fundingEligibilityDeclaration!.FundingEligibilityDeclarationEvidence ??= evidenceFiles;
+        }
+    }
+
+    private void RemoveEvidenceFileConfirm(int recordID)
+    {
+        evidenceFileID = recordID;
+        action = "RemoveEvidenceFileConfirm";
+
+        msgConfirmTitle = $"Remove Piece of Evidence?";
+        msgConfirm = (MarkupString)$"Are you sure you want to remove this piece of evidence?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveEvidenceFile()
+    {
+        action = "RemoveEvidenceFile";
+
+        modalConfirm!.Close();
+
+        if (fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence?.Count > 1)
+        {
+            var recordToDelete = fundingEligibilityDeclaration.FundingEligibilityDeclarationEvidence?
+                .Where(c => c.FundingEligibilityDeclarationEvidenceID == evidenceFileID).FirstOrDefault();
+
+            if (recordToDelete != null)
+            {
+                fundingEligibilityDeclaration.FundingEligibilityDeclarationEvidence?
+                .Remove(recordToDelete);
+            }
+            else
+            {
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Remove This Piece of Evidence";
+                msgError = (MarkupString)$"There was an error removing the piece of evidence. Please try again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
+            }
+        }
+        else
+        {
+            action = "Error";
+
+            msgErrorTitle = $"Cannot Remove Last Piece of Evidence";
+            msgError = (MarkupString)$"This piece of evidence cannot be removed as you must send us at least one piece of evidence to support your claim.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private async Task<int> LoadFile(InputFileChangeEventArgs e, int? recordID)
+    {
+        var evidenceFile = fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence?.Where(c => c.FundingEligibilityDeclarationEvidenceID == recordID).FirstOrDefault();
+        int result = 0;
+
+        //Eventual location to save the file to
+        string filePath = Path.Combine("UploadedFiles", "FundingEligibilityDeclaration", fundingEligibilityDeclaration?.StudentRef ?? "0");
+
+        //Moved to shared function below
+        //var file = e.File;
+        //var buffer = new byte[file.Size];
+
+        //await file.OpenReadStream().ReadAsync(buffer, 0, (int)file.Size);
+        //await file.OpenReadStream().ReadExactlyAsync(buffer.AsMemory(0, (int)file.Size)); //Better way to read file
+
+        SystemFileModel? systemFile = new SystemFileModel();
+        systemFile = await FileFunctions.LoadFileIntoModel(e, filePath);
+
+        if (systemFile == null) 
+        {
+            action = "Error";
+
+            msgErrorTitle = $"Cannot Add This File";
+            msgError = (MarkupString)$"There was an error adding the file. Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+
+            result = 1;
+        }
+        else if (systemFile.FileContentType == "Error")
+        {
+            action = "Error";
+            msgErrorTitle = $"Cannot Add This File";
+            msgError = (MarkupString)systemFile!.FileName!;
+            msgErrorStackTrace = systemFile.FileExtension;
+            modalError!.Open();
+
+            result = 1;
+        }
+        else {
+            if (evidenceFile != null)
+            {
+                evidenceFile.EvidenceContent = systemFile.FileContent;
+                evidenceFile.ImageThumbnail = systemFile.ImageThumbnail;
+                evidenceFile.EvidenceFileName = systemFile.FileName;
+                evidenceFile.EvidenceFilePath = systemFile.FilePath;
+                evidenceFile.EvidenceFileSize = systemFile.FileSize;
+                evidenceFile.EvidenceFileExtension = systemFile.FileExtension;
+                evidenceFile.EvidenceContentType = systemFile.FileContentType;
+            }
+        }
+
+        return result;
+    }
+
+    // private async Task<int> SaveFile(byte[]? evidence)
+    // {
+    //     string currentFolder = Directory.GetCurrentDirectory();
+    //     string filePath = Path.Combine(currentFolder, "FundingEligibilityDeclaration", "LionKing.pdf");
+    //     var fileContents = evidence;
+
+    //     //Save File to File System
+    //     using var stream = File.Create(filePath);
+    //     if (fileContents != null) {
+    //         await stream.WriteAsync(fileContents, 0, fileContents.Length);
+    //     }
+    //     else {
+    //         return 1;
+    //     }
+
+    //     return 0;
+    // }
+
+    private async Task<int> DownloadFile(byte[] fileContent, string fileName)
+    {
+        var buffer = new byte[fileContent.Length];
+        fileContent.CopyTo(buffer, 0);
+        var content = new System.IO.MemoryStream(buffer);
+        await content.CopyToAsync(new FileStream(fileName, FileMode.Create));
+
+        return 0;
+    }
+
+    //DropDowns
+    // public List<DropDownModel> Titles { get; } = new List<DropDownModel>
+    // {
+    //     new DropDownModel { Code = "Mr", Description = "Mr" },
+    //     new DropDownModel { Code = "Mrs", Description = "Mrs" },
+    //     new DropDownModel { Code = "Miss", Description = "Miss" }
+    // };
+
+    //Values for drop-downs
+    public static List<DropDownIntModel>? FeeExemptionReasons { get; private set; }
+    public async Task LoadFeeExemptionReasons()
+    {
+        string endPoint = $"{configuration["APIEndpoint"]}/FeeExemptionReason";
+        try
+        {
+            FeeExemptionReasons = await Http.GetFromJsonAsync<List<DropDownIntModel>>(endPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            FeeExemptionReasons = new List<DropDownIntModel>();
+            HandleJsonException(ex, "FeeExemptionReason");
+        }
+    }
+    public static List<DropDownIntModel> GetFeeExemptionReasons() => FeeExemptionReasons ?? new List<DropDownIntModel>();
+
+    private void HandleJsonException (HttpRequestException ex, string objectName)
+    {
+        if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+        {
+            loadDataErrorMsg = $"You are not authorised to view this page";
+        }
+        else if (ex.Message.Contains("404 (Not Found)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+        }
+        else if (ex.Message.Contains("400 (Bad Request)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+        }
+        else 
+        {
+            loadDataErrorMsg = $"Error: {ex.Message}";
+        }
+    }
+}

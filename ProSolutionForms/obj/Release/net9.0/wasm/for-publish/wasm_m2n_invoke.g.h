@@ -186,6 +186,16 @@ wasm_invoke_li (void *target_func, MonoInterpMethodArguments *margs)
 }
 
 static void
+wasm_invoke_liiil (void *target_func, MonoInterpMethodArguments *margs)
+{
+	typedef int64_t (*T)(int arg_0, int arg_1, int arg_2, int64_t arg_3);
+	T func = (T)target_func;
+	int64_t res = func (mono_wasm_interp_method_args_get_iarg (margs, 0), mono_wasm_interp_method_args_get_iarg (margs, 1), mono_wasm_interp_method_args_get_iarg (margs, 2), mono_wasm_interp_method_args_get_larg (margs, 3));
+	void *retval = mono_wasm_interp_method_args_get_retval (margs);
+	*(int64_t*)retval = res;
+}
+
+static void
 wasm_invoke_lil (void *target_func, MonoInterpMethodArguments *margs)
 {
 	typedef int64_t (*T)(int arg_0, int64_t arg_1);
@@ -290,6 +300,7 @@ static void* interp_to_native_invokes[] = {
 	wasm_invoke_iilli,
 	wasm_invoke_l,
 	wasm_invoke_li,
+	wasm_invoke_liiil,
 	wasm_invoke_lil,
 	wasm_invoke_lili,
 	wasm_invoke_lill,
@@ -320,6 +331,7 @@ static const char* interp_to_native_signatures[] = {
 	"IILLI",
 	"L",
 	"LI",
+	"LIIIL",
 	"LIL",
 	"LILI",
 	"LILL",
@@ -331,7 +343,7 @@ static const char* interp_to_native_signatures[] = {
 	"VIIIII",
 	"VIIIIII",
 };
-static unsigned int interp_to_native_signatures_count = 28;
+static unsigned int interp_to_native_signatures_count = 29;
 
 static int
 compare_icall_tramp (const void *key, const void *elem)

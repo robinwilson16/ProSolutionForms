@@ -81,6 +81,8 @@ void SystemNative_Free (void *);
 
 int32_t SystemNative_FStat (void *, void *);
 
+int32_t SystemNative_FSync (void *);
+
 int32_t SystemNative_FTruncate (void *, int64_t);
 
 int32_t SystemNative_GetCryptographicallySecureRandomBytes (void *, int32_t);
@@ -131,6 +133,12 @@ int32_t SystemNative_PosixFAdvise (void *, int64_t, int64_t, int32_t);
 
 int32_t SystemNative_PRead (void *, void *, int32_t, int64_t);
 
+int64_t SystemNative_PReadV (void *, void *, int32_t, int64_t);
+
+int32_t SystemNative_PWrite (void *, void *, int32_t, int64_t);
+
+int64_t SystemNative_PWriteV (void *, void *, int32_t, int64_t);
+
 int32_t SystemNative_Read (void *, void *, int32_t);
 
 int32_t SystemNative_ReadDirR (void *, void *, int32_t, void *);
@@ -160,6 +168,7 @@ static PinvokeImport libSystem_Native_imports [] = {
     {"SystemNative_FLock", SystemNative_FLock}, // System.Private.CoreLib
     {"SystemNative_Free", SystemNative_Free}, // System.Private.CoreLib
     {"SystemNative_FStat", SystemNative_FStat}, // System.Private.CoreLib
+    {"SystemNative_FSync", SystemNative_FSync}, // System.Private.CoreLib
     {"SystemNative_FTruncate", SystemNative_FTruncate}, // System.Private.CoreLib
     {"SystemNative_GetCryptographicallySecureRandomBytes", SystemNative_GetCryptographicallySecureRandomBytes}, // System.Private.CoreLib
     {"SystemNative_GetCwd", SystemNative_GetCwd}, // System.Private.CoreLib
@@ -185,6 +194,9 @@ static PinvokeImport libSystem_Native_imports [] = {
     {"SystemNative_OpenDir", SystemNative_OpenDir}, // System.Private.CoreLib
     {"SystemNative_PosixFAdvise", SystemNative_PosixFAdvise}, // System.Private.CoreLib
     {"SystemNative_PRead", SystemNative_PRead}, // System.Private.CoreLib
+    {"SystemNative_PReadV", SystemNative_PReadV}, // System.Private.CoreLib
+    {"SystemNative_PWrite", SystemNative_PWrite}, // System.Private.CoreLib
+    {"SystemNative_PWriteV", SystemNative_PWriteV}, // System.Private.CoreLib
     {"SystemNative_Read", SystemNative_Read}, // System.Private.CoreLib
     {"SystemNative_ReadDirR", SystemNative_ReadDirR}, // System.Private.CoreLib
     {"SystemNative_ReadLink", SystemNative_ReadLink}, // System.Private.CoreLib
@@ -194,7 +206,7 @@ static PinvokeImport libSystem_Native_imports [] = {
     {"SystemNative_StrErrorR", SystemNative_StrErrorR}, // System.Console, System.Private.CoreLib
     {"SystemNative_TryGetUInt32OSThreadId", SystemNative_TryGetUInt32OSThreadId}, // System.Private.CoreLib
     {"SystemNative_Unlink", SystemNative_Unlink}, // System.Private.CoreLib
-    {"SystemNative_Write", SystemNative_Write}, // System.Console
+    {"SystemNative_Write", SystemNative_Write}, // System.Console, System.Private.CoreLib
     {NULL, NULL}
 };
 static PinvokeImport libSystem_IO_Compression_Native_imports [] = {

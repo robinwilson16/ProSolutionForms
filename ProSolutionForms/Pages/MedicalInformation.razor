@@ -19,7 +19,7 @@
         </p>
     </Body>
     <Footer>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
     </Footer>
 </Modal>
 
@@ -36,7 +36,7 @@
         }
     </Body>
     <Footer>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
     </Footer>
 </Modal>
 
@@ -535,7 +535,7 @@
                                         <div class="row">
                                             <div class="col-md">
                                                 <div class="d-grid gap-2 d-md-block text-end">
-                                                    <button type="submit" class="btn btn-warning me-md-3" @onclick="AddMedicalCondition"><i class="fa-solid fa-notes-medical"></i> Add Another Medical Condition</button>
+                                                    <button type="button" class="btn btn-warning me-md-3" @onclick="AddMedicalCondition"><i class="fa-solid fa-notes-medical"></i> Add Another Medical Condition</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -772,7 +772,7 @@
                                         <div class="row">
                                             <div class="col-md">
                                                 <div class="d-grid gap-2 d-md-block text-end">
-                                                    <button type="submit" class="btn btn-warning me-md-3" @onclick="AddDifficultyDisability"><i class="fa-brands fa-accessible-icon"></i> Add Another Difficulty/Disability</button>
+                                                    <button type="button" class="btn btn-warning me-md-3" @onclick="AddDifficultyDisability"><i class="fa-brands fa-accessible-icon"></i> Add Another Difficulty/Disability</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -1075,6 +1075,7 @@
                                     <ValidationMessage For="@(() => medicalInformation!.SignedStudentDate)" />
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -1431,13 +1432,13 @@
                     {
                         contact.MedicalInformationEmergencyContactID = 0;
                     }
-                    foreach (var contact in medicalInformation?.MedicalConditions!)
+                    foreach (var medicalCondition in medicalInformation?.MedicalConditions!)
                     {
-                        contact.MedicalInformationMedicalConditionID = 0;
+                        medicalCondition.MedicalInformationMedicalConditionID = 0;
                     }
-                    foreach (var contact in medicalInformation?.DifficultiesDisabilities!)
+                    foreach (var difficultyDisability in medicalInformation?.DifficultiesDisabilities!)
                     {
-                        contact.MedicalInformationDifficultyDisabilityID = 0;
+                        difficultyDisability.MedicalInformationDifficultyDisabilityID = 0;
                     }
 
                     HttpResponseMessage formResponse = await Http.PostAsJsonAsync<MedicalInformationModel>(submitEndPoint, medicalInformation);

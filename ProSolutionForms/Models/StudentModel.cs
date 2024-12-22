@@ -1,5 +1,8 @@
-﻿namespace ProSolutionForms.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ProSolutionForms.Models
 {
+    [NotMapped]
     public class StudentModel
     {
         public int StudentID { get; set; }
