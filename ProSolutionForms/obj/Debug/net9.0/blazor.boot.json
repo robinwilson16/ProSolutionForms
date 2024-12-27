@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "ProSolutionForms",
   "resources": {
-    "hash": "sha256-1UGk52rotI+3AWXmECsrENfIoDNZLEsNmsI04dYn+xY=",
+    "hash": "sha256-xibuIFTybmRiwFsc7adRwj2RLrLhG3xdGRYWL9vxLLA=",
     "fingerprinting": {
       "Blazored.FluentValidation.x0xsecpmtx.wasm": "Blazored.FluentValidation.wasm",
       "FluentValidation.a26tmul8eq.wasm": "FluentValidation.wasm",
@@ -204,8 +204,8 @@
       "icudt_CJK.tjcz0u77k5.dat": "icudt_CJK.dat",
       "icudt_EFIGS.tptq2av103.dat": "icudt_EFIGS.dat",
       "icudt_no_CJK.lfu7j35m59.dat": "icudt_no_CJK.dat",
-      "ProSolutionForms.qt2ysbuutm.wasm": "ProSolutionForms.wasm",
-      "ProSolutionForms.0zze1ytqs7.pdb": "ProSolutionForms.pdb"
+      "ProSolutionForms.08p61u8g3j.wasm": "ProSolutionForms.wasm",
+      "ProSolutionForms.190jxgrxmw.pdb": "ProSolutionForms.pdb"
     },
     "jsModuleNative": {
       "dotnet.native.hmanx9razn.js": "sha256-d7UNSArplVrX3arY2Kmhxp1wN79ng8hLqIBrkiQ9Gbo="
@@ -418,10 +418,10 @@
       "WindowsBase.377bly7twj.wasm": "sha256-0VmBdMjdc0nZGHDSfaGirT6y3mJTM0qx8eqCUC/rpiE=",
       "mscorlib.o0184ey5ia.wasm": "sha256-2GxNKZQJVJvYMUxSTuXa5V2qxawSMMHZtwG33SKVCZU=",
       "netstandard.hb3h2rr8mk.wasm": "sha256-DWn9+RH/ElZQ6imlYqVwZvir1KTzNwY18AzGmnyiymU=",
-      "ProSolutionForms.qt2ysbuutm.wasm": "sha256-zkr/+jq20xUOk2aNKUZfqGe9xAWYhYW7KQAJB38qa2w="
+      "ProSolutionForms.08p61u8g3j.wasm": "sha256-0OFG/5HcA0Pj+I6hKQL4G5TU53AZ3LEPAQGXujF5CvQ="
     },
     "pdb": {
-      "ProSolutionForms.0zze1ytqs7.pdb": "sha256-nGZdzvV/Nsk6XrAFzPaR4QbrYtOn6ul8rqapmoUQyH8="
+      "ProSolutionForms.190jxgrxmw.pdb": "sha256-+4Y3jgAqzfazBe2LX/qlZVYwDREQvnRNyrIH/ndNIgM="
     }
   },
   "cacheBootResources": true,

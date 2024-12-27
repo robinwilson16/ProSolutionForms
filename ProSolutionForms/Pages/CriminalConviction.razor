@@ -434,7 +434,7 @@
         }
         catch (HttpRequestException ex)
         {
-            HandleJsonException(ex, "GUID");
+            HandleJsonException(ex, "GUID", StudentGUID ?? "");
         }
     }
 
@@ -468,6 +468,25 @@
 
                         modalError!.Open();
                     }
+                    else
+                    {
+                        List<CriminalConvictionModel> insertedCriminalConvictions = await formResponse.Content.ReadFromJsonAsync<List<CriminalConvictionModel>>() ?? new List<CriminalConvictionModel>();
+
+                        if (insertedCriminalConvictions.Count > 0)
+                        {
+                            //If insert successful
+                        }
+                        else
+                        {
+                            action = "Error";
+
+                            msgErrorTitle = $"Cannot Submit Form";
+                            msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                            msgErrorStackTrace = null;
+
+                            modalError!.Open();
+                        }
+                    }
                 }
                 else
                 {
@@ -483,7 +502,7 @@
             }
             catch (HttpRequestException ex)
             {
-                HandleJsonException(ex, "GUID");
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
             }
         }
     }
@@ -581,19 +600,22 @@
         }
     }
 
-    private void HandleJsonException(HttpRequestException ex, string objectName)
+    private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
     {
         if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
         {
             loadDataErrorMsg = $"You are not authorised to view this page";
+
+            //Redirect to login screen
+            //NavManager.NavigateTo($"Login/Vehicles");
         }
         else if (ex.Message.Contains("404 (Not Found)"))
         {
-            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" is not found";
         }
         else if (ex.Message.Contains("400 (Bad Request)"))
         {
-            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" resulted in an invalid request";
         }
         else
         {

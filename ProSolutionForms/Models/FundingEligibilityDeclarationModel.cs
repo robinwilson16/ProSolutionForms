@@ -17,7 +17,7 @@ namespace ProSolutionForms.Models
         public string? CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string? LastUpdatedBy { get; set; }
-        public DateTime LastUpdatedDate { get; set; }
+        public DateTime? LastUpdatedDate { get; set; }
         //Linking Data
         public int? StudentDetailID { get; set; }
         public string? AcademicYearID { get; set; }

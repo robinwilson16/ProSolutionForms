@@ -443,7 +443,7 @@
                                                                     <div class="col-md-3">
                                                                         <div class="card">
                                                                             <div class="card-body text-center">
-                                                                                <a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(evidence.EvidenceContent ?? new byte[0]), evidence.EvidenceContentType)" type="@evidence.EvidenceContentType" download="@evidence.EvidenceFileName">
+                                                                                <a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(evidence?.EvidenceContent ?? new byte[0]), evidence?.EvidenceContentType)" type="@evidence?.EvidenceContentType" download="@evidence?.EvidenceFileName">
                                                                                     <h1><i class="fa-solid fa-file-lines"></i></h1>
                                                                                 </a>
                                                                             </div>
@@ -606,7 +606,7 @@
             }
             catch (HttpRequestException ex)
             {
-                HandleJsonException(ex, "GUID");
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
             }
 
             //Create objects to hold form entries
@@ -723,6 +723,25 @@
 
                         modalError!.Open();
                     }
+                    else
+                    {
+                        FundingEligibilityDeclarationModel insertedFundingEligibilityDeclaration = await formResponse.Content.ReadFromJsonAsync<FundingEligibilityDeclarationModel>() ?? new FundingEligibilityDeclarationModel();
+
+                        if (insertedFundingEligibilityDeclaration.FundingEligibilityDeclarationID > 0)
+                        {
+                            //If insert successful
+                        }
+                        else
+                        {
+                            action = "Error";
+
+                            msgErrorTitle = $"Cannot Submit Form";
+                            msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                            msgErrorStackTrace = null;
+
+                            modalError!.Open();
+                        }
+                    }
                 }
                 else
                 {
@@ -777,7 +796,7 @@
             }
             catch (HttpRequestException ex)
             {
-                HandleJsonException(ex, "GUID");
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
             }
         }
     }
@@ -959,26 +978,29 @@
         catch (HttpRequestException ex)
         {
             FeeExemptionReasons = new List<DropDownIntModel>();
-            HandleJsonException(ex, "FeeExemptionReason");
+            HandleJsonException(ex, "FeeExemptionReason", "0");
         }
     }
     public static List<DropDownIntModel> GetFeeExemptionReasons() => FeeExemptionReasons ?? new List<DropDownIntModel>();
 
-    private void HandleJsonException (HttpRequestException ex, string objectName)
+    private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
     {
         if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
         {
             loadDataErrorMsg = $"You are not authorised to view this page";
+
+            //Redirect to login screen
+            NavManager.NavigateTo($"Login/Vehicles");
         }
         else if (ex.Message.Contains("404 (Not Found)"))
         {
-            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" is not found";
         }
         else if (ex.Message.Contains("400 (Bad Request)"))
         {
-            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" resulted in an invalid request";
         }
-        else 
+        else
         {
             loadDataErrorMsg = $"Error: {ex.Message}";
         }

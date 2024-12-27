@@ -1296,7 +1296,7 @@
             }
             catch (HttpRequestException ex)
             {
-                HandleJsonException(ex, "GUID");
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
             }
 
             //Create objects to hold form entries
@@ -1454,6 +1454,24 @@
 
                         modalError!.Open();
                     }
+                    else {
+                        MedicalInformationModel insertedMedicalInformation = await formResponse.Content.ReadFromJsonAsync<MedicalInformationModel>() ?? new MedicalInformationModel();
+
+                        if (insertedMedicalInformation.MedicalInformationID > 0)
+                        {
+                            //If insert successful
+                        }
+                        else
+                        {
+                            action = "Error";
+
+                            msgErrorTitle = $"Cannot Submit Form";
+                            msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                            msgErrorStackTrace = null;
+
+                            modalError!.Open();
+                        }
+                    }
                 }
                 else
                 {
@@ -1469,7 +1487,7 @@
             }
             catch (HttpRequestException ex)
             {
-                HandleJsonException(ex, "GUID");
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
             }
         }
     }
@@ -1531,12 +1549,12 @@
 
     public void IsPrimaryDifficultyDisabilityToggle(MedicalInformationDifficultyDisabilityModel? selectedRecord, bool? trueOrFalse)
     {
-        if (medicalInformation.DifficultiesDisabilities != null)
+        if (medicalInformation?.DifficultiesDisabilities != null)
         {
             foreach (var difficulty in medicalInformation.DifficultiesDisabilities)
             {
                 //Allolw only one option to be ticked
-                if (difficulty.MedicalInformationDifficultyDisabilityID == selectedRecord.MedicalInformationDifficultyDisabilityID)
+                if (difficulty.MedicalInformationDifficultyDisabilityID == selectedRecord?.MedicalInformationDifficultyDisabilityID)
                 {
                     difficulty.IsPrimary = true;
                 }
@@ -1753,7 +1771,7 @@
         catch (HttpRequestException ex)
         {
             DisabilityCategories = new List<DropDownIntModel>();
-            HandleJsonException(ex, "DisabilityCategory");
+            HandleJsonException(ex, "DisabilityCategory", "0");
         }
     }
     public static List<DropDownIntModel> GetDisabilityCategories() => DisabilityCategories ?? new List<DropDownIntModel>();
@@ -1769,7 +1787,7 @@
         catch (HttpRequestException ex)
         {
             MedicalConditionTypes = new List<DropDownIntModel>();
-            HandleJsonException(ex, "MedicalConditionType");
+            HandleJsonException(ex, "MedicalConditionType", "0");
         }
     }
     public static List<DropDownIntModel> GetMedicalConditionTypes() => MedicalConditionTypes ?? new List<DropDownIntModel>();
@@ -1785,7 +1803,7 @@
         catch (HttpRequestException ex)
         {
             Titles = new List<DropDownStringModel>();
-            HandleJsonException(ex, "Title");
+            HandleJsonException(ex, "Title", "0");
         }
     }
     public static List<DropDownStringModel> GetTitles() => Titles ?? new List<DropDownStringModel>();
@@ -1801,26 +1819,29 @@
         catch (HttpRequestException ex)
         {
             Relationships = new List<DropDownIntModel>();
-            HandleJsonException(ex, "Relationship");
+            HandleJsonException(ex, "Relationship", "0");
         }
     }
     public static List<DropDownIntModel> GetRelationships() => Relationships ?? new List<DropDownIntModel>();
 
-    private void HandleJsonException (HttpRequestException ex, string objectName)
+    private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
     {
         if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
         {
             loadDataErrorMsg = $"You are not authorised to view this page";
+
+            //Redirect to login screen
+            NavManager.NavigateTo($"Login/Vehicles");
         }
         else if (ex.Message.Contains("404 (Not Found)"))
         {
-            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" is not found";
         }
         else if (ex.Message.Contains("400 (Bad Request)"))
         {
-            loadDataErrorMsg = $"The {objectName} \"{StudentGUID}\" does not exist";
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" resulted in an invalid request";
         }
-        else 
+        else
         {
             loadDataErrorMsg = $"Error: {ex.Message}";
         }
