@@ -11,6 +11,9 @@
 <PageTitle>Criminal Conviction Form</PageTitle>
 
 <Modal @ref="modalInfo">
+    <WindowControls>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => modalInfo!.Close()"></button>
+    </WindowControls>
     <Title><i class="fa-solid fa-circle-info"></i> @msgInfoTitle</Title>
     <Body>
         <p>
@@ -18,11 +21,14 @@
         </p>
     </Body>
     <Footer>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
     </Footer>
 </Modal>
 
 <Modal @ref="modalError">
+    <WindowControls>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => modalInfo!.Close()"></button>
+    </WindowControls>
     <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
     <Body>
         <div class="alert alert-danger" role="alert">
@@ -35,11 +41,14 @@
         }
     </Body>
     <Footer>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
     </Footer>
 </Modal>
 
 <Modal @ref="modalConfirm">
+    <WindowControls>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => modalInfo!.Close()"></button>
+    </WindowControls>
     <Title><i class="fa-solid fa-circle-question"></i> @msgConfirmTitle</Title>
     <Body>
         <p>
@@ -48,7 +57,7 @@
     </Body>
     <Footer>
         <button type="button" class="btn btn-danger" @onclick="ClearFormConfirm"><i class="fa-solid fa-trash"></i> Yes</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
     </Footer>
 </Modal>
 
@@ -288,7 +297,7 @@
         }
         catch (HttpRequestException ex)
         {
-            HandleJsonException(ex, "GUID");
+            HandleJsonException(ex, "GUID", StudentGUID ?? "");
         }
     }
 
@@ -373,7 +382,7 @@
         }
         catch (HttpRequestException ex)
         {
-            HandleJsonException(ex, "GUID");
+            HandleJsonException(ex, "GUID", StudentGUID ?? "");
         }
     }
 
