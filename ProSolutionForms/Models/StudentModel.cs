@@ -23,6 +23,5 @@ namespace ProSolutionForms.Models
         public DateTime? StartDate { get; set; }
         public DateTime? ExpEndDate { get; set; }
         public DateTime? ActEndDate { get; set; }
-        public int? NumConvictions { get; set; }
     }
 }

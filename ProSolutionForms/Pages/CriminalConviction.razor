@@ -1,7 +1,10 @@
 ﻿@page "/CriminalConviction"
 @page "/CriminalConviction/{StudentGUID}"
+@page "/CriminalConviction/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
 
+@using ProSolutionForms.Components
 @using ProSolutionForms.Models
+@using ProSolutionForms.Shared
 @using System.Net
 @inject HttpClient Http
 @inject IConfiguration configuration
@@ -149,6 +152,14 @@
             <div class="container">
                 <div class="row mb-3 align-items-center">
                     <div class="col-md-4">
+                        <i class="fa-solid fa-hashtag"></i> Student Ref
+                    </div>
+                    <div class="col-md-8">
+                        @student?.StudentRef
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
                         <i class="fa-solid fa-user"></i> Name
                     </div>
                     <div class="col-md-8">
@@ -157,46 +168,95 @@
                 </div>
                 <div class="row mb-3 align-items-center">
                     <div class="col-md-4">
-                        <i class="fa-solid fa-briefcase"></i> Curriculum Area
+                        <i class="fa-solid fa-calendar-days"></i> Academic Year
                     </div>
                     <div class="col-md-8">
-                        @student?.TeamName
-                    </div>
-                </div>
-                <div class="row mb-3 align-items-center">
-                    <div class="col-md-4">
-                        <i class="fa-solid fa-graduation-cap"></i> Course
-                    </div>
-                    <div class="col-md-8">
-                        @student?.CourseCode - @student?.CourseTitle
+                        @student?.AcademicYearID
                     </div>
                 </div>
             </div>
         </div>
 
-        <EditForm FormName="CriminalConvictions" Model="criminalConvictions" OnSubmit="SubmitMany">
+        <div class="alert alert-primary hstack gap-3" role="alert">
+            <div>
+                <h1><i class="fa-solid fa-circle-info"></i></h1>
+            </div>
+            <div>
+                <p>
+                    South Hampshire College Group has a duty of care to the college community to ensure their safety. In order to meet these responsibilities, it is necessary for all students to declare any relevant convictions, cautions and warnings to enable the College to make a judgement on any particular risks. This includes any criminal investigations you may currently be involved in.
+                </p>
+                <p>
+                    Having a criminal record will not necessarily stop anyone from securing a place on a college course but a separate risk assessment or further checks may be required.
+                </p>
+            </div>
+        </div>
+
+        @if (existingCriminalConviction?.Offences?.Count > 0)
+        {
+            <div class="alert alert-warning hstack gap-3" role="alert">
+                <div>
+                    <h1><i class="fa-solid fa-clipboard-check"></i></h1>
+                </div>
+                <div>
+                    <p>
+                        You have already declared @existingCriminalConviction?.Offences?.Count Offences. If you wish to declare further offences you did not previously declare then please add these below, otherwise we have your information and will be in touch soon.
+                    </p>
+                    <p>
+                        Having a criminal record will not necessarily stop anyone from securing a place on a college course but a separate risk assessment or further checks may be required.
+                    </p>
+                </div>
+            </div>
+        }
+
+        <EditForm FormName="CriminalConviction" Model="criminalConviction" OnSubmit="SubmitForm">
             <FluentValidationValidator @ref="_fluentValidationValidator" />
 
-            @if (criminalConvictions != null) 
+            @if (criminalConviction != null)
             {
-                @if (criminalConvictions.Convictions != null)
+                @if (criminalConviction.Offences != null)
                 {
-                    int? criminalConvictionRow = 0;
-                    foreach (var conv in criminalConvictions.Convictions) {
-                        criminalConvictionRow++;
+                    int? offenceRow = 0;
+                    foreach (var offence in criminalConviction.Offences)
+                    {
+                        offenceRow++;
 
                         <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
                             <div class="container">
+                                @if (offenceRow == 1)
+                                {
+                                    <div class="row mb-3 align-items-center">
+                                        <div class="col-md text-center">
+                                            <h4>Details of Criminal Offences and/or Ongoing Criminal Investigations</h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> If you do not have any offences or ongoing investigations to declare then please tick this box and complete only the consent and declaration section, otherwise please instead complete the information below</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <CustomBoolInputSelect @bind-Value="criminalConviction!.NoOffencesToDeclare" class="form-select d-none">
+                                                <option value="">-- Please Select --</option>
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </CustomBoolInputSelect>
+                                            <div class="d-grid gap-2 d-md-block">
+                                                <button type="button" class="btn @(criminalConviction!.NoOffencesToDeclare == true? "btn-primary" : "btn-outline-primary") me-md-3" @onclick="(e) => NoOffencesToDeclareToggle()"><i class="@(criminalConviction!.NoOffencesToDeclare == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                            </div>
+                                            <ValidationMessage For="@(() => criminalConviction!.NoOffencesToDeclare)" />
+                                        </div>
+                                    </div>
+                                }
                                 <div class="row">
                                     <div class="col-md">
 
                                         <div class="row g-3 mb-3">
                                             <div class="col-md-4">
-                                                <i class="fa-regular fa-calendar-days"></i> <label class="col-form-label">Date of Offence</label>
+                                                <i class="fa-regular fa-calendar-days"></i> <label class="col-form-label">Date of Conviction/Investigation</label>
                                             </div>
                                             <div class="col-md-8">
-                                                <InputDate @bind-Value="conv!.DateOfOffence" class="form-control" />
-                                                <ValidationMessage For="@(() => conv!.DateOfOffence)" />
+                                                <InputDate @bind-Value="offence!.DateOfOffence" class="form-control" />
+                                                <ValidationMessage For="@(() => offence!.DateOfOffence)" />
                                             </div>
                                         </div>
 
@@ -205,8 +265,8 @@
                                                 <i class="fa-solid fa-handcuffs"></i> <label class="col-form-label">Offence</label>
                                             </div>
                                             <div class="col-md-8">
-                                                <InputTextArea @bind-Value="conv!.Offence" class="form-control" />
-                                                <ValidationMessage For="@(() => conv!.Offence)" />
+                                                <InputTextArea @bind-Value="offence!.Offence" class="form-control" />
+                                                <ValidationMessage For="@(() => offence!.Offence)" />
                                             </div>
                                         </div>
 
@@ -215,8 +275,8 @@
                                                 <i class="fa-solid fa-book"></i> <label class="col-form-label">Penalty</label>
                                             </div>
                                             <div class="col-md-8">
-                                                <InputTextArea @bind-Value="conv!.Penalty" class="form-control" />
-                                                <ValidationMessage For="@(() => conv!.Penalty)" />
+                                                <InputTextArea @bind-Value="offence!.Penalty" class="form-control" />
+                                                <ValidationMessage For="@(() => offence!.Penalty)" />
                                             </div>
                                         </div>
 
@@ -225,25 +285,25 @@
                                                 <i class="fa-solid fa-comment"></i> <label class="col-form-label">Comments</label>
                                             </div>
                                             <div class="col-md-8">
-                                                <InputTextArea @bind-Value="conv!.Comments" class="form-control" />
-                                                <ValidationMessage For="@(() => conv!.Comments)" />
+                                                <InputTextArea @bind-Value="offence!.Comments" class="form-control" />
+                                                <ValidationMessage For="@(() => offence!.Comments)" />
                                             </div>
                                         </div>
 
                                         <div class="row g-3 mb-3">
                                             <div class="col-md-4">
-                                                <i class="fa-solid fa-id-card-clip"></i> <label class="col-form-label">Contact Name</label>
+                                                <i class="fa-solid fa-id-card-clip"></i> <label class="col-form-label">Name and contact details of Probation Officer, Youth Justice Contact, Drugs Worker, or other where applicable</label>
                                             </div>
                                             <div class="col-md-8">
-                                                <InputText @bind-Value="conv!.ContactName" class="form-control" />
-                                                <ValidationMessage For="@(() => conv!.ContactName)" />
+                                                <InputText @bind-Value="offence!.ContactName" class="form-control" />
+                                                <ValidationMessage For="@(() => offence!.ContactName)" />
                                             </div>
                                         </div>
 
                                         <div class="row g-3 mb-3">
                                             <div class="col-md">
                                                 <div class="d-grid gap-2 d-md-block text-end">
-                                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveCriminalConvictionConfirm(conv?.CriminalConvictionID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Offence</button>
+                                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveOffenceConfirm(offence?.CriminalConvictionOffenceID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Offence</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -256,17 +316,85 @@
                 }
             }
 
-            <ValidationSummary />
-
             <div class="container">
                 <div class="row">
                     <div class="col-md">
                         <div class="d-grid gap-2 d-md-block text-end">
-                            <button type="button" class="btn btn-primary mb-3" @onclick="AddAnotherConviction"><i class="fa-solid fa-file-circle-plus"></i> Record Details of Another Offence</button>
+                            <button type="button" class="btn btn-primary mb-3" @onclick="AddAnotherOffence"><i class="fa-solid fa-file-circle-plus"></i> Record Details of Another Offence</button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="bd-callout bd-callout-SHCG-green bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Consent and Delaration</h4>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> If you are <strong>18 or over</strong> at the start of your course, I confirm, by ticking this box, I agree all information provided is correct to the best of my knowledge?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="criminalConviction!.AgreeInfoIsCorrectStudent" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(criminalConviction!.AgreeInfoIsCorrectStudent == true? "btn-primary" : "btn-outline-primary") me-md-3" @onclick="(e) => AgreeInfoIsCorrectStudentToggle()"><i class="@(criminalConviction!.AgreeInfoIsCorrectStudent == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => criminalConviction!.AgreeInfoIsCorrectStudent)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-file-contract"></i> Student name:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputText @bind-Value="criminalConviction!.SignedStudent" class="form-control" />
+                                    <ValidationMessage For="@(() => criminalConviction!.SignedStudent)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-regular fa-calendar-days"></i> Date</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputDate @bind-Value="criminalConviction!.SignedStudentDate" class="form-control" />
+                                    <ValidationMessage For="@(() => criminalConviction!.SignedStudentDate)" />
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-warning hstack gap-3" role="alert">
+                <div>
+                    <h1><i class="fa-solid fa-circle-info"></i></h1>
+                </div>
+                <div>
+                    <p>
+                        Please note:
+                        <ul>
+                            <li>The information provided will only be seen by the safeguarding panel for the group and will be stored securely.</li>
+                            <li>If you are currently involved in a criminal investigation or you are convicted of a criminal offence after you have applied or started on your college course, you will need to inform us.</li>
+                            <li>If you fail to reveal a criminal conviction, caution or warning this may end any enrolment agreement with the College</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+
+            <ValidationSummary />
 
             <div class="alert alert-secondary" role="alert">
                 <div class="row">
@@ -285,6 +413,12 @@
 @code {
     [Parameter]
     public string? StudentGUID { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart1 { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart2 { get; set; }
+
+    public string? AcademicYearID { get; set; }
 
     bool formSubmitted = false;
 
@@ -299,7 +433,7 @@
         }
     }
 
-    public int? criminalConvictionID { get; set; }
+    public int? criminalConvictionOffenceID { get; set; }
     public string? action { get; set; }
 
     private Modal? modalInfo { get; set; }
@@ -315,11 +449,11 @@
     public string? msgConfirmTitle = null;
     public MarkupString? msgConfirm = null;
 
-
-    public CriminalConvictionModel? criminalConviction { get; set; }
-    public ICollection<CriminalConvictionModel>? criminalConvictionList { get; set; }
     [SupplyParameterFromForm]
-    public CriminalConvictionsModel? criminalConvictions { get; set; }
+    public CriminalConvictionModel? criminalConviction { get; set; }
+    public IList<CriminalConvictionOffenceModel>? offences { get; set; }
+
+    public CriminalConvictionModel? existingCriminalConviction { get; set; }
 
     private FluentValidationValidator? _fluentValidationValidator;
 
@@ -332,11 +466,21 @@
 
     protected override async Task OnInitializedAsync()
     {
+        bool isError = false;
+
+        if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
+            AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
+
         if (StudentGUID == null) {
+            isError = true;
             loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
         }
         else {
-            studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+            if (AcademicYearID != null)
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{AcademicYearID}/{StudentGUID}";
+            else
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+
             try
             {
                 student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
@@ -346,19 +490,23 @@
             }
             catch (HttpRequestException ex)
             {
-                if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+                isError = true;
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
+            }
+
+            if (isError != true)
+            {
+                string criminalConvictionEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/{student?.AcademicYearID}/{student?.StudentGUID}";
+                Console.WriteLine($"Load data from {criminalConvictionEndPoint}");
+
+                try
                 {
-                    loadDataErrorMsg = $"You are not authorised to view this page";
+                    existingCriminalConviction = await Http.GetFromJsonAsync<CriminalConvictionModel>(criminalConvictionEndPoint);
                 }
-                else if (ex.Message.Contains("404 (Not Found)"))
+                catch (HttpRequestException ex)
                 {
-                    loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
+                    //Not Found
                 }
-                else if (ex.Message.Contains("400 (Bad Request)"))
-                {
-                    loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
-                }
-                else loadDataErrorMsg = $"Error: {ex.Message}";
             }
         }
     }
@@ -366,34 +514,38 @@
     public void CreateNewObjects()
     {
         //Main Model
-        criminalConviction = AddConviction();
+        criminalConviction = CreateNewCriminalConviction();
+        offences = new List<CriminalConvictionOffenceModel>();
+        offences.Add(CreateNewOffence());
 
-        //Parent Model
-        criminalConvictions = new CriminalConvictionsModel();
-
-        criminalConvictionList = new List<CriminalConvictionModel>();
-        criminalConvictionList.Add(criminalConviction);
-
-        criminalConvictions.Convictions = criminalConvictionList;
+        criminalConviction.Offences ??= offences;
     }
 
-    private CriminalConvictionModel AddConviction()
+    private CriminalConvictionModel CreateNewCriminalConviction()
     {
-        CriminalConvictionModel newConviction = new CriminalConvictionModel();
-        newConviction.CriminalConvictionID = criminalConvictions?.Convictions?.Count + 1 ?? 1;
-        newConviction.CreatedBy = student?.Email;
-        newConviction.CreatedDate = DateTime.Now;
-        newConviction.StudentDetailID = student?.StudentDetailID;
-        newConviction.AcademicYearID = student?.AcademicYearID;
-        newConviction.StudentRef = student?.StudentRef;
+        CriminalConvictionModel newCriminalConviction = new CriminalConvictionModel();
+        newCriminalConviction.CreatedBy = student?.Email;
+        newCriminalConviction.CreatedDate = DateTime.Now;
+        newCriminalConviction.StudentDetailID = student?.StudentDetailID;
+        newCriminalConviction.AcademicYearID = student?.AcademicYearID;
+        newCriminalConviction.StudentRef = student?.StudentRef;
+        newCriminalConviction.StudentGUID = student?.StudentGUID;
 
-        return newConviction;
+        return newCriminalConviction;
     }
 
-    private void AddAnotherConviction()
+    private CriminalConvictionOffenceModel CreateNewOffence()
     {
-        CriminalConvictionModel newConviction = AddConviction();
-        criminalConvictions?.Convictions?.Add(newConviction);
+        CriminalConvictionOffenceModel newOffence = new CriminalConvictionOffenceModel();
+        newOffence.CriminalConvictionOffenceID = criminalConviction?.Offences?.Count + 1 ?? 1;
+
+        return newOffence;
+    }
+
+    private void AddAnotherOffence()
+    {
+        CriminalConvictionOffenceModel newOffence = CreateNewOffence();
+        criminalConviction?.Offences?.Add(newOffence);
     }
 
     private void ResetForm()
@@ -405,69 +557,31 @@
 
     private async Task SubmitForm()
     {
-        //Not using this now as submitting many at once (below)
-
-        formSubmitted = true;
-        Logger.LogInformation("Id = {Id}", criminalConviction?.CriminalConvictionID);
-
-        submitEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction";
-        try
-        {
-            if (criminalConviction != null)
-            {
-                HttpResponseMessage formResponse = await Http.PostAsJsonAsync<CriminalConvictionModel>(submitEndPoint, criminalConviction);
-
-                if (formResponse.IsSuccessStatusCode != true)
-                {
-                    string responseBody = await formResponse.Content.ReadAsStringAsync();
-                    action = "Error";
-
-                    msgErrorTitle = $"Cannot Submit Form";
-                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
-                    msgErrorStackTrace = responseBody;
-
-                    modalError!.Open();
-                }
-            }
-            else
-            {
-                action = "Error";
-
-                msgErrorTitle = $"Cannot Submit Form";
-                msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
-                msgErrorStackTrace = null;
-
-                modalError!.Open();
-            }
-
-        }
-        catch (HttpRequestException ex)
-        {
-            HandleJsonException(ex, "GUID", StudentGUID ?? "");
-        }
-    }
-
-    private async Task SubmitMany()
-    {
         if (await _fluentValidationValidator!.ValidateAsync())
         {
+            //Not using this now as submitting many at once (below)
+
             formSubmitted = true;
             Logger.LogInformation("Id = {Id}", criminalConviction?.CriminalConvictionID);
 
-            submitEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/Many";
+            submitEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction";
             try
             {
-                if (criminalConvictions?.Convictions?.Count > 0)
+                if (criminalConviction != null)
                 {
                     //Clear out IDs set earlier as database will set these
-                    foreach (var conv in criminalConvictions?.Convictions!)
+                    if (criminalConviction?.Offences != null)
                     {
-                        conv.CriminalConvictionID = 0;
+                        foreach (var offence in criminalConviction?.Offences!)
+                        {
+                            offence.CriminalConvictionOffenceID = 0;
+                        }
                     }
+                    
+                    HttpResponseMessage formResponse = await Http.PostAsJsonAsync<CriminalConvictionModel>(submitEndPoint, criminalConviction);
 
-                    HttpResponseMessage formResponse = await Http.PostAsJsonAsync<ICollection<CriminalConvictionModel>>(submitEndPoint, criminalConvictions.Convictions!);
-
-                    if (formResponse.IsSuccessStatusCode != true) {
+                    if (formResponse.IsSuccessStatusCode != true)
+                    {
                         string responseBody = await formResponse.Content.ReadAsStringAsync();
                         action = "Error";
 
@@ -476,25 +590,6 @@
                         msgErrorStackTrace = responseBody;
 
                         modalError!.Open();
-                    }
-                    else
-                    {
-                        List<CriminalConvictionModel> insertedCriminalConvictions = await formResponse.Content.ReadFromJsonAsync<List<CriminalConvictionModel>>() ?? new List<CriminalConvictionModel>();
-
-                        if (insertedCriminalConvictions.Count > 0)
-                        {
-                            //If insert successful
-                        }
-                        else
-                        {
-                            action = "Error";
-
-                            msgErrorTitle = $"Cannot Submit Form";
-                            msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
-                            msgErrorStackTrace = null;
-
-                            modalError!.Open();
-                        }
                     }
                 }
                 else
@@ -516,8 +611,107 @@
         }
     }
 
+    // private async Task SubmitMany()
+    // {
+    //     if (await _fluentValidationValidator!.ValidateAsync())
+    //     {
+    //         formSubmitted = true;
+    //         Logger.LogInformation("Id = {Id}", criminalConviction?.CriminalConvictionID);
+
+    //         submitEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/Many";
+    //         try
+    //         {
+    //             if (criminalConviction?.Offences?.Count > 0)
+    //             {
+    //                 //Clear out IDs set earlier as database will set these
+    //                 foreach (var conv in criminalConviction?.Offences!)
+    //                 {
+    //                     conv.CriminalConvictionOffenceID = 0;
+    //                 }
+
+    //                 HttpResponseMessage formResponse = await Http.PostAsJsonAsync<ICollection<CriminalConvictionOffenceModel>>(submitEndPoint, criminalConviction!);
+
+    //                 if (formResponse.IsSuccessStatusCode != true) {
+    //                     string responseBody = await formResponse.Content.ReadAsStringAsync();
+    //                     action = "Error";
+
+    //                     msgErrorTitle = $"Cannot Submit Form";
+    //                     msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+    //                     msgErrorStackTrace = responseBody;
+
+    //                     modalError!.Open();
+    //                 }
+    //                 else
+    //                 {
+    //                     List<CriminalConvictionOffenceModel> insertedCriminalConvictions = await formResponse.Content.ReadFromJsonAsync<List<CriminalConvictionOffenceModel>>() ?? new List<CriminalConvictionOffenceModel>();
+
+    //                     if (insertedCriminalConvictions.Count > 0)
+    //                     {
+    //                         //If insert successful
+    //                     }
+    //                     else
+    //                     {
+    //                         action = "Error";
+
+    //                         msgErrorTitle = $"Cannot Submit Form";
+    //                         msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+    //                         msgErrorStackTrace = null;
+
+    //                         modalError!.Open();
+    //                     }
+    //                 }
+    //             }
+    //             else
+    //             {
+    //                 action = "Error";
+
+    //                 msgErrorTitle = $"Cannot Submit Form";
+    //                 msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
+    //                 msgErrorStackTrace = null;
+
+    //                 modalError!.Open();
+    //             }
+
+    //         }
+    //         catch (HttpRequestException ex)
+    //         {
+    //             HandleJsonException(ex, "GUID", StudentGUID ?? "");
+    //         }
+    //     }
+    // }
+
     private void GoToSHCGHomepage() {
         NavManager.NavigateTo("https://www.shcg.ac.uk");
+    }
+
+    public void NoOffencesToDeclareToggle()
+    {
+        if (criminalConviction != null)
+        {
+            if (criminalConviction.NoOffencesToDeclare == true)
+            {
+                criminalConviction.NoOffencesToDeclare = false;
+            }
+            else
+            {
+                criminalConviction.NoOffencesToDeclare = true;
+            }
+        }
+    }
+
+    public void AgreeInfoIsCorrectStudentToggle()
+    {
+        if (criminalConviction != null)
+        {
+            if (criminalConviction.AgreeInfoIsCorrectStudent == true)
+            {
+                criminalConviction.AgreeInfoIsCorrectStudent = false;
+            }
+            else
+            {
+                criminalConviction.AgreeInfoIsCorrectStudent = true;
+            }
+        }
     }
 
     private void FormAction() {
@@ -526,9 +720,9 @@
         if (action == "ClearFormConfirm") {
             ClearForm();
         }
-        else if (action == "RemoveCriminalConvictionConfirm")
+        else if (action == "RemoveOffenceConfirm")
         {
-            RemoveCriminalConviction();
+            RemoveOffence();
         }
         else {
             action = "Error";
@@ -545,7 +739,7 @@
         action = "ClearFormConfirm";
 
         msgConfirmTitle = $"Clear Form?";
-        msgConfirm = (MarkupString)$"Are you sure you want to clear all {criminalConvictions?.Convictions?.Count ?? 0} entries?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear all {criminalConviction?.Offences?.Count ?? 0} entries?";
 
         modalConfirm!.Open();
     }
@@ -553,39 +747,34 @@
     private void ClearForm() {
         action = "ClearForm";
 
-        criminalConviction = new CriminalConvictionModel();
-        criminalConvictions = new CriminalConvictionsModel();
-        criminalConvictionList = new List<CriminalConvictionModel>();
-        criminalConvictionList.Add(criminalConviction);
-
-        criminalConvictions.Convictions = criminalConvictionList;
+        CreateNewObjects();
 
         modalConfirm!.Close();
     }
 
-    private void RemoveCriminalConvictionConfirm(int recordID)
+    private void RemoveOffenceConfirm(int recordID)
     {
-        criminalConvictionID = recordID;
-        action = "RemoveCriminalConvictionConfirm";
+        criminalConvictionOffenceID = recordID;
+        action = "RemoveOffenceConfirm";
 
-        msgConfirmTitle = $"Remove Criminal Conviction?";
-        msgConfirm = (MarkupString)$"Are you sure you want to remove this criminal conviction?";
+        msgConfirmTitle = $"Remove Offence?";
+        msgConfirm = (MarkupString)$"Are you sure you want to remove this offence?";
 
         modalConfirm!.Open();
     }
 
-    private void RemoveCriminalConviction()
+    private void RemoveOffence()
     {
-        action = "RemoveCriminalConviction";
+        action = "RemoveOffence";
 
         modalConfirm!.Close();
 
-        if (criminalConvictions?.Convictions?.Count > 1) {
-            var recordToDelete = criminalConvictionList?
-                .Where(c => c.CriminalConvictionID == criminalConvictionID).FirstOrDefault();
+        if (criminalConviction?.Offences?.Count > 1) {
+            var recordToDelete = criminalConviction?.Offences?
+                .Where(c => c.CriminalConvictionOffenceID == criminalConvictionOffenceID).FirstOrDefault();
 
             if (recordToDelete != null) {
-                criminalConvictionList?
+                criminalConviction?.Offences?
                 .Remove(recordToDelete);
             }
             else {

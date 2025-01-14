@@ -1361,6 +1361,7 @@ C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroo
 C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\lib\bootstrap-icons\icons\calendar-heart-fill.svg
 C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\lib\bootstrap-icons\icons\stopwatch-fill.svg
 C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\lib\bootstrap-icons\icons\chat-quote.svg
+C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\appsettings.Development.json
 C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\lib\bootstrap-icons\icons\file-earmark-medical-fill.svg
 C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\lib\bootstrap-icons\icons\trello.svg
 C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\lib\bootstrap-icons\icons\lightning-charge.svg
@@ -2182,6 +2183,7 @@ C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroo
 C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\lib\bootstrap-icons\icons\image.svg
 C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\lib\bootstrap-icons\icons\emoji-heart-eyes-fill.svg
 C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\wwwroot\lib\bootstrap-icons\icons\cup-fill.svg
+wwwroot\appsettings.Development.json
 wwwroot\appsettings.json
 wwwroot\css\app.css
 wwwroot\css\callout.css

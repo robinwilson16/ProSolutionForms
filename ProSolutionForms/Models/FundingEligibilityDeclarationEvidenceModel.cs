@@ -35,7 +35,11 @@ namespace ProSolutionForms.Models
         Birth_Certificate = 2,
         [Display(Name = "Driving Licence")]
         Driving_Licence = 3,
-        Other = 4
+        [Display(Name = "Low Wage Evidence")]
+        Low_Wage_Evidence = 4,
+        [Display(Name = "Benefit Evidence")]
+        Benefit_Evidence = 5,
+        Other = 6
     }
 
     public class FundingEligibilityDeclarationEvidenceValidator : AbstractValidator<FundingEligibilityDeclarationEvidenceModel>

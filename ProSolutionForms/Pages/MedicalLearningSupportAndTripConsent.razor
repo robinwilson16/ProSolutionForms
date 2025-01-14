@@ -1,0 +1,1986 @@
+﻿@page "/MedicalLearningSupportAndTripConsent"
+@page "/MedicalLearningSupportAndTripConsent/{StudentGUID}"
+@page "/MedicalLearningSupportAndTripConsent/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
+
+@using ProSolutionForms.Components
+@using ProSolutionForms.Models
+@using ProSolutionForms.Shared
+@using System.Net
+@inject HttpClient Http
+@inject IConfiguration configuration
+@inject NavigationManager NavManager
+@inject ILogger<MedicalLearningSupportAndTripConsentModel> Logger
+
+<PageTitle>Medical, Learning Support And Trip Consent Form</PageTitle>
+
+<Modal @ref="modalInfo">
+    <Title><i class="fa-solid fa-circle-info"></i> @msgInfoTitle</Title>
+    <Body>
+        <p>
+            @msgInfo
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalError">
+    <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
+    <Body>
+        <div class="alert alert-danger" role="alert">
+            @msgError
+        </div>
+        @if (msgErrorStackTrace != null) 
+        {
+            <p><i class="fa-solid fa-bug"></i> Stack Trace:</p>
+            <pre class="pre-scrollable ErrorDetails">@msgErrorStackTrace</pre>
+        }
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalConfirm">
+    <Title><i class="fa-solid fa-circle-question"></i> @msgConfirmTitle</Title>
+    <Body>
+        <p>
+            @msgConfirm
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-danger" @onclick="FormAction"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
+    </Footer>
+</Modal>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md text-center">
+            <img class="img-fluid CollegeLogo" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+        </div>
+    </div>
+</div>
+
+<div class="bd-callout bd-callout-SHCG-blue bd-callout-grey GreyBackground">
+    <div class="container">
+        <div class="row">
+            <div class="col-md text-center">
+                <h3 class="mt-3 mb-3"><i class="fa-solid fa-notes-medical"></i> Medical, Learning Support And Trip Consent Form</h3>
+            </div>
+        </div>
+    </div>
+
+    @if (loadDataErrorMsg != null) 
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                @loadDataErrorMsg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (formSubmitted == true || existingMedicalLearningSupportAndTripConsent?.StudentDetailID != null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-success hstack gap-3" role="alert">
+                        <div class="ms-auto me-3">
+                            <h1><i class="fa-solid fa-clipboard-check"></i></h1>
+                        </div>
+                        <div class="me-auto">
+                            <h4 class="alert-heading">Medical Information Successfully Submitted</h4>
+                            <hr>
+                            @if (existingMedicalLearningSupportAndTripConsent?.StudentDetailID != null)
+                            {
+                                <p>
+                                    You have already declared your Medical Information.
+                                </p>
+                            }
+                            else {
+                                <p>
+                                    Thank you for declaring your Medical Information.
+                                </p>
+                            }
+                            <p>
+                                We will be in touch with you soon to discuss the next steps.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="row">
+                            <div class="col-md text-end">
+                                <button type="button" class="btn btn-success" @onclick="GoToSHCGHomepage"><i class="fa-solid fa-arrow-up-right-from-square"></i> Go To The SHCG Website</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if(student == null) {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-primary text-center" role="alert">
+                        <h1>
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else {
+        <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
+            <div class="container">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md text-center">
+                        <h4>Personal Information</h4>
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-hashtag"></i> Student Ref
+                    </div>
+                    <div class="col-md-8">
+                        @student?.StudentRef
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-user"></i> Name
+                    </div>
+                    <div class="col-md-8">
+                        <strong>@student?.Forename @student?.Surname</strong>
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-calendar-days"></i> Academic Year
+                    </div>
+                    <div class="col-md-8">
+                        @student?.AcademicYearID
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <EditForm FormName="medicalLearningSupportAndTripConsent" Model="medicalLearningSupportAndTripConsent" OnValidSubmit="SubmitForm">
+            <FluentValidationValidator @ref="_fluentValidationValidator" />
+            <ValidationSummary />
+
+            <div class="bd-callout bd-callout-SHCG-green bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Medical Information</h4>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-primary hstack gap-3" role="alert">
+                                <div>
+                                    <h1><i class="fa-solid fa-circle-info"></i></h1>
+                                </div>
+                                <div>
+                                    <p>
+                                        <strong>
+                                            All students are required to complete the following section. If you are under 18, you must ask your parent / carer to
+                                            complete and sign this section.
+                                        </strong>
+                                    </p>
+                                    <p>
+                                        These details will be held confidentially by the College and will only be used for support services, if you become ill while
+                                        at College and/or require medication, or to help staff in the event of an emergency
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Do you have any medical conditions?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasMedicalCondition" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasMedicalCondition == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasMedicalConditionToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasMedicalCondition == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasMedicalConditionToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasMedicalCondition)" />
+                                </div>
+                            </div>
+
+                            @* Medical Conditions List *@
+
+                            @if (medicalLearningSupportAndTripConsent?.MedicalConditions != null)
+                            {
+                                int? medicalLearningSupportAndTripConsentRow = 0;
+                                <div class="alert alert-warning" role="alert">
+                                    <h4 class="alert-heading"><i class="fa-solid fa-notes-medical"></i> Medical Conditions</h4>
+
+                                    <datalist class="col-4" id="MedicalConditionTypesList">
+                                        @if (MedicalConditionTypes != null)
+                                        {
+                                            @foreach (var option in MedicalConditionTypes)
+                                            {
+                                                <option value="@option.Code">@option.Description</option>
+                                            }
+                                        }
+                                    </datalist>
+
+                                    @foreach (var condition in medicalLearningSupportAndTripConsent!.MedicalConditions)
+                                    {
+                                        medicalLearningSupportAndTripConsentRow++;
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md">
+                                                <div class="card">
+                                                    <div class="card-body">
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Medical Condition</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <div class="input-group mb-3">
+                                                                    <InputNumber @bind-Value="condition!.MedicalConditionTypeID" class="form-control" list="MedicalConditionTypesList" />
+                                                                    <span class="input-group-text w-75">
+                                                                        @MedicalConditionTypes?.Where(m => m.Code == condition!.MedicalConditionTypeID)?.FirstOrDefault()?.Description
+                                                                    </span>
+                                                                </div>
+
+                                                                <ValidationMessage For="@(() => condition!.MedicalConditionTypeID)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Medication Details</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputTextArea @bind-Value="condition!.MedicationDetails" class="form-control" />
+                                                                <ValidationMessage For="@(() => condition!.MedicationDetails)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Medication Schedule</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputTextArea @bind-Value="condition!.MedicationSchedule" class="form-control" />
+                                                                <ValidationMessage For="@(() => condition!.MedicationSchedule)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Notes</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputTextArea @bind-Value="condition!.Notes" class="form-control" />
+                                                                <ValidationMessage For="@(() => condition!.Notes)" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md">
+                                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveMedicalConditionConfirm(condition?.MedicalLearningSupportAndTripConsentMedicalConditionID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Medical Condition</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="alert alert-secondary" role="alert">
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                    <button type="button" class="btn btn-warning me-md-3" @onclick="AddMedicalCondition"><i class="fa-solid fa-notes-medical"></i> Add Another Medical Condition</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-info hstack gap-3" role="alert">
+                                        <div>
+                                            <h1><i class="fa-solid fa-circle-info"></i></h1>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                Please be aware that the College is not responsible for the administering of any medication and has the provision for first
+                                                aid facilities only. If it is assessed on completion of this form that additional support is needed for medical needs, then the
+                                                college will contact you for an individual appointment or you can contact the Careers Centre direct on <a href="tel:01329 815 200">01329 815 200</a>.
+                                            </p>
+                                            <p>
+                                                I confirm that this medical information is correct to the best of my knowledge and authorise a member of South Hampshire College Group
+                                                College's staff to arrange emergency medical treatment should it become necessary on my behalf. I give permission
+                                                under the Data Protection Act 2018, for the College to process the information on this form.
+                                            </p>
+                                            <p>
+                                                I agree to keep the College informed of any future medical conditions that I may develop in order for the College to
+                                                support me effectively. I agree to inform the College of any changes in my emergency contact details
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            }
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Do you (or your parent/guardian) believe any medical conditions you have (if any) require a risk assessment to be completed? If you have none then please select No</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.RequiresRiskAssesment" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.RequiresRiskAssesment == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => RequiresRiskAssesmentToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.RequiresRiskAssesment == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => RequiresRiskAssesmentToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.RequiresRiskAssesment)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Have you been hospitalised for any reason in the last year?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasBeenHospitalisedInLastYearToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasBeenHospitalisedInLastYearToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> If yes please give details:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputTextArea @bind-Value="medicalLearningSupportAndTripConsent!.HospitalisationNotes" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HospitalisationNotes)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <i class="fa-solid fa-angles-right"></i> <label class="col-form-label">Do you require any learning support?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.RequiresLearningSupport" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.RequiresLearningSupport == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => RequiresLearningSupportToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.RequiresLearningSupport == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => RequiresLearningSupportToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.RequiresLearningSupport)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Do you have an EHCP (Educational Health Care Plan)</label>
+                                    <div class="text-body-secondary">
+                                        If <strong>YES</strong> your application is put on hold until we have received all relevant information to
+                                        access the support needed. You will still need to obtain the required entrance qualifications for your study
+                                        programme irrespective of support needs
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasEHCP" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasEHCP == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasEHCPToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasEHCP == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasEHCPToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasEHCP)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if (medicalLearningSupportAndTripConsent != null) 
+            {
+                int? emergencyContactRow = 0;
+                string? numberSuffix;
+                @if (medicalLearningSupportAndTripConsent?.EmergencyContacts != null)
+                {
+                    foreach (var contact in medicalLearningSupportAndTripConsent?.EmergencyContacts!)
+                    {
+                        emergencyContactRow++;
+
+                        <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md">
+                                        @if (emergencyContactRow == 1) {
+                                            numberSuffix = "st";
+
+                                            <div class="alert alert-primary hstack gap-3" role="alert">
+                                                <div>
+                                                    <h1><i class="fa-solid fa-circle-info"></i></h1>
+                                                </div>
+                                                <div>
+                                                    <p>
+                                                        In case of emergency/illness we may need to contact a parent/carer, relative or friend. Please give two contacts aged 18 or over.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        }
+                                        else {
+                                            numberSuffix = "nd";
+                                        }
+
+                                        <div class="row mb-3 align-items-center">
+                                            <div class="col-md text-center">
+                                                <h4>@emergencyContactRow@numberSuffix contact (parent/carer/ next of kin):</h4>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Surname</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.Surname" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.Surname)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> First Name(s)</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.Forename" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.Forename)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Title</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                @* <InputSelect @bind-Value="contact!.Title" bind="@Titles" class="form-select">
+                                                    <option value=null>-- Please Select --</option>
+                                                    @if (Titles != null)
+                                                    {
+                                                        @foreach (var title in Titles)
+                                                        {
+                                                            <option value="@title.Code">@title.Description</option>
+                                                        }
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="@(() => contact!.Title)" /> *@
+                                                <div class="input-group mb-3">
+                                                    <InputText @bind-Value="contact!.Title" class="form-control" list="TitlesList" />
+                                                    <span class="input-group-text w-75">
+                                                        @Titles?.Where(t => t.Code == contact!.Title)?.FirstOrDefault()?.Description
+                                                    </span>
+                                                </div>
+
+                                                <datalist class="col-4" id="TitlesList">
+                                                    @if (Titles != null)
+                                                    {
+                                                        @foreach (var option in Titles)
+                                                        {
+                                                            <option value="@option.Code">@option.Description</option>
+                                                        }
+                                                    }
+                                                </datalist>
+                                                <ValidationMessage For="@(() => contact!.Title)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Relationship to Student</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="input-group mb-3">
+                                                    <InputNumber @bind-Value="contact!.RelationshipToStudent" class="form-control" list="RelationshipsList" />
+                                                    <span class="input-group-text w-75">
+                                                        @Relationships?.Where(r => r.Code == contact!.RelationshipToStudent)?.FirstOrDefault()?.Description
+                                                    </span>
+                                                </div>
+
+                                                <datalist class="col-4" id="RelationshipsList">
+                                                    @if (Relationships != null)
+                                                    {
+                                                        @foreach (var option in Relationships)
+                                                        {
+                                                            <option value="@option.Code">@option.Description</option>
+                                                        }
+                                                    }
+                                                </datalist>
+                                                <ValidationMessage For="@(() => contact!.RelationshipToStudent)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md">
+                                                <strong>Contact address (if different):</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Address 1</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.Address1" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.Address1)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Address 2</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.Address2" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.Address2)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Town</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.Address3" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.Address3)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> County</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.Address4" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.Address4)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Post Code</label>
+                                            </div>
+                                            <div class="col-auto">
+                                                <InputText @bind-Value="contact!.PostCodeOut" size="4" maxlength="4" class="form-control" />
+                                            </div>
+                                            <div class="col-auto">
+                                                <InputText @bind-Value="contact!.PostCodeIn" size="3" maxlength="3" class="form-control" />
+                                            </div>
+                                            <div class="col-md-12">
+                                                <ValidationMessage For="@(() => contact!.PostCodeOut)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Mobile Telephone</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.TelMobile" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.TelMobile)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Home Telephone</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.TelHome" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.TelHome)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Work Telephone</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.TelWork" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.TelWork)" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Email Address</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="contact!.Email" class="form-control" />
+                                                <ValidationMessage For="@(() => contact!.Email)" />
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+
+            <div class="bd-callout bd-callout-SHCG-blue bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Learning Difficulties and Disabilities</h4>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Do you have any learning difficulties and/or disabilities?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasLearningDifficultyDisabilityToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasLearningDifficultyDisabilityToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability)" />
+                                </div>
+                            </div>
+
+                            @* Difficulties/Disabilities List *@
+
+                            @if (medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities != null)
+                            {
+                                int? learningDifficultyDisabilityRow = 0;
+                                <div class="alert alert-warning" role="alert">
+                                    <h4 class="alert-heading"><i class="fa-brands fa-accessible-icon"></i> Learning Difficulties/Disabilities</h4>
+
+                                    <datalist class="col-4" id="LearningDifficultiesDisabilitiesList">
+                                        @if (DisabilityCategories != null)
+                                        {
+                                            @foreach (var option in DisabilityCategories)
+                                            {
+                                                <option value="@option.Code">@option.Description</option>
+                                            }
+                                        }
+                                    </datalist>
+
+                                    @foreach (var learningDifficultyDisability in medicalLearningSupportAndTripConsent!.LearningDifficultiesDisabilities)
+                                    {
+                                        learningDifficultyDisabilityRow++;
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md">
+                                                <div class="card">
+                                                    <div class="card-body">
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Difficulties/Disabilities</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <div class="input-group mb-3">
+                                                                    <InputNumber @bind-Value="learningDifficultyDisability!.DisabilityCategoryID" class="form-control" list="LearningDifficultiesDisabilitiesList" />
+                                                                    <span class="input-group-text w-75">
+                                                                        @DisabilityCategories?.Where(d => d.Code == learningDifficultyDisability!.DisabilityCategoryID)?.FirstOrDefault()?.Description
+                                                                    </span>
+                                                                </div>
+
+                                                                <ValidationMessage For="@(() => learningDifficultyDisability!.DisabilityCategoryID)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Notes</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <InputTextArea @bind-Value="learningDifficultyDisability!.Notes" class="form-control" />
+                                                                <ValidationMessage For="@(() => learningDifficultyDisability!.Notes)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md-4">
+                                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> This is My Primary Disability</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <CustomBoolInputSelect @bind-Value="learningDifficultyDisability!.IsPrimary" class="form-select d-none">
+                                                                    <option value="">-- Please Select --</option>
+                                                                    <option value="true">Yes</option>
+                                                                    <option value="false">No</option>
+                                                                </CustomBoolInputSelect>
+                                                                <div class="d-grid gap-2 d-md-block">
+                                                                    <button type="button" class="btn @(learningDifficultyDisability!.IsPrimary == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsPrimaryLearningDifficultyDisabilityToggle(learningDifficultyDisability, true)"><i class="@(learningDifficultyDisability!.IsPrimary == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                                                </div>
+                                                                <ValidationMessage For="@(() => learningDifficultyDisability!.IsPrimary)" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col-md">
+                                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveLearningDifficultyDisabilityConfirm(learningDifficultyDisability?.MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Learning Difficulty/Disability</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="alert alert-secondary" role="alert">
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="d-grid gap-2 d-md-block text-end">
+                                                    <button type="button" class="btn btn-warning me-md-3" @onclick="AddLearningDifficultyDisability"><i class="fa-brands fa-accessible-icon"></i> Add Another Learning Difficulty/Disability</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Home Situation and Support at School</h4>
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Are you currently a Looked After Child?*</label>
+                                    <div class="text-body-secondary">*A child in care under the local authority.</div>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.IsLAC" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsLAC == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsLACToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsLAC == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => IsLACToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.IsLAC)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Are you a Care Leaver?*</label>
+                                    <div class="text-body-secondary">
+                                        *A child previously in care under the local authority.
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.IsCareLeaver" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsCareLeaver == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsCareLeaverToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsCareLeaver == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => IsCareLeaverToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.IsCareLeaver)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Are you registered as a Young Carer?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.IsYoungCarer" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsYoungCarer == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsYoungCarerToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsYoungCarer == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => IsYoungCarerToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.IsYoungCarer)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Are you currently entitled to free school meals?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasFSM" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasFSM == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasFSMToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasFSM == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasFSMToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasFSM)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Are you from a Military Service Family?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsFromMilitaryServiceFamilyToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => IsFromMilitaryServiceFamilyToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label">
+                                        <i class="fa-solid fa-angles-right"></i> Have you had any access arrangements for
+                                        your exams in the past?
+                                    </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasAccessArrangements" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasAccessArrangements == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasAccessArrangementsToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasAccessArrangements == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasAccessArrangementsToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasAccessArrangements)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> If yes please give details:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputTextArea @bind-Value="medicalLearningSupportAndTripConsent!.AccessRequirementDetails" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.AccessRequirementDetails)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label">
+                                        <i class="fa-solid fa-angles-right"></i> Did you have any further suppport at school/college?
+                                    </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HadFurtherSupportAtSchoolOrCollegeToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HadFurtherSupportAtSchoolOrCollegeToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> If yes please give details:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputTextArea @bind-Value="medicalLearningSupportAndTripConsent!.FurtherSupportAtSchoolOrCollegeDetails" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.FurtherSupportAtSchoolOrCollegeDetails)" />
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bd-callout bd-callout-SHCG-green bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Off Site Activities</h4>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-primary hstack gap-3" role="alert">
+                                <div>
+                                    <h1><i class="fa-solid fa-circle-info"></i></h1>
+                                </div>
+                                <div>
+                                    <p>
+                                        Consent for work experience/work placements, sporting events (including team games, tournaments and enrichment
+                                        activities), off site day visits and local learning activities (up to 20 miles radius from the College campuses and within normal
+                                        College opening hours). Separate consent will be sought for residential visits.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-secondary" role="alert">
+                                <h4 class="alert-heading">Under 18 at the Start of the Course</h4>
+                                <p>
+                                    I give consent for my son/daughter/ward to participate in work experience/sporting events/enrichment activities/day visits/local learning activities and acknowledge
+                                    that he/she may have to use public or private transportation to do this. I confirm that they are medically fit, and/or I have informed the College of any condition that would result in an unnecessary risk to my son/daughter/ward
+                                    or others' health and safety.
+                                </p>
+                                <p>
+                                    I agree to inform the College, via Student Services, of any changes to my son/daughter/ward's medical condition/health issue/
+                                    disability etc. If such a condition does exist, I agree that their medical condition may be discussed with and passed on in
+                                    confidence to the prospective employer or responsible person. The College is insured for public and employers' liability.
+                                </p>
+                                <p>
+                                    <strong>For information:</strong><br />
+                                    Where work experience involves working with children under the age of 16 or vulnerable adults, the College is obliged to
+                                    carry out a criminal record check from the Disclosure and Barring Service.
+                                </p>
+                                <p>
+                                    I give consent, and agree that, if applicable, a criminal records check from the Disclosure and Barring Service may be
+                                    carried out on my son/daughter/ward and understand that details of work experience will be sent to me when arranged.
+                                </p>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> I Provide My Consent on Behalf of My Son/Daughter/Ward</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer" class="form-select d-none">
+                                            <option value="">-- Please Select --</option>
+                                            <option value="true">Yes</option>
+                                            <option value="false">No</option>
+                                        </CustomBoolInputSelect>
+                                        <div class="d-grid gap-2 d-md-block">
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasGivenTripConsentParentCarerToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasGivenTripConsentParentCarerToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        </div>
+                                        <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-secondary" role="alert">
+                                <h4 class="alert-heading">18 and Over at the Start of the Course</h4>
+                                <p>
+                                    I give consent to participate in work experience/sporting events/enrichment activities/day visits/local learning
+                                    activities and acknowledge that I may have to use public or private transportation to do this. I confirm that I am medically fit, and/or 
+                                    I have informed the College of any condition that would result in an unnecessary risk to my or others' health
+                                    and safety. 
+                                </p>
+                                <p>
+                                    I agree to inform the College, via Student Services, of any changes to my medical condition/health issue/disability
+                                    etc. If such a condition does exist, I agree that my medical condition may be discussed with and passed on in confidence to the
+                                    prospective employer or responsible person. The College is insured for public and employers' liability.
+                                </p>
+                                <p>
+                                    <strong>For information:</strong><br />
+                                    Where work experience involves working with children under the age of 16 or vulnerable adults, the College is obliged to
+                                    carry out a criminal records check from the Disclosure and Barring Service.<br />
+                                </p>
+                                <p>
+                                    I give consent, and agree that, if applicable, a criminal records check from the Disclosure
+                                    and Barring Service on me and understand that details of work experience will be sent to me when arranged.
+                                </p>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> I Provide My Consent as Someone Aged 18 Or Over</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent" class="form-select d-none">
+                                            <option value="">-- Please Select --</option>
+                                            <option value="true">Yes</option>
+                                            <option value="false">No</option>
+                                        </CustomBoolInputSelect>
+                                        <div class="d-grid gap-2 d-md-block">
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasGivenTripConsentStudentToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasGivenTripConsentStudentToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        </div>
+                                        <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-secondary" role="alert">
+                                <h4 class="alert-heading">Permission to Publish Photographic Images</h4>
+                                <p>
+                                    From time to time our College photographer or staff members will take photos in and around College, which you may appear
+                                    in. These photos will be used solely to promote South Hampshire College Group and will be held without limit of time. These may be used in
+                                    printed or electronic form and may appear in different publications (including websites, cinema, advertising boards, television,
+                                    exhibition panels and other large scale media). To comply with the Data Protection Act 2018, your permission is required before
+                                    we take any photographs or recordings of you.
+                                </p>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> I Agree to the Above "Permission to Publish Photographic Images"" and Give My Consent</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent" class="form-select d-none">
+                                            <option value="">-- Please Select --</option>
+                                            <option value="true">Yes</option>
+                                            <option value="false">No</option>
+                                        </CustomBoolInputSelect>
+                                        <div class="d-grid gap-2 d-md-block">
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasGivenPhotographicImagesConsentToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasGivenPhotographicImagesConsentToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        </div>
+                                        <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent)" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md text-center">
+                                    <h4>Consents and Delarations</h4>
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label">
+                                        <i class="fa-solid fa-angles-right"></i> Can we contact your school/college/other institution/employer for details of your learning
+                                        difficulties/disabilities (if any) and obtain copies of any relevant documents? If you have none then please select No.
+                                    </label>
+                                    <div class="text-body-secondary">
+                                        Please note that if we are not allowed to obtain information about your learning
+                                        difficulties it may not be possible to support you appropriately.
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => CanContactPriorSchoolOrCollegeToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => CanContactPriorSchoolOrCollegeToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label">
+                                        <i class="fa-solid fa-angles-right"></i> Do you have any pending, ongoing, or outstanding
+                                        criminal investigations or
+                                        convictions?
+                                    </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.HasCriminalConvictions" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasCriminalConvictions == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasCriminalConvictionsToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasCriminalConvictions == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasCriminalConvictionsToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasCriminalConvictions)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> If yes please give details:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputTextArea @bind-Value="medicalLearningSupportAndTripConsent!.CriminalConvictionDetails" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.CriminalConvictionDetails)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label">
+                                        <i class="fa-solid fa-angles-right"></i> I agree that information concerning my disability(ies) can be shared internally with staff within South Hampshire College Group and
+                                        externally, where appropriate (e.g. placement settings)
+                                        <div class="text-body-secondary">
+                                            This is in order to:
+                                            <ul>
+                                                <li>facilitate communication in respect of disability issues</li>
+                                                <li>facilitate reasonable adjustments to be made to meet my individual support needs in college or the workplace</li>
+                                            </ul>
+                                            <p>
+                                                For Apprenticeships; I consent to the sharing of my information with potential employers as part of the recruitment process
+                                            </p>
+                                            <p>
+                                                <strong>Please note that if you refuse consent it may not be possible to meet your individual needs.</strong>
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => CanShareInformationWithPotentialEmployersToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => CanShareInformationWithPotentialEmployersToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> YES ONLY If the student is <strong>under</strong> 18 at the start of their course, I confirm, as parent/carer, by ticking this box, I agree all information provided is correct to the best of my knowledge?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer == true? "btn-primary" : "btn-outline-primary") me-md-3" @onclick="(e) => AgreeInfoIsCorrectParentCarerToggle()"><i class="@(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-file-contract"></i> Parent/carer name:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputText @bind-Value="medicalLearningSupportAndTripConsent!.SignedParentCarer" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.SignedParentCarer)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-regular fa-calendar-days"></i> Date</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputDate @bind-Value="medicalLearningSupportAndTripConsent!.SignedParentCarerDate" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.SignedParentCarerDate)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> If you are <strong>18 or over</strong> at the start of your course, I confirm, by ticking this box, I agree all information provided is correct to the best of my knowledge?</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectStudent" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectStudent == true? "btn-primary" : "btn-outline-primary") me-md-3" @onclick="(e) => AgreeInfoIsCorrectStudentToggle()"><i class="@(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectStudent == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectStudent)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-solid fa-file-contract"></i> Student name:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputText @bind-Value="medicalLearningSupportAndTripConsent!.SignedStudent" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.SignedStudent)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label"><i class="fa-regular fa-calendar-days"></i> Date</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <InputDate @bind-Value="medicalLearningSupportAndTripConsent!.SignedStudentDate" class="form-control" />
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.SignedStudentDate)" />
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-secondary" role="alert">
+                <div class="row">
+                    <div class="col-md">
+                        <div class="d-grid gap-2 d-md-block text-center">
+                            <button type="submit" class="btn btn-success me-md-3"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+                            <button type="button" class="btn btn-warning" @onclick="ClearFormConfirm"><i class="fa-solid fa-eraser"></i> Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? StudentGUID { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart1 { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart2 { get; set; }
+
+    public string? AcademicYearID { get; set; }
+
+    bool formSubmitted = false;
+
+    //Hide navbar in layout component
+    [CascadingParameter]
+    public MainLayout? Layout { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Layout != null) {
+            Layout.HideNav();
+        }
+    }
+
+    public int? medicalConditionID { get; set; }
+    public int? learningDifficultyDisabilityID { get; set; }
+    public string? action { get; set; }
+
+    private Modal? modalInfo { get; set; }
+    public string? msgInfoTitle = null;
+    public MarkupString? msgInfo = null;
+
+    private Modal? modalError { get; set; }
+    public string? msgErrorTitle = null;
+    public MarkupString? msgError = null;
+    public string? msgErrorStackTrace = null;
+
+    private Modal? modalConfirm { get; set; }
+    public string? msgConfirmTitle = null;
+    public MarkupString? msgConfirm = null;
+
+    [SupplyParameterFromForm]
+    public MedicalLearningSupportAndTripConsentModel? medicalLearningSupportAndTripConsent { get; set; }
+    public IList<MedicalLearningSupportAndTripConsentEmergencyContactModel>? emergencyContacts { get; set; }
+    public IList<MedicalLearningSupportAndTripConsentMedicalConditionModel>? medicalConditions { get; set; }
+    public IList<MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityModel>? learningDifficultiesDisabilities { get; set; }
+
+    public MedicalLearningSupportAndTripConsentModel? existingMedicalLearningSupportAndTripConsent { get; set; }
+
+    private FluentValidationValidator? _fluentValidationValidator;
+
+    public string? loadDataErrorMsg = null;
+
+    private StudentModel? student;
+    private string? studentEndPoint;
+
+    private string? submitEndPoint;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bool isError = false;
+
+        if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
+            AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
+
+        if (StudentGUID == null)
+        {
+            isError = true;
+            loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
+        }
+        else
+        {
+            if (AcademicYearID!= null)
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{AcademicYearID}/{StudentGUID}";
+            else
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+
+            try
+            {
+                student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
+            }
+            catch (HttpRequestException ex)
+            {
+                isError = true;
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
+            }
+
+            if (isError != true) 
+            {
+                string medicalEndPoint = $"{configuration["APIEndpoint"]}/MedicalLearningSupportAndTripConsent/{student?.AcademicYearID}/{student?.StudentGUID}";
+
+                try
+                {
+                    existingMedicalLearningSupportAndTripConsent = await Http.GetFromJsonAsync<MedicalLearningSupportAndTripConsentModel>(medicalEndPoint);
+                }
+                catch (HttpRequestException ex)
+                {
+                    //Not Found
+                }
+            }
+
+            //Create objects to hold form entries
+            CreateNewObjects();
+
+            //Populate Drop-Downs
+            await LoadDisabilityCategories();
+            await LoadMedicalConditionTypes();
+            await LoadTitles();
+            await LoadRelationships();
+        }
+    }
+
+    public void CreateNewObjects() 
+    {
+        //Main Model
+        //medicalLearningSupportAndTripConsent ??= new();
+        medicalLearningSupportAndTripConsent = CreateNewMedicalLearningSupportAndTripConsent();
+
+        //Create 2 emergency contacts
+        //emergencyContacts ??= new();
+        emergencyContacts = new List<MedicalLearningSupportAndTripConsentEmergencyContactModel>();
+        emergencyContacts?.Add(CreateNewEmergencyContact());
+        emergencyContacts?.Add(CreateNewEmergencyContact());
+
+        //Add emergency contacts to main model
+        medicalLearningSupportAndTripConsent.EmergencyContacts ??= emergencyContacts;
+    }
+
+    private MedicalLearningSupportAndTripConsentModel CreateNewMedicalLearningSupportAndTripConsent()
+    {
+        MedicalLearningSupportAndTripConsentModel newMedical = new MedicalLearningSupportAndTripConsentModel();
+        newMedical.CreatedBy = student?.Email;
+        newMedical.CreatedDate = DateTime.Now;
+        newMedical.StudentDetailID = student?.StudentDetailID;
+        newMedical.AcademicYearID = student?.AcademicYearID;
+        newMedical.StudentRef = student?.StudentRef;
+        newMedical.StudentGUID = student?.StudentGUID;
+
+        return newMedical;
+    }
+
+    private MedicalLearningSupportAndTripConsentEmergencyContactModel CreateNewEmergencyContact()
+    {
+        MedicalLearningSupportAndTripConsentEmergencyContactModel newEmergencyContact = new MedicalLearningSupportAndTripConsentEmergencyContactModel();
+        newEmergencyContact.MedicalLearningSupportAndTripConsentEmergencyContactID = medicalLearningSupportAndTripConsent?.EmergencyContacts?.Count + 1 ?? 1;
+        newEmergencyContact.ContactOrder = medicalLearningSupportAndTripConsent?.EmergencyContacts?.Count + 1 ?? 1;
+
+        return newEmergencyContact;
+    }
+
+    private MedicalLearningSupportAndTripConsentMedicalConditionModel CreateNewMedicalCondition()
+    {
+        MedicalLearningSupportAndTripConsentMedicalConditionModel newMedicalCondition = new MedicalLearningSupportAndTripConsentMedicalConditionModel();
+        newMedicalCondition.MedicalLearningSupportAndTripConsentMedicalConditionID = medicalLearningSupportAndTripConsent?.MedicalConditions?.Count + 1 ?? 1;
+
+        return newMedicalCondition;
+    }
+
+    private MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityModel CreateNewLearningDifficultyDisability()
+    {
+        MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityModel newLearningDifficultyDisability = new MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityModel();
+        newLearningDifficultyDisability.MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityID = medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities?.Count + 1 ?? 1;
+
+        return newLearningDifficultyDisability;
+    }
+
+    private void FormAction() {
+        //Determine what clear form button should do on dialog box
+
+        if (action == "ClearFormConfirm") {
+            ClearForm();
+        }
+        else if (action == "RemoveMedicalConditionConfirm")
+        {
+            RemoveMedicalCondition();
+        }
+        else if (action == "RemoveAllMedicalConditionsConfirm")
+        {
+            RemoveAllMedicalConditions();
+        }
+        else if (action == "RemoveLearningDifficultyDisabilityConfirm")
+        {
+            RemoveLearningDifficultyDisability();
+        }
+        else if (action == "RemoveAllLearningDifficultiesDisabilitiesConfirm")
+        {
+            RemoveAllLearningDifficultiesDisabilities();
+        }
+        else {
+            action = "Error";
+
+            msgErrorTitle = $"Invalid Action";
+            msgError = (MarkupString)$"An invalid option was specified. Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void ClearFormConfirm()
+    {
+        action = "ClearFormConfirm";
+
+        msgConfirmTitle = $"Clear Form?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear all information on this form?";
+
+        modalConfirm!.Open();
+    }
+
+    private void ClearForm()
+    {
+        action = "ClearForm";
+
+        CreateNewObjects();
+
+        modalConfirm!.Close();
+    }
+
+    private async Task SubmitForm()
+    {
+        if (await _fluentValidationValidator!.ValidateAsync())
+        {
+            formSubmitted = true;
+            Logger.LogInformation("Id = {Id}", medicalLearningSupportAndTripConsent?.MedicalLearningSupportAndTripConsentID);
+
+            submitEndPoint = $"{configuration["APIEndpoint"]}/MedicalLearningSupportAndTripConsent";
+            try
+            {
+                if (medicalLearningSupportAndTripConsent != null)
+                {
+                    //Clear out IDs set earlier as database will set these
+                    if (medicalLearningSupportAndTripConsent?.EmergencyContacts != null)
+                    {
+                        foreach (var contact in medicalLearningSupportAndTripConsent?.EmergencyContacts!)
+                        {
+                            contact.MedicalLearningSupportAndTripConsentEmergencyContactID = 0;
+                        }
+                    }
+                    
+                    if (medicalLearningSupportAndTripConsent?.MedicalConditions != null)
+                    {
+                        foreach (var medicalCondition in medicalLearningSupportAndTripConsent?.MedicalConditions!)
+                        {
+                            medicalCondition.MedicalLearningSupportAndTripConsentMedicalConditionID = 0;
+                        }
+                    }
+
+                    if (medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities != null)
+                    {
+                        foreach (var learningDifficultyDisability in medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities!)
+                        {
+                            learningDifficultyDisability.MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityID = 0;
+                        }
+                    }
+
+                    HttpResponseMessage formResponse = await Http.PostAsJsonAsync<MedicalLearningSupportAndTripConsentModel>(submitEndPoint, medicalLearningSupportAndTripConsent);
+
+                    if (formResponse.IsSuccessStatusCode != true)
+                    {
+                        string responseBody = await formResponse.Content.ReadAsStringAsync();
+                        action = "Error";
+
+                        msgErrorTitle = $"Cannot Submit Form";
+                        msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                        msgErrorStackTrace = responseBody;
+
+                        modalError!.Open();
+                    }
+                    else {
+                        MedicalLearningSupportAndTripConsentModel insertedmedicalLearningSupportAndTripConsent = await formResponse.Content.ReadFromJsonAsync<MedicalLearningSupportAndTripConsentModel>() ?? new MedicalLearningSupportAndTripConsentModel();
+
+                        if (insertedmedicalLearningSupportAndTripConsent.MedicalLearningSupportAndTripConsentID > 0)
+                        {
+                            //If insert successful
+                        }
+                        else
+                        {
+                            action = "Error";
+
+                            msgErrorTitle = $"Cannot Submit Form";
+                            msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                            msgErrorStackTrace = null;
+
+                            modalError!.Open();
+                        }
+                    }
+                }
+                else
+                {
+                    action = "Error";
+
+                    msgErrorTitle = $"Cannot Submit Form";
+                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
+                    msgErrorStackTrace = null;
+
+                    modalError!.Open();
+                }
+
+            }
+            catch (HttpRequestException ex)
+            {
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
+            }
+        }
+    }
+
+    private void GoToSHCGHomepage() {
+        NavManager.NavigateTo("https://www.shcg.ac.uk");
+    }
+
+    //Functions to update drop down on button press
+    public void HasMedicalConditionToggle(bool? trueOrFalse) 
+    {
+        if (trueOrFalse == true) 
+        {
+            medicalLearningSupportAndTripConsent!.HasMedicalCondition = trueOrFalse;
+            AddMedicalCondition();
+        }
+        else {
+            if (medicalLearningSupportAndTripConsent?.MedicalConditions?.Count > 0)
+            {
+                RemoveAllMedicalConditionsConfirm();
+            }
+            else {
+                medicalLearningSupportAndTripConsent!.HasMedicalCondition = trueOrFalse;
+            }
+        }
+    }
+    public void RequiresRiskAssesmentToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.RequiresRiskAssesment = trueOrFalse;
+    public void HasBeenHospitalisedInLastYearToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear = trueOrFalse;
+    public void RequiresLearningSupportToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.RequiresLearningSupport = trueOrFalse;
+    public void HasEHCPToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasEHCP = trueOrFalse;
+    public void HasLearningDifficultyDisabilityToggle(bool? trueOrFalse)
+    {
+        medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability = trueOrFalse;
+
+        if (trueOrFalse == true)
+        {
+            AddLearningDifficultyDisability();
+        }
+        else
+        {
+            if (medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities?.Count > 0)
+            {
+                RemoveAllLearningDifficultiesDisabilitiesConfirm();
+            }
+        }
+    }
+    public void IsLACToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.IsLAC = trueOrFalse;
+    public void IsCareLeaverToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.IsCareLeaver = trueOrFalse;
+    public void IsYoungCarerToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.IsYoungCarer = trueOrFalse;
+    public void HasFSMToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasFSM = trueOrFalse;
+    public void IsFromMilitaryServiceFamilyToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily = trueOrFalse;
+    public void HasAccessArrangementsToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasAccessArrangements = trueOrFalse;
+    public void HadFurtherSupportAtSchoolOrCollegeToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege = trueOrFalse;
+    public void CanContactPriorSchoolOrCollegeToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege = trueOrFalse;
+    public void HasCriminalConvictionsToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasCriminalConvictions = trueOrFalse;
+    public void CanShareInformationWithPotentialEmployersToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers = trueOrFalse;
+    public void HasGivenTripConsentStudentToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent = trueOrFalse;
+    public void HasGivenTripConsentParentCarerToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer = trueOrFalse;
+    public void HasGivenPhotographicImagesConsentToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent = trueOrFalse;
+    public void AgreeInfoIsCorrectParentCarerToggle()
+    {
+        if (medicalLearningSupportAndTripConsent != null)
+        {
+            if (medicalLearningSupportAndTripConsent.AgreeInfoIsCorrectParentCarer == true)
+            {
+                medicalLearningSupportAndTripConsent.AgreeInfoIsCorrectParentCarer = false;
+            }
+            else
+            {
+                medicalLearningSupportAndTripConsent.AgreeInfoIsCorrectParentCarer = true;
+            }
+        }
+    }
+    public void AgreeInfoIsCorrectStudentToggle()
+    {
+        if (medicalLearningSupportAndTripConsent != null)
+        {
+            if (medicalLearningSupportAndTripConsent.AgreeInfoIsCorrectStudent == true)
+            {
+                medicalLearningSupportAndTripConsent.AgreeInfoIsCorrectStudent = false;
+            }
+            else
+            {
+                medicalLearningSupportAndTripConsent.AgreeInfoIsCorrectStudent = true;
+            }
+        }
+    }
+
+    public void IsPrimaryLearningDifficultyDisabilityToggle(MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityModel? selectedRecord, bool? trueOrFalse)
+    {
+        if (medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities != null)
+        {
+            foreach (var difficulty in medicalLearningSupportAndTripConsent.LearningDifficultiesDisabilities)
+            {
+                //Allolw only one option to be ticked
+                if (difficulty.MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityID == selectedRecord?.MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityID)
+                {
+                    difficulty.IsPrimary = true;
+                }
+                else {
+                    difficulty.IsPrimary = false;
+                }
+            }
+        }
+
+        // medicalLearningSupportAndTripConsent!.HasDifficultyDisability = trueOrFalse;
+
+        // if (trueOrFalse == true)
+        // {
+        //     AddDifficultyDisability();
+        // }
+        // else
+        // {
+        //     if (medicalLearningSupportAndTripConsent?.DifficultiesDisabilities?.Count > 0)
+        //     {
+        //         RemoveAllDifficultiesDisabilitiesConfirm();
+        //     }
+        // }
+    }
+
+    //Medical condition actions
+    public void AddMedicalCondition() 
+    {
+        medicalConditions ??= new List<MedicalLearningSupportAndTripConsentMedicalConditionModel>();
+        medicalConditions?.Add(CreateNewMedicalCondition());
+
+        if (medicalLearningSupportAndTripConsent != null) {
+            medicalLearningSupportAndTripConsent!.MedicalConditions ??= medicalConditions;
+        }
+    }
+
+    private void RemoveMedicalConditionConfirm(int recordID)
+    {
+        medicalConditionID = recordID;
+        action = "RemoveMedicalConditionConfirm";
+
+        msgConfirmTitle = $"Remove Medical Condition?";
+        msgConfirm = (MarkupString)$"Are you sure you want to remove this medical condition?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveMedicalCondition()
+    {
+        action = "RemoveMedicalCondition";
+
+        modalConfirm!.Close();
+
+        if (medicalLearningSupportAndTripConsent?.MedicalConditions?.Count > 1)
+        {
+            var recordToDelete = medicalLearningSupportAndTripConsent.MedicalConditions?
+                .Where(c => c.MedicalLearningSupportAndTripConsentMedicalConditionID == medicalConditionID).FirstOrDefault();
+
+            if (recordToDelete != null)
+            {
+                medicalLearningSupportAndTripConsent.MedicalConditions?
+                .Remove(recordToDelete);
+            }
+            else
+            {
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Remove This Medical Condition";
+                msgError = (MarkupString)$"There was an error removing the medical condition. Please try again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
+            }
+        }
+        else
+        {
+            action = "Error";
+
+            msgErrorTitle = $"Cannot Remove Last Medical Condition";
+            msgError = (MarkupString)$"This medical condition cannot be removed as you must send us details of at least one. If you do not have any please select No to the question above";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void RemoveAllMedicalConditionsConfirm()
+    {
+        action = "RemoveAllMedicalConditionsConfirm";
+
+        msgConfirmTitle = $"Remove All Medical Conditions?";
+        msgConfirm = (MarkupString)$"Setting this to no will clear the {medicalLearningSupportAndTripConsent?.MedicalConditions?.Count ?? 0} medical conditions entered below. Are you sure you wish to clear these?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveAllMedicalConditions()
+    {
+        action = "RemoveAllMedicalConditions";
+
+        medicalLearningSupportAndTripConsent!.HasMedicalCondition = false;
+        medicalConditions = new List<MedicalLearningSupportAndTripConsentMedicalConditionModel>();
+
+        modalConfirm!.Close();
+
+        if (medicalLearningSupportAndTripConsent != null)
+        {
+            medicalLearningSupportAndTripConsent!.MedicalConditions = null;
+        }
+    }
+
+    public void AddLearningDifficultyDisability()
+    {
+        learningDifficultiesDisabilities ??= new List<MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityModel>();
+        learningDifficultiesDisabilities?.Add(CreateNewLearningDifficultyDisability());
+
+        if (learningDifficultiesDisabilities != null)
+        {
+            medicalLearningSupportAndTripConsent!.LearningDifficultiesDisabilities ??= learningDifficultiesDisabilities;
+        }
+    }
+
+    private void RemoveLearningDifficultyDisabilityConfirm(int recordID)
+    {
+        learningDifficultyDisabilityID = recordID;
+        action = "RemoveLearningDifficultyDisabilityConfirm";
+
+        msgConfirmTitle = $"Remove Learning Difficulty/Disability?";
+        msgConfirm = (MarkupString)$"Are you sure you want to remove this learning difficulty/disability?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveLearningDifficultyDisability()
+    {
+        action = "RemoveLearningDifficultyDisability";
+
+        modalConfirm!.Close();
+
+        if (medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities?.Count > 1)
+        {
+            var recordToDelete = medicalLearningSupportAndTripConsent.LearningDifficultiesDisabilities?
+                .Where(d => d.MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityID == learningDifficultyDisabilityID).FirstOrDefault();
+
+            if (recordToDelete != null)
+            {
+                medicalLearningSupportAndTripConsent.LearningDifficultiesDisabilities?
+                .Remove(recordToDelete);
+            }
+            else
+            {
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Remove This Learning Difficulty/Disability";
+                msgError = (MarkupString)$"There was an error removing the learning difficulty/disability. Please try again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
+            }
+        }
+        else
+        {
+            action = "Error";
+
+            msgErrorTitle = $"Cannot Remove Last Learning Difficulty/Disability";
+            msgError = (MarkupString)$"This learning difficulty/disability cannot be removed as you must send us details of at least one. If you do not have any please select No to the question above";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void RemoveAllLearningDifficultiesDisabilitiesConfirm()
+    {
+        action = "RemoveAllLearningDifficultiesDisabilitiesConfirm";
+
+        msgConfirmTitle = $"Remove All Learning Difficulties/Disabilities?";
+        msgConfirm = (MarkupString)$"Setting this to no will clear the {medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities?.Count ?? 0} learning difficulties/disabilities entered below. Are you sure you wish to clear these?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveAllLearningDifficultiesDisabilities()
+    {
+        action = "RemoveAllLearningDifficultiesDisabilities";
+
+        medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability = false;
+        learningDifficultiesDisabilities = new List<MedicalLearningSupportAndTripConsentLearningDifficultyDisabilityModel>();
+
+        modalConfirm!.Close();
+
+        if (medicalLearningSupportAndTripConsent != null)
+        {
+            medicalLearningSupportAndTripConsent!.LearningDifficultiesDisabilities = null;
+        }
+    }
+
+    //DropDowns
+    // public List<DropDownModel> Titles { get; } = new List<DropDownModel>
+    // {
+    //     new DropDownModel { Code = "Mr", Description = "Mr" },
+    //     new DropDownModel { Code = "Mrs", Description = "Mrs" },
+    //     new DropDownModel { Code = "Miss", Description = "Miss" }
+    // };
+
+    //Values for drop-downs
+    public static List<DropDownIntModel>? DisabilityCategories { get; private set; }
+    public async Task LoadDisabilityCategories()
+    {
+        string endPoint = $"{configuration["APIEndpoint"]}/DisabilityCategory";
+        try
+        {
+            DisabilityCategories = await Http.GetFromJsonAsync<List<DropDownIntModel>>(endPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            DisabilityCategories = new List<DropDownIntModel>();
+            HandleJsonException(ex, "DisabilityCategory", "0");
+        }
+    }
+    public static List<DropDownIntModel> GetDisabilityCategories() => DisabilityCategories ?? new List<DropDownIntModel>();
+
+    public static List<DropDownIntModel>? MedicalConditionTypes { get; private set; }
+    public async Task LoadMedicalConditionTypes()
+    {
+        string endPoint = $"{configuration["APIEndpoint"]}/MedicalConditionType";
+        try
+        {
+            MedicalConditionTypes = await Http.GetFromJsonAsync<List<DropDownIntModel>>(endPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            MedicalConditionTypes = new List<DropDownIntModel>();
+            HandleJsonException(ex, "MedicalConditionType", "0");
+        }
+    }
+    public static List<DropDownIntModel> GetMedicalConditionTypes() => MedicalConditionTypes ?? new List<DropDownIntModel>();
+
+    public static List<DropDownStringModel>? Titles { get; private set; }
+    public async Task LoadTitles()
+    {
+        string endPoint = $"{configuration["APIEndpoint"]}/Title";
+        try
+        {
+            Titles = await Http.GetFromJsonAsync<List<DropDownStringModel>>(endPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            Titles = new List<DropDownStringModel>();
+            HandleJsonException(ex, "Title", "0");
+        }
+    }
+    public static List<DropDownStringModel> GetTitles() => Titles ?? new List<DropDownStringModel>();
+
+    public static List<DropDownIntModel>? Relationships { get; private set; }
+    public async Task LoadRelationships()
+    {
+        string endPoint = $"{configuration["APIEndpoint"]}/Relationship";
+        try
+        {
+            Relationships = await Http.GetFromJsonAsync<List<DropDownIntModel>>(endPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            Relationships = new List<DropDownIntModel>();
+            HandleJsonException(ex, "Relationship", "0");
+        }
+    }
+    public static List<DropDownIntModel> GetRelationships() => Relationships ?? new List<DropDownIntModel>();
+
+    private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
+    {
+        if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+        {
+            loadDataErrorMsg = $"You are not authorised to view this page";
+
+            //Redirect to login screen
+            NavManager.NavigateTo($"Login/Vehicles");
+        }
+        else if (ex.Message.Contains("404 (Not Found)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" is not found";
+        }
+        else if (ex.Message.Contains("400 (Bad Request)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" resulted in an invalid request";
+        }
+        else
+        {
+            loadDataErrorMsg = $"Error: {ex.Message}";
+        }
+    }
+}

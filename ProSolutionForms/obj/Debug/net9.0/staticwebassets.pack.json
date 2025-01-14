@@ -9,6 +9,10 @@
       "PackagePath": "staticwebassets\\ProSolutionForms.styles.css"
     },
     {
+      "Id": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\appsettings.Development.json",
+      "PackagePath": "staticwebassets\\appsettings.Development.json"
+    },
+    {
       "Id": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\appsettings.json",
       "PackagePath": "staticwebassets\\appsettings.json"
     },

@@ -1,6 +1,8 @@
 ﻿@page "/FundingEligibilityDeclaration"
 @page "/FundingEligibilityDeclaration/{StudentGUID}"
+@page "/FundingEligibilityDeclaration/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
 
+@using ProSolutionForms.Components
 @using ProSolutionForms.Models
 @using ProSolutionForms.Shared
 @using System.Net
@@ -8,7 +10,7 @@
 @inject HttpClient Http
 @inject IConfiguration configuration
 @inject NavigationManager NavManager
-@inject ILogger<MedicalInformation> Logger
+@inject ILogger<FundingEligibilityDeclarationModel> Logger
 
 <PageTitle>Funding Eligibility Declaration Form</PageTitle>
 
@@ -99,7 +101,7 @@
             </div>
         </div>
     }
-    else if (formSubmitted == true)
+    else if (formSubmitted == true || existingFundingEligibilityDeclaration?.StudentDetailID != null)
     {
         <div class="container">
             <div class="row">
@@ -111,9 +113,18 @@
                         <div class="me-auto">
                             <h4 class="alert-heading">Funding Eligibility Declaration Successfully Submitted</h4>
                             <hr>
-                            <p>
-                                Thank you for declaring your Funding Eligibility.
-                            </p>
+                            @if (existingFundingEligibilityDeclaration?.StudentDetailID != null)
+                            {
+                                <p>
+                                    You have already declared your Funding Eligibility.
+                                </p>
+                            }
+                            else
+                            {
+                                <p>
+                                    Thank you for declaring your Funding Eligibility.
+                                </p>
+                            }
                             <p>
                                 We will be in touch with you soon to discuss the next steps.
                             </p>
@@ -153,6 +164,14 @@
                 </div>
                 <div class="row mb-3 align-items-center">
                     <div class="col-md-4">
+                        <i class="fa-solid fa-hashtag"></i> Student Ref
+                    </div>
+                    <div class="col-md-8">
+                        @student?.StudentRef
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
                         <i class="fa-solid fa-user"></i> Name
                     </div>
                     <div class="col-md-8">
@@ -161,18 +180,10 @@
                 </div>
                 <div class="row mb-3 align-items-center">
                     <div class="col-md-4">
-                        <i class="fa-solid fa-briefcase"></i> Curriculum Area
+                        <i class="fa-solid fa-calendar-days"></i> Academic Year
                     </div>
                     <div class="col-md-8">
-                        @student?.TeamName
-                    </div>
-                </div>
-                <div class="row mb-3 align-items-center">
-                    <div class="col-md-4">
-                        <i class="fa-solid fa-graduation-cap"></i> Course
-                    </div>
-                    <div class="col-md-8">
-                        @student?.CourseCode - @student?.CourseTitle
+                        @student?.AcademicYearID
                     </div>
                 </div>
             </div>
@@ -347,7 +358,7 @@
                                     <ValidationMessage For="@(() => fundingEligibilityDeclaration!.FeeExemptionReasonID)" />
                                 </div>
                                 <div class="col-md-10">
-                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Not receiving any benefits, wants to be employed and the identified learning is directly relevant to employment prospects and local labour market needs.</label>
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Not receiving any benefits, wants to be employed and the identified learning is directly relevant to employment prospects.</label>
                                 </div>
                             </div>
                         </div>
@@ -460,7 +471,7 @@
                                                                     </div>
                                                                 }
                                                             }
-                                                            
+
                                                         </div>
 
                                                         <div class="row g-3 mb-3">
@@ -511,7 +522,7 @@
                                 </div>
                                 <div>
                                     <p>
-                                        I confirm that the information given on this form is true, complete and accurate and no information or other material information has been omitted. I accept that if this is not the case, the College shall have the right to cancel my application and any offer of a place on a course maybe withdrawn. I shall also have no claim against the College (where this data will be recorded for statistical purposes) or any other education institution relation thereto.
+                                        I confirm that the information given on this form is true, complete and accurate, and no other information has been omitted. I accept that if this is not the case, the College shall have the right to cancel my application and any offer of a place on a course maybe withdrawn. I shall also have no claim against the College (where this data will be recorded for statistical purposes) or any other education institution relation thereto.
                                     </p>
                                 </div>
                             </div>
@@ -557,6 +568,12 @@
 @code {
     [Parameter]
     public string? StudentGUID { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart1 { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart2 { get; set; }
+
+    public string? AcademicYearID { get; set; }
 
     bool formSubmitted = false;
 
@@ -591,6 +608,8 @@
     public FundingEligibilityDeclarationModel? fundingEligibilityDeclaration { get; set; }
     public List<FundingEligibilityDeclarationEvidenceModel>? evidenceFiles { get; set; }
 
+    public FundingEligibilityDeclarationModel? existingFundingEligibilityDeclaration { get; set; }
+
     private FluentValidationValidator? _fluentValidationValidator;
 
     public string? loadDataErrorMsg = null;
@@ -602,20 +621,45 @@
 
     protected override async Task OnInitializedAsync()
     {
+        bool isError = false;
+
+        if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
+            AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
+
         if (StudentGUID == null)
         {
+            isError = true;
             loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
         }
         else
         {
-            studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+            if (AcademicYearID != null)
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{AcademicYearID}/{StudentGUID}";
+            else
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+
             try
             {
                 student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
             }
             catch (HttpRequestException ex)
             {
+                isError = true;
                 HandleJsonException(ex, "GUID", StudentGUID ?? "");
+            }
+
+            if (isError != true)
+            {
+                string fundingEligibilityEndPoint = $"{configuration["APIEndpoint"]}/FundingEligibilityDeclaration/{student?.AcademicYearID}/{student?.StudentGUID}";
+
+                try
+                {
+                    existingFundingEligibilityDeclaration = await Http.GetFromJsonAsync<FundingEligibilityDeclarationModel>(fundingEligibilityEndPoint);
+                }
+                catch (HttpRequestException ex)
+                {
+                    //Not Found
+                }
             }
 
             //Create objects to hold form entries
@@ -649,6 +693,7 @@
         newDeclaration.StudentDetailID = student?.StudentDetailID;
         newDeclaration.AcademicYearID = student?.AcademicYearID;
         newDeclaration.StudentRef = student?.StudentRef;
+        newDeclaration.StudentGUID = student?.StudentGUID;
 
         return newDeclaration;
     }
@@ -714,9 +759,12 @@
                 if (fundingEligibilityDeclaration != null)
                 {
                     //Clear out IDs set earlier as database will set these
-                    foreach (var evidenceFile in fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence!)
+                    if (fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence != null)
                     {
-                        evidenceFile.FundingEligibilityDeclarationEvidenceID = 0;
+                        foreach (var evidenceFile in fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence!)
+                        {
+                            evidenceFile.FundingEligibilityDeclarationEvidenceID = 0;
+                        }
                     }
 
                     HttpResponseMessage formResponse = await Http.PostAsJsonAsync<FundingEligibilityDeclarationModel>(submitEndPoint, fundingEligibilityDeclaration);
