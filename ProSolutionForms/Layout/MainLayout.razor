@@ -1,10 +1,12 @@
 ﻿@inherits LayoutComponentBase
 
+@inject NavigationManager NavigationManager
+
 <CascadingValue Value="this">
     <div class="page">
         @if (ShowNavMenu != false) {
-            <div class="sidebar">
-                <NavMenu />
+            <div class="sidebar" style="@IconMenuCssClass">
+                <NavMenu ShowIconMenu="ToggleIconMenu" />
             </div>
         }
 
@@ -24,9 +26,24 @@
 @code {
     public bool? ShowNavMenu { get; set; }
 
+    private bool _iconMenuActive { get; set; }
+    private string? IconMenuCssClass => _iconMenuActive ? "width: 82px;" : null;
+
     protected override void OnInitialized()
     {
-        ShowNavMenu = true;
+        ShowNav();
+    }
+
+    public void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        ShowNav();
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 
     public void HideNav() {
@@ -38,5 +55,11 @@
     {
         ShowNavMenu = true;
         StateHasChanged();
+    }
+
+    //Toggle full or icon sidebar
+    protected void ToggleIconMenu(bool iconMenuActive)
+    {
+        _iconMenuActive = iconMenuActive;
     }
 }

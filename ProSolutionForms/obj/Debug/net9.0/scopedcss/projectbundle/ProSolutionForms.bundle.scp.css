@@ -86,9 +86,28 @@ main[b-p520psltql] {
     background-color: rgba(0,0,0,0.4);
 }
 
+/*Added for colapsible Sidebar*/
+.bottom-row[b-4cszjamost] {
+    position: absolute;
+    bottom: 0;
+    padding-bottom: 10px;
+    text-align: left;
+    width: 100%;
+    padding-right: 28px;
+}
+
+/*Added for colapsible Sidebar*/
+.icon-menu-arrow[b-4cszjamost] {
+    text-align: right;
+}
+
 .navbar-brand[b-4cszjamost] {
     font-size: 1.1rem;
 }
+
+    .navbar-brand i.WithDescription[b-4cszjamost] {
+        margin-right: 10px; /*Added for space after Font Awesome icon*/
+    }
 
 .bi[b-4cszjamost] {
     display: inline-block;
@@ -134,7 +153,7 @@ main[b-p520psltql] {
         line-height: 1rem; /*Changed to fit better*/
     }
 
-    .nav-item i[b-4cszjamost] {
+    .nav-item i.WithDescription[b-4cszjamost] {
         margin-right: 10px; /*Added for space after Font Awesome icon*/
     }
 
@@ -162,5 +181,12 @@ main[b-p520psltql] {
         /* Allow sidebar to scroll for tall menus */
         height: calc(100vh - 3.5rem);
         overflow-y: auto;
+    }
+}
+
+/*Added for colapsible Sidebar*/
+@media (max-width: 640px) {
+    .bottom-row[b-4cszjamost] {
+        display: block;
     }
 }

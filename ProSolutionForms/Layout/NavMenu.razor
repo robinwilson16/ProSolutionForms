@@ -1,8 +1,18 @@
-﻿@using System.Reflection;
+﻿@using ProSolutionForms.Shared
+@using System.Reflection;
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href=""><i class="fa-solid fa-file-circle-check"></i> ProSolution Forms</a>
+        <a class="navbar-brand" href="">
+            <i class="fa-solid fa-file-circle-check @(IconMenuActive == true? "" : "WithDescription")"></i>
+            @if (!@IconMenuActive)
+            {
+                <label>ProSolution Forms</label>
+            }
+        </a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -11,43 +21,68 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <i class="fa-solid fa-warehouse @(IconMenuActive == true? "" : "WithDescription")"></i>
+                @if (!@IconMenuActive)
+                {
+                    <label> Home</label>
+                }
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="CriminalConviction">
-                <i class="fa-solid fa-building-shield"></i> Criminal Conviction
-            </NavLink>
-        </div>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="CriminalConviction/25/26/05a13fa1-22a3-457e-86be-389806731e3f">
-                <i class="fa-solid fa-building-shield"></i> Criminal Conviction with Student
+                <i class="fa-solid fa-building-shield @(IconMenuActive == true? "" : "WithDescription")"></i>
+                @if (!@IconMenuActive)
+                {
+                    <label> Criminal Conviction</label>
+                }
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="MedicalLearningSupportAndTripConsent">
-                <i class="fa-solid fa-notes-medical"></i> Medical, Learning Support And Trip Consent
-            </NavLink>
-        </div>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="MedicalLearningSupportAndTripConsent/25/26/05a13fa1-22a3-457e-86be-389806731e3f">
-                <i class="fa-solid fa-notes-medical"></i> Medical, Learning Support And Trip Consent with Student
+                <i class="fa-solid fa-notes-medical @(IconMenuActive == true? "" : "WithDescription")"></i>
+                @if (!@IconMenuActive)
+                {
+                    <label> Medical, Learning Support And Trip Consent</label>
+                }
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="FundingEligibilityDeclaration">
-                <i class="fa-solid fa-hand-holding-dollar"></i> Funding Eligibility Declaration
-            </NavLink>
-        </div>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="FundingEligibilityDeclaration/25/26/05a13fa1-22a3-457e-86be-389806731e3f">
-                <i class="fa-solid fa-hand-holding-dollar"></i> Funding Eligibility Declaration with Student
+                <i class="fa-solid fa-hand-holding-dollar @(IconMenuActive == true? "" : "WithDescription")"></i>
+                @if (!@IconMenuActive)
+                {
+                    <label> Funding Eligibility Declaration</label>
+                }
             </NavLink>
         </div>
     </nav>
-    <div class="fixed-bottom VersionText m-3">Version @ProductVersion</div>
+    @* <div class="fixed-bottom VersionText m-3">Version @ProductVersion</div> *@
+</div>
+<div class="bottom-row">
+    @if ((ActiveVersion ?? ProductVersion) != ProductVersion)
+    {
+        <div class="VersionText Outdated m-3">Version @ActiveVersion <button type="button" class="btn btn-sm btn-danger" @onclick="() => ServiceWorkerFunctions.UpdateServiceWorker(JSRuntime, NavigationManager)"><i class="fa-solid fa-download"></i></button></div>
+    }
+    else
+    {
+        <div class="VersionText m-3">Version @ActiveVersion</div>
+    }
+    <div class="icon-menu-arrow">
+        @if (!@IconMenuActive)
+        {
+            <button type="button" class="btn btn-dark" @onclick="ToggleIconMenu"><i class="fa-solid fa-arrow-left"></i></button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-dark" @onclick="ToggleIconMenu"><i class="fa-solid fa-arrow-right"></i></button>
+        }
+    </div>
 </div>
 
 @code {
@@ -55,10 +90,34 @@
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
+    //bool to send to MainLayout for shrinking sidebar and showing/hide menu text
+    private bool IconMenuActive { get; set; } = false;
+
+    //EventCallback for sending bool to MainLayout
+    [Parameter]
+    public EventCallback<bool> ShowIconMenu { get; set; }
+
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
     }
 
+    //Method to toggle IconMenuActive bool and send bool via EventCallback
+    private async Task ToggleIconMenu()
+    {
+        IconMenuActive = !IconMenuActive;
+        await ShowIconMenu.InvokeAsync(IconMenuActive);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await Task.Delay(1000);
+        //await JSRuntime.InvokeVoidAsync("toastInterop.showToast", "liveToast");
+
+        //await SetVersionNumber();
+        ActiveVersion = await ServiceWorkerFunctions.GetCurrentVersionNumber(JSRuntime) ?? ProductVersion;
+    }
+
+    private string? ActiveVersion { get; set; }
     private string? ProductVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
 }
