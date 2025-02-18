@@ -1,0 +1,1275 @@
+﻿@page "/Admin"
+@page "/Admin/Students"
+@page "/Admin/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}"
+@page "/Admin/Students/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}"
+
+@using ProSolutionForms.Models
+@using ProSolutionForms.Services
+@using ProSolutionForms.Shared
+@using ProSolutionForms.Components
+@using System.Net
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using TinyMCE.Blazor
+@using System.Globalization
+@using System.Reflection
+@using System.Linq.Expressions
+
+@inject HttpClient Http
+@inject IConfiguration configuration
+@inject NavigationManager NavManager
+@inject ILogger<StudentDetailModel> Logger
+@inject AppData appData
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Potential Students @@ South Hampshire College Group</PageTitle>
+
+<audio src="@soundEffect" autoplay></audio>
+
+<Modal @ref="modalInfo">
+    <WindowControls>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => modalInfo!.Close()"></button>
+    </WindowControls>
+    <Title><i class="fa-solid fa-circle-info"></i> @msgInfoTitle</Title>
+    <Body>
+        @msgInfo
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalInfo!.Close()">Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalError">
+    <WindowControls>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => modalError!.Close()"></button>
+    </WindowControls>
+    <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
+    <Body>
+        <div class="alert alert-danger" role="alert">
+            @msgError
+        </div>
+        @if (msgErrorStackTrace != null)
+        {
+            <p><i class="fa-solid fa-bug"></i> Stack Trace:</p>
+            <pre class="pre-scrollable ErrorDetails">@msgErrorStackTrace</pre>
+        }
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalError!.Close()">Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalConfirm">
+    <WindowControls>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => modalConfirm!.Close()"></button>
+    </WindowControls>
+    <Title><i class="fa-solid fa-circle-question"></i> @msgConfirmTitle</Title>
+    <Body>
+        <p>
+            @msgConfirm
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-danger" @onclick="FormAction"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalMainRecord">
+    <WindowControls>
+        @if (selectedRecordChanges?.Count > 0)
+        {
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CancelMainRecordConfirm"></button>
+        }
+        else
+        {
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => modalMainRecord!.Close()"></button>
+        }
+    </WindowControls>
+    <Title>
+
+        @if (selectedRecordCopy?.StudentDetailID > 0)
+        {
+            <i class="fa-solid fa-user"></i> <span>@selectedRecordCopy!.Forename @selectedRecordCopy!.Surname (@selectedRecordCopy!.StudentRef)</span>
+        }
+        else
+        {
+            <i class="fa-regular fa-user"></i> <span>New Student</span>
+        }
+
+    </Title>
+    <Body>
+        <EditForm EditContext="@EditContextMain" OnValidSubmit="() => SaveMainRecord(true)">
+            <FluentValidationValidator @ref="_fluentValidationValidator" />
+
+            @if (selectedRecordCopy == null)
+            {
+                <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey GreyBackground">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="alert alert-primary text-center" role="alert">
+                                    <h1>
+                                        <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                                    </h1>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey GreyBackground">
+                    <div class="container">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        StudentRef
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.StudentRef
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Surname
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        <strong>@selectedRecordCopy?.Surname</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Forename
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        <strong>@selectedRecordCopy?.Forename</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        College Code
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.CollegeCode
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        College Name
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.CollegeName
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Directorate Code
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.DirectorateCode
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Directorate Name
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.DirectorateName
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        CAM Code
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.CAMCode
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        CAM Name
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.CAMName
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Dept Code
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.DeptCode
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Dept Name
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.DeptName
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Course Code
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.CourseCode
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Course Title
+                                    </div>
+                                    <div class="col-md-8 Text">
+                                        @selectedRecordCopy?.CourseTitle
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-secondary" role="alert">
+                    <h4 class="alert-heading">View Form</h4>
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="d-grid gap-2 d-md-block">
+                                <a class="btn btn-secondary mb-1" href="/MedicalLearningSupportAndTripConsent/Edit/@selectedRecordCopy?.StudentDetailID" target="_blank" role="button"><i class="fa-solid fa-notes-medical"></i> Medical, Learning Support And Trip Consent Form</a>
+                                <a class="btn btn-warning mb-1" href="/CriminalConviction/Edit/@selectedRecordCopy?.StudentDetailID" target="_blank" role="button"><i class="fa-solid fa-building-shield"></i> Criminal Conviction Form</a>
+                                <a class="btn btn-success mb-1" href="/FundingEligibilityDeclaration/Edit/@selectedRecordCopy?.StudentDetailID" target="_blank" role="button"><i class="fa-solid fa-hand-holding-dollar"></i> Funding Eligibility Declaration Form</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <ValidationSummary />
+
+        </EditForm>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => AdvanceToMainRecord(-1)"><i class="fa-solid fa-square-caret-left"></i></button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => AdvanceToMainRecord(1)"><i class="fa-solid fa-square-caret-right"></i></button>
+
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="CloseMainRecord"><i class="fa-solid fa-rotate-left"></i> Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalFormat">
+    <WindowControls>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => modalFormat!.Close()"></button>
+    </WindowControls>
+    <Title><i class="fa-solid fa-palette"></i> Formatting Options for @selectedDatabaseField</Title>
+    <Body>
+        @{
+            Type? propertyType = ModelFunctions.GetPropertyTypeFromModelAndNameDataTag(selectedDatabaseField);
+        }
+        <div class="bd-callout bd-callout-primary bd-callout-grey GreyBackground">
+            <div class="container">
+                <div class="row g-3 mb-3">
+                    <div class="col-md">
+                        <div class="row">
+                            <div class="col-md">
+                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Add With Format</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-palette"></i></span>
+                                    <InputSelect @bind-Value="selectedDatabaseFieldFormatted" class="form-select">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="@selectedDatabaseField">No Format</option>
+
+                                        @if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?))
+                                        {
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:dd/MM/yyyy>")">Short Date (dd/MM/yyyy)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:dd/MM/yyyy HH:mm>")">Short Date and Time (dd/MM/yyyy HH:mm)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:dd/MM/yyyy HH:mm:ss>")">Short Date and Time with Seconds (dd/MM/yyyy HH:mm:ss)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:dd MMMM yyyy>")">Long Date (dd MMMM yyyy)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:dd MMMM yyyy HH:mm>")">Long Date and Time (dd MMMM yyyy HH:mm)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:dd MMMM yyyy HH:mm:ss>")">Long Date and Time with Seconds (dd MMMM yyyy HH:mm:ss)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:HH:mm>")">Time (HH:mm)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:HH:mm:ss>")">Time with Seconds (HH:mm:ss)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:d>")">Day of Month (d)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:dddd>")">Day of Week (dddd)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:ddd>")">Day of Week Short (ddd)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:MMMM>")">Month of Year (MMMM)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:yyyy>")">Year (yyyy)</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:yyyy-MM-dd>")">Year, Month, Day (yyyy-MM-dd)</option>
+                                        }
+                                        else if (propertyType == typeof(int) || propertyType == typeof(int?))
+                                        {
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:N0>")">1,000</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:C0>")">&pound;0</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:P0>")">0.%</option>
+                                        }
+                                        else if (propertyType == typeof(decimal) || propertyType == typeof(decimal?))
+                                        {
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:N0>")">1,000</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:N1>")">1,000.0</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:N2>")">1,000.00</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:C0>")">&pound;0</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:C2>")">&pound;0.00</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:P0>")">0.%</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:P1>")">0.0%</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:P2>")">0.00%</option>
+                                        }
+                                        else if (propertyType == typeof(bool) || propertyType == typeof(bool?))
+                                        {
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:True/False>")">True/False</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:Y/N>")">Y/N</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:Yes/No>")">Yes/No</option>
+                                            <option value="@selectedDatabaseField?.Replace(">",",Format:1/0>")">1/0</option>
+                                        }
+
+                                    </InputSelect>
+                                    <button class="btn btn-outline-primary" type="button" @onclick="InsertDatabaseFieldWithFormat"><i class="fa-solid fa-square-plus"></i> Add Selected Field</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalFormat!.Close()">Close</button>
+    </Footer>
+</Modal>
+
+@if (HideContent != true)
+{
+    <h3><i class="fa-solid fa-users"></i> Students</h3>
+
+    @if (loadDataErrorMsg != null) 
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                @loadDataErrorMsg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (mainRecords == null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-primary text-center" role="alert">
+                        <h1>
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else {
+        <div class="container-fluid">
+            @{
+                IList<string> ExcludeMainFields = new List<string> { "StudentDetailID", "StudentID", "CollegeName", "DirectorateName", "CAMName" };
+                string? DisabledItemFieldName = null;
+                string? ErrorItemFieldName = null;
+            }
+            <Grid Items="ItemsMain"
+            ExcludeFields="ExcludeMainFields"
+            FilterFields="FilterFieldsMain"
+            DisabledItemFieldName="@DisabledItemFieldName"
+            ErrorItemFieldName="@ErrorItemFieldName"
+            ShowEditButtons="false"
+            DropDownValues="DropDownValues"
+            SelectedItemID="selectedRecord?.StudentDetailID" 
+            OnSelectItem="SelectMainRecord" 
+            OnEditItem="EditMainRecord" 
+            OnDeleteItem="DeleteMainRecordConfirm"
+            OnRemoveFilters="RemoveFiltersMain"
+            OnRemoveLastFilter="RemoveLastFilterMain"
+            OnRemoveFilter="RemoveFilterMain"
+            OnShowFilterHelp="ShowFilterHelpMain"
+            OnChangeFilter="ChangeFilterMainFromComponent"/>
+
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public int? StudentDetailID { get; set; }
+
+    [Parameter]
+    public int? AcademicYearIDPart1 { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart2 { get; set; }
+
+    public string? AcademicYearID { get; set; }
+
+    [Parameter]
+    public bool? HideContent { get; set; }
+
+    public EditContext? EditContextMain { get; set; }
+    public FluentValidationValidator? _fluentValidationValidator;
+
+    private string? studentDetailEndPoint;
+
+    private IList<Func<StudentDetailModel, bool>> filtersMain = new List<Func<StudentDetailModel, bool>>();
+
+    private IQueryable<StudentDetailModel>? ItemsMain =>
+        mainRecords?.AsQueryable().Where(m => filtersMain.All(filter => filter(m)));
+
+    private void AddFilterMain(Func<StudentDetailModel, bool> filter)
+    {
+        filtersMain.Add(filter);
+    }
+
+    private void RemoveFilterMain(Func<StudentDetailModel, bool> filter)
+    {
+        filtersMain.Remove(filter);
+    }
+
+    [Parameter]
+    public List<StudentDetailModel>? mainRecords { get; set; }
+
+    [Parameter]
+    public StudentDetailModel? selectedRecord { get; set; } = new StudentDetailModel();
+    [Parameter]
+    public StudentDetailModel? selectedRecordCopy { get; set; } = new StudentDetailModel();
+
+    private StudentDetailModel? studentDetailFields = new StudentDetailModel();
+
+    private string? selectedDatabaseField { get; set; }
+    private string? selectedDatabaseFieldFormatted { get; set; }
+
+    //Related datasets
+    protected override async Task OnInitializedAsync()
+    {
+        //CheckAuthentication();
+
+        SetEditorContextMain();
+
+        bool? isError = false;
+        studentDetailEndPoint = $"{configuration["APIEndpoint"]}/StudentDetail";
+
+        try
+        {
+            mainRecords = await Http.GetFromJsonAsync<List<StudentDetailModel>>(studentDetailEndPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            isError = true;
+            HandleJsonException(ex, "StudentDetail", StudentDetailID.ToString() ?? "");
+        }
+
+        if (isError != true)
+        {
+            //Load other objects
+
+        }
+
+        PopulateDropDownValuesMain();
+    }
+
+    public void SetMainRecords(List<StudentDetailModel> updatedStudentDetails)
+    {
+        mainRecords = updatedStudentDetails;
+        StateHasChanged();
+    }
+
+    public void SetStudentDetailModel(StudentDetailModel updatedStudentDetail)
+    {
+        selectedRecord = updatedStudentDetail;
+        StateHasChanged();
+    }
+
+    public void SetStudentDetailCopyModel(StudentDetailModel updatedStudentDetail)
+    {
+        selectedRecordCopy = updatedStudentDetail;
+        StateHasChanged();
+    }
+
+    private void CheckAuthentication()
+    {
+        if (appData?.CurrentUser?.Email == null)
+        {
+            NavManager.NavigateTo("/Login");
+        }
+    }
+
+    private StudentDetailModel? GetMainRecord(int recordID)
+    {
+        return
+        mainRecords?
+        .Where(t => t.StudentDetailID == recordID)
+        .FirstOrDefault();
+    }
+
+    private void SelectMainRecord(int? recordID)
+    {
+        if (recordID != null && recordID > 0)
+        {
+            selectedRecord = GetMainRecord(recordID ?? 0);
+        }
+        else
+        {
+            selectedRecord = new StudentDetailModel();
+
+            //Related Datasets
+
+        }
+
+        //Keep a copy of this object to be used for edit form so original object can remain untouched until save operation (otherwise it changes on screen)
+        if (selectedRecord != null)
+            selectedRecordCopy = selectedRecord?.Clone();
+    }
+
+    public async Task AdvanceToMainRecord(int numRecords)
+    {
+        //if (await SaveMainRecord(false) == true)
+        //{
+            int? currentRecordID = selectedRecord?.StudentDetailID;
+            StudentDetailModel? nextRecord = new StudentDetailModel();
+
+            if (numRecords > 0)
+            {
+                nextRecord =
+                ItemsMain?
+                .SkipWhile(obj => obj.StudentDetailID != currentRecordID)
+                .Skip(numRecords)
+                .FirstOrDefault();
+            }
+            else if (numRecords < 0)
+            {
+                int numRecordsBack = Math.Abs(numRecords);
+                nextRecord =
+                    ItemsMain?
+                    .Reverse()
+                    .SkipWhile(obj => obj.StudentDetailID != currentRecordID)
+                    .Skip(numRecordsBack)
+                    .FirstOrDefault();
+            }
+
+            if (nextRecord != null)
+            {
+                if (nextRecord?.StudentDetailID != null)
+                {
+                    selectedRecord = nextRecord;
+                    selectedRecordCopy = nextRecord;
+                }
+            }
+        //}
+    }
+
+    public void PopulateDropDownValuesMain()
+    {
+        DropDownValues = new List<object?>();
+
+    }
+
+    public void AddDatabaseFieldToTextArea()
+    {
+        if (selectedRecordCopy != null)
+        {
+            //selectedRecordCopy.Message = "Changed";
+        }
+    }
+
+    //Toggles for nullable bools
+    public void ToggleMainRecordIsAccepted()
+    {
+        if (selectedRecordCopy != null)
+        {
+            
+        }
+    }
+
+    public void SetEditorContextMain()
+    {
+        //When Edit Form is based on an Edit Context this must be called each time the context changes for validation to work
+        if (selectedRecordCopy != null)
+            EditContextMain = new EditContext(selectedRecordCopy);
+
+        if (EditContextMain != null)
+        {
+            EditContextMain.OnFieldChanged += ChangeMainRecord;
+        }
+    }
+
+    public string? action { get; set; }
+    public string? soundEffect { get; set; }
+    public Modal? modalMainRecord { get; set; }
+
+    private Modal? modalInfo { get; set; }
+    public string? msgInfoTitle = null;
+    public MarkupString? msgInfo = null;
+
+    private Modal? modalError { get; set; }
+    public string? msgErrorTitle = null;
+    public MarkupString? msgError = null;
+    public string? msgErrorStackTrace = null;
+
+    private Modal? modalConfirm { get; set; }
+    public string? msgConfirmTitle = null;
+    public MarkupString? msgConfirm = null;
+
+    private Modal? modalFormat { get; set; }
+
+    public string? loadDataErrorMsg = null;
+
+    private IDictionary<string, string>? selectedRecordChanges = new Dictionary<string, string>();
+
+    public Dictionary<string, (object? value, ComparisonOperator? comparisonOperator)>? FilterFieldsMain { get; set; }
+
+
+
+    public IList<object?>? DropDownValues { get; set; }
+
+    private void ChangeFilterMainFromComponent((string fieldName, object? value, ComparisonOperator? comparisonOperator) args)
+    {
+        FilterFieldsMain = GridFilterAndSort.ChangeFilter<StudentDetailModel>(args.fieldName, (args.value, args.comparisonOperator), FilterFieldsMain, filtersMain);
+        //Console.WriteLine($"Filter {args.fieldName} value {args.value}");
+    }
+
+    private void RemoveFiltersMain()
+    {
+        if (FilterFieldsMain != null)
+        {
+            FilterFieldsMain.Clear();
+        }
+        filtersMain.Clear();
+
+        // Trigger UI update
+        StateHasChanged();
+    }
+
+    private void RemoveLastFilterMain()
+    {
+        if (FilterFieldsMain != null)
+        {
+            string? lastKey = FilterFieldsMain.Keys.LastOrDefault();
+
+            if (lastKey != null)
+            {
+                FilterFieldsMain.Remove(lastKey);
+            }
+
+            GridFilterAndSort.ApplyFilters<StudentDetailModel>(FilterFieldsMain, filtersMain);
+        }
+    }
+
+    private void RemoveFilterMain(string? fieldName)
+    {
+        if (fieldName != null)
+        {
+            if (FilterFieldsMain != null)
+                FilterFieldsMain.Remove(fieldName);
+        }
+
+        GridFilterAndSort.ApplyFilters<StudentDetailModel>(FilterFieldsMain, filtersMain);
+    }
+
+    private void ShowFilterHelpMain()
+    {
+        action = "Info";
+        soundEffect = SoundFunctions.GetPromptSound();
+
+        msgInfoTitle = $"Filtering and Sorting Information";
+        msgInfo = (MarkupString)$@"
+            <h3><i class=""fa-solid fa-filter""></i> Information on Filtering</h3>
+            <p>To filter on a field press the <button type=""button"" class=""btn btn-primary btn-sm""><i class=""fa-solid fa-bars""></i></button> button next to the field name in the header and then select or type in your search criteria (depending on the field type).</p>
+            <p>Text and numeric fields will show a search box <button type=""button"" class=""btn btn-primary btn-sm""><i class=""fa-solid fa-magnifying-glass""></i></button> whereas selection fields will show a drop-down <button type=""button"" class=""btn btn-primary btn-sm""><i class=""fa-solid fa-square-caret-down""></i></button> and yes/no fields will show a checkbox <button type=""button"" class=""btn btn-primary btn-sm""><i class=""fa-solid fa-square-check""></i></button>.</p>
+            <p>Once you have added filters you can clear all these by pressing on the <button type=""button"" class=""btn btn-primary btn-sm"">Clear Filers <i class=""fa-solid fa-filter-circle-xmark""></i></button> button or you can press on the <button type=""button"" class=""btn btn-primary btn-sm"">Clear Last Filter <i class=""fa-solid fa-filter-circle-xmark""></i></button> button to clear the last field you filtered by. These will become visible once you have added your first filter.</p>
+            <p>You can also clear individual filters by pressing the <button type=""button"" class=""btn btn-primary btn-sm""><i class=""fa-solid fa-filter-circle-xmark""></i></button> button next to each one.</p>
+            <h3><i class=""fa-solid fa-arrow-up-a-z""></i> Information on Sorting</h3>
+            <p>You can sort a field by clicking on its name in the header row where the first time you press it the column will sort in ascending order <button type=""button"" class=""btn btn-primary btn-sm""><i class=""fa-solid fa-arrow-up-a-z""></i></button> and the second time you press it, it will sort in descending order <button type=""button"" class=""btn btn-primary btn-sm""><i class=""fa-solid fa-arrow-down-z-a""></i></button>.</p>
+            <p>To sort by a different field just click the header of that column and it will replace the sort you had and sort by the new column instead.</p>";
+
+        modalInfo!.Open();
+    }
+
+    private async Task FormAction()
+    {
+        //Determine what clear form button should do on dialog box
+
+        if (action == "ClearFormConfirm")
+        {
+            ClearForm();
+        }
+        else if (action == "CancelMainRecordConfirm")
+        {
+            CancelMainRecord();
+        }
+        else if (action == "DeleteMainRecordConfirm")
+        {
+            await DeleteMainRecord();
+        }  
+        else
+        {
+            action = "Error";
+            soundEffect = SoundFunctions.GetErrorSound();
+
+            msgErrorTitle = $"Invalid Action";
+            msgError = (MarkupString)$"An invalid option was specified. Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void ClearFormConfirm()
+    {
+        action = "ClearFormConfirm";
+        soundEffect = SoundFunctions.GetPromptSound();
+
+        msgConfirmTitle = $"Clear Form?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear all information on this form?";
+
+        modalConfirm!.Open();
+    }
+
+    private void ClearForm()
+    {
+        action = "ClearForm";
+
+        selectedRecord = new();
+
+        modalConfirm!.Close();
+    }
+
+    protected void ChangeMainRecord(object? sender, FieldChangedEventArgs? e)
+    {
+        string? fieldName = e?.FieldIdentifier.FieldName;
+        string? fieldValue = e?.FieldIdentifier.Model.GetType().GetProperty(fieldName ?? "")?.GetValue(e?.FieldIdentifier.Model)?.ToString();
+
+        fieldValue = StringFunctions.FormatFieldChangedValue(fieldValue);
+
+        if (selectedRecordChanges != null && fieldName != null)
+        {
+            if (selectedRecordChanges.ContainsKey(fieldName))
+            {
+                selectedRecordChanges[fieldName] = fieldValue ?? "";
+            }
+            else
+            {
+                selectedRecordChanges.Add(fieldName, fieldValue ?? "");
+            }
+        }
+
+        focusElement = null;
+    }
+
+    public void EditMainRecord(int? recordID)
+    {
+        if (recordID != null)
+            SelectMainRecord(recordID);
+
+        SetEditorContextMain();
+
+        if (selectedRecordCopy != null)
+        {
+            modalMainRecord!.MakeLarge();
+            modalMainRecord!.Open();
+        }
+        else
+        {
+            action = "Error";
+            soundEffect = SoundFunctions.GetErrorSound();
+
+            msgErrorTitle = $"Cannot Load Record {recordID}";
+            msgError = (MarkupString)$"Unfortunately the record could not be loaded due to an error.<br />Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    public async Task<bool> SaveMainRecord(bool? CloseDialogAfterSave)
+    {
+        string? saveEndPoint;
+        bool returnValue = false;
+
+        if (await _fluentValidationValidator!.ValidateAsync())
+        {
+            Logger.LogInformation("Id = {Id}", selectedRecordCopy?.StudentDetailID);
+
+            try
+            {
+                if (selectedRecord != null && selectedRecordCopy != null)
+                {
+                    //Update related entities (as only IDs are updated on the form so rest of object is not updated)
+
+                    HttpResponseMessage formResponse = new HttpResponseMessage();
+
+                    if (selectedRecordCopy?.StudentDetailID > 0) {
+                        //Set other fields
+                        if (selectedRecordCopy != null)
+                        {
+                            //selectedRecordCopy.LastModifiedBy = appData.CurrentUser?.Email;
+                            //selectedRecordCopy.LastModifiedDate = DateTime.Now;
+                        }
+
+                        //Update existing record
+                        saveEndPoint = $"{configuration["APIEndpoint"]}/StudentDetail/{selectedRecord?.StudentDetailID}";
+                        formResponse = await Http.PutAsJsonAsync<StudentDetailModel>(saveEndPoint, selectedRecordCopy!);
+                    }
+                    else 
+                    {
+                        //Set other fields
+                        if (selectedRecordCopy != null)
+                        {
+                            //selectedRecordCopy.CreatedBy = appData.CurrentUser?.Email;
+                            //selectedRecordCopy.CreatedDate = DateTime.Now;
+                        }
+
+                        //Insert new record
+                        saveEndPoint = $"{configuration["APIEndpoint"]}/StudentDetail";
+                        formResponse = await Http.PostAsJsonAsync<StudentDetailModel>(saveEndPoint, selectedRecordCopy!);
+                    }
+
+                    if (formResponse.IsSuccessStatusCode != true)
+                    {
+                        string responseBody = await formResponse.Content.ReadAsStringAsync();
+                        action = "Error";
+                        soundEffect = SoundFunctions.GetErrorSound();
+
+                        msgErrorTitle = $"Cannot Save Student Detail Record";
+                        msgError = (MarkupString)$"Unfortunately the Student Detail Record could not be saved successfully due to an error.<br />Please check your network connection and attempt to save again.";
+                        msgErrorStackTrace = responseBody;
+
+                        modalError!.Open();
+                    }
+                    else
+                    {
+                        //Copy properties back to tracked object being saved
+                        selectedRecordCopy.CopyProperties(selectedRecord);
+
+                        selectedRecordChanges?.Clear();
+
+                        soundEffect = SoundFunctions.GetConfirmSound();
+                        returnValue = true;
+
+                        if (selectedRecordCopy?.StudentDetailID > 0)
+                        {
+                            //Update existing record
+                            if (CloseDialogAfterSave == true)
+                            {
+                                CloseMainRecord();
+                            }
+                        }
+                        else 
+                        {
+                            //Insert new record
+
+                            //Get ID of newly inserted record and add new item to model so shows on screen
+                            StudentDetailModel insertedMainRecord = await formResponse.Content.ReadFromJsonAsync<StudentDetailModel>() ?? new StudentDetailModel();
+
+                            if (insertedMainRecord.StudentDetailID > 0)
+                            {                                                               
+                                mainRecords?.Add(insertedMainRecord);
+
+                                if (CloseDialogAfterSave == true)
+                                {
+                                    CloseMainRecord();
+                                }
+                            }
+                            else
+                            {
+                                action = "Error";
+                                soundEffect = SoundFunctions.GetErrorSound();
+
+                                msgErrorTitle = $"Cannot Save Student Detail Record";
+                                msgError = (MarkupString)$"Unfortunately the Student Detail Record could not be saved successfully due to an error.<br />Please check your network connection and attempt to save again.";
+                                msgErrorStackTrace = null;
+
+                                modalError!.Open();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    action = "Error";
+                    soundEffect = SoundFunctions.GetErrorSound();
+
+                    msgErrorTitle = $"Cannot Save Student Detail Record";
+                    msgError = (MarkupString)$"Unfortunately the Student Detail Record could not be saved successfully due to an error.<br />Please check your network connection and attempt to save again.";
+                    msgErrorStackTrace = null;
+
+                    modalError!.Open();
+                }
+
+            }
+            catch (HttpRequestException ex)
+            {
+                HandleJsonException(ex, "StudentDetail", selectedRecordCopy?.StudentDetailID.ToString() ?? "0");
+            }
+        }
+
+        return returnValue;
+    }
+
+    private void DeleteMainRecordConfirm()
+    {
+        if (selectedRecord?.StudentDetailID > 0)
+        {
+            action = "DeleteMainRecordConfirm";
+            soundEffect = SoundFunctions.GetPromptSound();
+
+            msgConfirmTitle = $"Confirm Delete?";
+            msgConfirm = (MarkupString)$"Are you sure you want to delete the Student Detail \"{selectedRecord.Forename} {selectedRecord.Surname} ({selectedRecord.StudentRef})\"";
+
+            modalConfirm!.OpenOnTop1();
+        }
+        else
+        {
+            action = "Error";
+            soundEffect = SoundFunctions.GetErrorSound();
+
+            msgErrorTitle = $"No Student Selected";
+            msgError = (MarkupString)$"Please select a student first before pressing the Delete button or if try to select one again if one had been selected.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private async Task DeleteMainRecord()
+    {
+        action = "DeleteMainRecord";
+
+        string? deleteEndPoint;
+
+        Logger.LogInformation("Id = {Id}", selectedRecord?.StudentDetailID);
+
+        modalConfirm!.Close();
+
+        try
+        {
+            if (selectedRecord != null)
+            {
+                StudentDetailModel formResponse = new StudentDetailModel();
+
+                if (selectedRecord?.StudentDetailID > 0)
+                {
+                    deleteEndPoint = $"{configuration["APIEndpoint"]}/StudentDetail/{selectedRecord?.StudentDetailID}";
+                    formResponse = await Http.DeleteFromJsonAsync<StudentDetailModel>(deleteEndPoint) ?? new StudentDetailModel();
+
+                    if (formResponse.StudentDetailID > 0)
+                    {
+                        //Remove record from screen as well
+                        mainRecords?.Remove(selectedRecord!);
+                    }
+                    else
+                    {
+                        action = "Error";
+                        soundEffect = SoundFunctions.GetErrorSound();
+
+                        msgErrorTitle = $"Cannot Delete Student Record";
+                        msgError = (MarkupString)$"Unfortunately the Student Record could not be deleted successfully due to an error.<br />Please check your network connection and attempt to save again.";
+                        msgErrorStackTrace = null;
+
+                        modalError!.Open();
+                    }
+                }
+                else
+                {
+                    action = "Error";
+                    soundEffect = SoundFunctions.GetErrorSound();
+
+                    msgErrorTitle = $"No Student Selected";
+                    msgError = (MarkupString)$"Please select a student first before pressing the Delete button or if try to select one again if one had been selected.";
+                    msgErrorStackTrace = null;
+
+                    modalError!.Open();
+                }
+            }
+            else
+            {
+                action = "Error";
+                soundEffect = SoundFunctions.GetErrorSound();
+
+                msgErrorTitle = $"Cannot Save Student Detail Record";
+                msgError = (MarkupString)$"Unfortunately the Student Detail Record could not be saved successfully due to an error.<br />Please check your network connection and attempt to save again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
+            }
+
+        }
+        catch (HttpRequestException ex)
+        {
+            HandleJsonException(ex, "StudentDetail", selectedRecord?.StudentDetailID.ToString() ?? "0");
+        }
+    }
+
+    //Additional Functions
+
+    
+    //Common Code
+    private void CancelMainRecordConfirm()
+    {
+        action = "CancelMainRecordConfirm";
+        soundEffect = SoundFunctions.GetPromptSound();
+
+        string? numberOfChanges = $"{selectedRecordChanges?.Count} {(selectedRecordChanges?.Count == 1 ? "Change" : "Changes")}";
+        string? listOfChanges = selectedRecordChanges?.Select(x => $"<li>{x.Key}: {x.Value}</li>").Aggregate((x, y) => $"{x}{y}"); //Aggregation in case of duplication
+        string? tableName = selectedRecord?.GetType().Name.Replace("Model", "").GetFieldNameWithSpaces(true) ?? "Record";
+
+        msgConfirmTitle = $"Confirm Cancel?";
+        msgConfirm = (MarkupString)$@"
+            <p>
+                You have made the following changes:<br />
+                - {tableName}: {numberOfChanges}:
+                <ul>
+    {listOfChanges}
+                </ul>
+            </p>
+            <p>
+                Are you sure you want to cancel and lose these changes?
+            </p>";
+
+        modalConfirm!.OpenOnTop1();
+    }
+
+    private void CancelMainRecord()
+    {
+        //selectedRecord = selectedRecordCopy;
+
+        //Set object back to original values
+        if (selectedRecord != null)
+        {
+            //selectedRecord.Subject = selectedRecordCopy?.Subject;
+        }
+
+        // if (selectedRecord != null && selectedRecordCopy != null)
+        //     selectedRecordCopy.CopyProperties(selectedRecord);
+
+        //Better way?
+        // PropertyInfo[]? properties = selectedRecordCopy?.GetType().GetProperties();
+        // if (properties != null)
+        // {
+        //     foreach (PropertyInfo property in properties)
+        //     {
+        //         // Get the name and value of each property
+        //         string? propertyName = property.Name;
+        //         object? propertyValue = property.GetValue(selectedRecord);
+
+        //         //Console.WriteLine($"{propertyName}: {propertyValue}");
+        //         selectedRecord?.GetType().GetProperty(propertyName)?.SetValue(selectedRecord, propertyValue);
+        //         //selectedRecord?.GetType().GetProperty(propertyName)?.SetValue(selectedRecordCopy, selectedRecordCopy?.GetType().GetProperty(propertyName)?.GetValue(selectedRecordCopy));
+        //     }
+        // }
+
+        CloseMainRecord();
+    }
+
+    private void CloseMainRecord()
+    {
+        modalMainRecord!.Close();
+        modalConfirm!.Close();
+
+        selectedRecordChanges?.Clear();
+        //messagePreview = null;
+    }
+
+    private async Task GetCursorPosition()
+    {
+        var cursorPosition = await JSRuntime.InvokeAsync<int>("tinymceInterop.getCursorPosition");
+        Logger.LogInformation("Cursor Position: {CursorPosition}", cursorPosition);
+    }
+
+    private async Task InsertTextIntoSubject(string? text)
+    {
+        string? textToInsert = text;
+
+        Console.WriteLine($"Selected Database Field To Insert into Subject: {textToInsert}");
+        await JSRuntime.InvokeVoidAsync("inputInterop.insertTextAtCursor", "subjectInput", textToInsert);
+    }
+
+    private async Task AddEditorContent(string? text)
+    {
+        string? textToInsert = text?.Replace("<", "&lt;").Replace(">", "&gt;");
+        Console.WriteLine($"Selected Database Field To Insert into Textarea: {textToInsert}");
+        await JSRuntime.InvokeVoidAsync("tinymceInterop.focusEditor");
+        await JSRuntime.InvokeVoidAsync("tinymceInterop.insertTextAtCursor", textToInsert);
+    }
+
+    private async Task ReplaceEditorContent(string? text)
+    {
+        string? textToInsert = text;
+
+        await JSRuntime.InvokeVoidAsync("tinymceInterop.replaceEditorContent", textToInsert);
+        await JSRuntime.InvokeVoidAsync("tinymceInterop.focusEditor");
+    }
+
+    private string? focusElement;
+    private void SetFocus(string? field)
+    {
+        focusElement = field;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // if (firstRender)
+        // {
+        //await JSRuntime.InvokeVoidAsync("tinymceInterop.initializeEditor", DotNetObjectReference.Create(this));
+        // }
+    }
+
+    [JSInvokable]
+    public void OnEditorBlur()
+    {
+        //focusElement = "Message";
+        //Logger.LogInformation("TinyMCE editor lost focus");
+    }
+
+    private async Task InsertDatabaseField()
+    {
+        if (selectedDatabaseField != null)
+        {
+            // if (focusElement == "Subject")
+            // {
+            //     await InsertTextIntoSubject(selectedDatabaseField);
+            // }
+            // else if (focusElement == "Message")
+            // {
+            //     await AddEditorContent(selectedDatabaseField);
+            // }
+            // else
+            // {
+            //     // Add as default for now
+            //     await AddEditorContent(selectedDatabaseField);
+            // }
+        }
+        else
+        {
+            action = "Error";
+            soundEffect = SoundFunctions.GetErrorSound();
+
+            msgErrorTitle = $"Please select a field first using the field selector on the left before pressing the Add Selected Field option";
+            msgError = (MarkupString)$"Unfortunately the Student Detail Record could not be saved successfully due to an error.<br />Please check your network connection and attempt to save again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private async Task InsertDatabaseFieldWithFormat()
+    {
+        if (selectedDatabaseField != null)
+        {
+            // if (focusElement == "Subject")
+            // {
+            //     await InsertTextIntoSubject(selectedDatabaseFieldFormatted);
+            // }
+            // else if (focusElement == "Message")
+            // {
+            //     await AddEditorContent(selectedDatabaseFieldFormatted);
+            // }
+            // else
+            // {
+            //     // Add as default for now
+            //     await AddEditorContent(selectedDatabaseFieldFormatted);
+            // }
+            modalFormat!.Close();
+        }
+        else
+        {
+            action = "Error";
+            soundEffect = SoundFunctions.GetErrorSound();
+
+            msgErrorTitle = $"Please select a field first using the field selector on the left before pressing the Add Selected Field option";
+            msgError = (MarkupString)$"Unfortunately the Student Detail Record could not be saved successfully due to an error.<br />Please check your network connection and attempt to save again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void InsertDatabaseFieldFromFormat()
+    {
+
+        modalFormat!.OpenOnTop1();
+    }
+
+    private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
+    {
+        if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+        {
+            loadDataErrorMsg = $"You are not authorised to view this page";
+
+            //Redirect to login screen
+            NavManager.NavigateTo($"Login/Vehicles");
+        }
+        else if (ex.Message.Contains("404 (Not Found)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" is not found";
+        }
+        else if (ex.Message.Contains("400 (Bad Request)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" resulted in an invalid request";
+        }
+        else
+        {
+            loadDataErrorMsg = $"Error: {ex.Message}";
+        }
+    }
+}

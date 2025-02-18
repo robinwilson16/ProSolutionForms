@@ -1,6 +1,10 @@
 ﻿@inherits LayoutComponentBase
+@using ProSolutionForms.Components
+@using ProSolutionForms.Shared
+@using System.Reflection;
 
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <CascadingValue Value="this">
     <div class="page">
@@ -17,6 +21,22 @@
             </div>
 
             <article class="content px-4">
+                <Toast @ref="toastNewVersionAvailable" ToastRef="toastNewVersionAvailable">
+                    <Title>
+                        <i class="fa-solid fa-download"></i> <strong class="me-auto"> @toastNewVersionAvailableTitle</strong>
+                    </Title>
+                    <Subtitle>
+                        @toastNewVersionAvailableSubtitle
+                    </Subtitle>
+                    <Body>
+                        @toastNewVersionAvailableText
+                    </Body>
+                    <Footer>
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="() => ServiceWorkerFunctions.UpdateServiceWorker(JSRuntime, NavigationManager)" data-bs-dismiss="toast"><i class="fa-solid fa-square-check"></i> Update to Latest Version</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-dismiss="toast"><i class="fa-solid fa-square-xmark"></i> Ignore</button>
+                    </Footer>
+                </Toast>
+
                 @Body
             </article>
         </main>
@@ -29,9 +49,24 @@
     private bool _iconMenuActive { get; set; }
     private string? IconMenuCssClass => _iconMenuActive ? "width: 82px;" : null;
 
-    protected override void OnInitialized()
+    private Toast? toastNewVersionAvailable { get; set; }
+    public string? toastNewVersionAvailableTitle = null;
+    public string? toastNewVersionAvailableSubtitle = null;
+    public MarkupString? toastNewVersionAvailableText = null;
+
+    protected override async Task OnInitializedAsync()
     {
         ShowNav();
+
+        ActiveVersion = await ServiceWorkerFunctions.GetCurrentVersionNumber(JSRuntime);
+
+        //Run this each time the location changes
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+        toastNewVersionAvailableTitle = "New Version Available";
+        toastNewVersionAvailableSubtitle = $"Version {ProductVersion}";
+        toastNewVersionAvailableText = (MarkupString)$"Version {ProductVersion} of ProSolution Forms is now available and you are running {ActiveVersion}. To avoid any errors please update to the latest version as soon as possible";
+        toastNewVersionAvailable?.DisableAutohide();
     }
 
     public void OnLocationChanged(object? sender, LocationChangedEventArgs args)
@@ -44,6 +79,26 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    private string? ActiveVersion { get; set; }
+    private string? ProductVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+
+    private async Task SetVersionNumber()
+    {
+        await JSRuntime.InvokeVoidAsync("serviceWorkerInterop.setVersionNumber", ProductVersion);
+    }
+
+    private async Task GetCurrentVersionNumber()
+    {
+        try
+        {
+            ActiveVersion = await JSRuntime.InvokeAsync<string>("serviceWorkerInterop.getVersionNumber");
+        }
+        catch
+        {
+            ActiveVersion = ProductVersion;
+        }
     }
 
     public void HideNav() {

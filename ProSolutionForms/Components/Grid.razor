@@ -1,0 +1,662 @@
+﻿@using ProSolutionForms.Models
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using ProSolutionForms.Shared
+@using System.Reflection
+
+@typeparam TItem
+
+<div class="row">
+    <div class="col-md TableArea mb-3 pt-3 rounded">
+        <div class="alert alert-primary" role="alert">
+
+            @if (FilterFields != null && FilterFields.Count > 0)
+            {
+                <button type="button" class="btn btn-primary btn-sm" @onclick="@RemoveFilters">Clear All Filters <i class="fa-solid fa-filter-circle-xmark"></i></button>
+                <button type="button" class="btn btn-secondary btn-sm me-3" @onclick="@RemoveLastFilter">Clear Last Filter <i class="fa-solid fa-filter-circle-xmark"></i></button>
+
+                int filterNumber = 0;
+                foreach (var filter in FilterFields)
+                {
+                    string filterName = filter.Key;
+                    //string filterValue = filter.Value?.ToString() ?? "blank";
+                    var (filterValue, comparisonOperator) = ((object?, ComparisonOperator?))filter.Value;
+
+                    filterNumber += 1;
+
+                    if (filterNumber > 1)
+                    {
+                        <span class="ps-1 pe-1">, </span>
+                    }
+                    <kbd><i class="fa-solid fa-filter"></i> @filterName.GetFieldNameWithSpaces(true) @(comparisonOperator?.GetEnumDescription() ?? "=") @(filterValue ?? "null") <button type="button" class="btn btn-primary" @onclick="() => RemoveFilter(filterName)" style="--bs-btn-padding-y: .1rem; --bs-btn-padding-x: .2rem; --bs-btn-font-size: .6rem;"><i class="fa-solid fa-filter-circle-xmark"></i></button></kbd>
+                }
+            }
+            else {
+                <button type="button" class="btn btn-secondary btn-sm" @onclick="@ShowFilterHelp"><i class="fa-solid fa-circle-info"></i> Information on Filtering and Sorting</button>
+            }
+
+        </div>
+        <div class="TableContainer">
+            <div class="table-responsive">
+                <QuickGrid Items="@Items" Virtualize="true" Class="table table-striped table-hover table-bordered" TGridItem="TItem">
+                    @if (Items != null)
+                    {
+
+                        int tableRow = 0;
+                        int? recordID = 0;
+                        IOrderedEnumerable<PropertyInfo?>? properties;
+
+                        if (PropertyOrder.Orders.ContainsKey(typeof(TItem).Name))
+                        {
+                            properties = typeof(TItem).GetProperties()
+                            .OrderBy(p =>
+                            {
+                                var order = Array.IndexOf(PropertyOrder.Orders.GetValueOrDefault(typeof(TItem).Name, new string[0]), p.Name);
+                                return order == -1 ? int.MaxValue : order;
+                            })
+                            .ThenBy(p => p.Name);
+                        }
+                        else 
+                        {
+                            properties = typeof(TItem).GetProperties()
+                            .OrderBy(p => p.Name);
+                        }
+                            
+
+                        foreach (var prop in properties)
+                        {
+                            if (ExcludeFields != null && ExcludeFields.Contains(prop.Name))
+                            {
+                                //Skip fields set to be excluded
+                                continue;
+                            }
+                            tableRow++;
+
+                            if (tableRow == 1) 
+                            {
+                                //Edit Record Button on left of column
+                                <TemplateColumn Title="" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetSortExpression<TItem>(prop.Name))">
+                                    <ChildContent>
+                                        @{
+                                            recordID = (int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context) ?? 0);
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <button type="button" class="btn btn-primary btn-sm" @onclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)"><i class="fa-solid fa-up-right-from-square"></i></button>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                                                <input type="number" class="form-control" placeholder="Enter Number..." autofocus
+                                                       @bind-value:get="GetFilter(prop.Name).value"
+                                                       @bind-value:set="(e) => ChangeFilter(prop.Name, (e, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))"
+                                                       @oninput="(e) => ChangeFilter(prop.Name, (e.Value, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))" />
+                                            </div>
+                                            <select class="form-select" @onchange="(e) => ChangeFilter(prop.Name, (GetFilter(prop.Name).value, Enum.Parse<ComparisonOperator>(e.Value.ToString())))">
+                                                @foreach (var op in Enum.GetValues<ComparisonOperator>())
+                                                {
+                                                    <option value="@op" selected="@((GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals) == op)">@op.GetEnumDisplayName()</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+
+                            if (prop.PropertyType == typeof(int) || prop.PropertyType == typeof(int?))
+                            {
+                                //Integer fields
+                                <TemplateColumn Title="@ModelFunctions.GetDisplayName(prop)" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetSortExpression<TItem>(prop.Name))">
+                                    <ChildContent>
+                                        @{
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <div @onclick="() => SelectItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" @ondblclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" class="@TableCSS(recordID, isEnabled, isOK)">
+                                            @context?.GetType().GetProperty(prop.Name)?.GetValue(context)
+                                        </div>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                                                <input type="number" class="form-control" placeholder="Enter Number..." autofocus
+                                                       @bind-value:get="GetFilter(prop.Name).value"
+                                                       @bind-value:set="(e) => ChangeFilter(prop.Name, (e, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))"
+                                                       @oninput="(e) => ChangeFilter(prop.Name, (e.Value, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))" />
+                                            </div>
+                                            <select class="form-select" @onchange="(e) => ChangeFilter(prop.Name, (GetFilter(prop.Name).value, Enum.Parse<ComparisonOperator>(e.Value.ToString())))">
+                                                @foreach (var op in Enum.GetValues<ComparisonOperator>())
+                                                {
+                                                    <option value="@op" selected="@((GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals) == op)">@op.GetEnumDisplayName()</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+
+                            else if (prop.PropertyType == typeof(decimal) || prop.PropertyType == typeof(decimal?) && ModelFunctions.GetDisplayGroup(prop) != null)
+                            {
+                                //Decimal fields (may want to split into money and not money)
+                                //Formats amount offered in red or green depending on if it is accepted
+                                <TemplateColumn Title="@ModelFunctions.GetDisplayName(prop)" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetSortExpression<TItem>(prop.Name))">
+                                    <ChildContent>
+                                        @{
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <div @onclick="() => SelectItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" @ondblclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" class="@TableCSS(recordID, isEnabled, isOK)">
+                                            <div class="col-justify-start text-center">
+                                                <h5 class="pt-1 pb-0 mb-0">
+                                                    <span class="badge @(ModelFunctions.GetIsTrue(context, ModelFunctions.GetDisplayGroup(prop)) == true ? "text-bg-success" : "text-bg-danger")">
+                                                        @string.Format("{0:C0}", context?.GetType().GetProperty(prop.Name)?.GetValue(context))
+                                                    </span>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                                                <input type="number" class="form-control" placeholder="Enter Number..." autofocus
+                                                       @bind-value:get="GetFilter(prop.Name).value"
+                                                       @bind-value:set="(e) => ChangeFilter(prop.Name, (e, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))"
+                                                       @oninput="(e) => ChangeFilter(prop.Name, (e.Value, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))" />
+                                            </div>
+                                            <select class="form-select" @onchange="(e) => ChangeFilter(prop.Name, (GetFilter(prop.Name).value, Enum.Parse<ComparisonOperator>(e.Value.ToString())))">
+                                                @foreach (var op in Enum.GetValues<ComparisonOperator>())
+                                                {
+                                                    <option value="@op" selected="@((GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals) == op)">@op.GetEnumDisplayName()</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+
+                            else if (prop.PropertyType == typeof(decimal) || prop.PropertyType == typeof(decimal?))
+                            {
+                                //Decimal fields (may want to split into money and not money)
+                                <TemplateColumn Title="@ModelFunctions.GetDisplayName(prop)" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetSortExpression<TItem>(prop.Name))">
+                                    <ChildContent>
+                                        @{
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <div @onclick="() => SelectItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" @ondblclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" class="@TableCSS(recordID, isEnabled, isOK)">
+                                            @string.Format("{0:C0}", context?.GetType().GetProperty(prop.Name)?.GetValue(context))
+                                        </div>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                                                <input type="number" class="form-control" placeholder="Enter Number..." autofocus
+                                                       @bind-value:get="GetFilter(prop.Name).value"
+                                                       @bind-value:set="(e) => ChangeFilter(prop.Name, (e, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))"
+                                                       @oninput="(e) => ChangeFilter(prop.Name, (e.Value, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))" />
+                                            </div>
+                                            <select class="form-select" @onchange="(e) => ChangeFilter(prop.Name, (GetFilter(prop.Name).value, Enum.Parse<ComparisonOperator>(e.Value.ToString())))">
+                                                @foreach (var op in Enum.GetValues<ComparisonOperator>())
+                                                {
+                                                    <option value="@op" selected="@((GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals) == op)">@op.GetEnumDisplayName()</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+
+                            else if (prop.PropertyType == typeof(bool) || prop.PropertyType == typeof(bool?))
+                            {
+                                //Boolean fields
+                                <TemplateColumn Title="@ModelFunctions.GetDisplayName(prop)" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetSortExpression<TItem>(prop.Name))">
+                                    <ChildContent>
+                                        @{
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <div @onclick="() => SelectItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" @ondblclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" class="@TableCSS(recordID, isEnabled, isOK)">
+                                            <div class="col-justify-start text-center">
+                                                <i class="@CSSFunctions.BoolCSS((bool?)context?.GetType().GetProperty(prop.Name)?.GetValue(context))"></i>
+                                            </div>
+                                        </div>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <button type="button" class="btn @(GetFilterBool(prop.Name).value == true? "btn-primary" : "btn-outline-primary")"
+                                                    value="@GetFilterBool(prop.Name).value"
+                                                    @onclick="(e) => ChangeFilter(prop.Name, (e, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))">
+                                                <i class="@(GetFilterBool(prop.Name).value == null? "fa-regular fa-square-minus" : GetFilterBool(prop.Name).value == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i>
+                                            </button>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+
+                            else if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?) || prop.PropertyType == typeof(DateOnly) || prop.PropertyType == typeof(DateOnly?))
+                            {
+                                //DateTime fields (using date for search so get date picker)
+                                <TemplateColumn Title="@ModelFunctions.GetDisplayName(prop)" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetSortExpression<TItem>(prop.Name))">
+                                    <ChildContent>
+                                        @{
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <div @onclick="() => SelectItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" @ondblclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" class="@TableCSS(recordID, isEnabled, isOK)">
+                                            @string.Format("{0:dd/MM/yyyy}", context?.GetType().GetProperty(prop.Name)?.GetValue(context))
+                                        </div>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text"><i class="fa-solid fa-calendar-day"></i></span>
+                                                <input type="date" class="form-control" placeholder="Enter Date..." autofocus
+                                                       @bind-value:get="GetFilterDate(prop.Name).value"
+                                                       @bind-value:set="(e) => ChangeFilter(prop.Name, (e, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))"
+                                                       @oninput="(e) => ChangeFilter(prop.Name, (e.Value, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))" />
+                                            </div>
+                                            <select class="form-select" @onchange="(e) => ChangeFilter(prop.Name, (GetFilter(prop.Name).value, Enum.Parse<ComparisonOperator>(e.Value.ToString())))">
+                                                @foreach (var op in Enum.GetValues<ComparisonOperator>())
+                                                {
+                                                    <option value="@op" selected="@((GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals) == op)">@op.GetEnumDisplayName()</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+
+                            else if (prop.PropertyType == typeof(Guid) || prop.PropertyType == typeof(Guid?))
+                            {
+                                //Guid fields
+                                <TemplateColumn Title="@ModelFunctions.GetDisplayName(prop)" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetSortExpression<TItem>(prop.Name))">
+                                    <ChildContent>
+                                        @{
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <div @onclick="() => SelectItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" @ondblclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" class="@TableCSS(recordID, isEnabled, isOK)">
+                                            @(context?.GetType().GetProperty(prop.Name)?.GetValue(context) ?? "")
+                                        </div>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text"><i class="fa-solid fa-code"></i></span>
+                                                <input type="text" class="form-control" placeholder="Enter Ref..." autofocus
+                                                       @bind-value:get="GetFilter(prop.Name).value"
+                                                       @bind-value:set="(e) => ChangeFilter(prop.Name, (e, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))"
+                                                       @oninput="(e) => ChangeFilter(prop.Name, (e.Value, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))" />
+                                            </div>
+                                            <select class="form-select" @onchange="(e) => ChangeFilter(prop.Name, (GetFilter(prop.Name).value, Enum.Parse<ComparisonOperator>(e.Value.ToString())))">
+                                                @foreach (var op in Enum.GetValues<ComparisonOperator>())
+                                                {
+                                                    <option value="@op" selected="@((GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals) == op)">@op.GetEnumDisplayName()</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+
+                            else if (prop.PropertyType.IsEnum || ModelFunctions.IsNullableEnum(prop.PropertyType))
+                            {
+                                //Enum lists
+                                <TemplateColumn Title="@ModelFunctions.GetDisplayName(prop)" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetSortExpression<TItem>(prop.Name))">
+                                    <ChildContent>
+                                        @{
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <div @onclick="() => SelectItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" @ondblclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" class="@TableCSS(recordID, isEnabled, isOK)">
+                                            @(((Enum?)context?.GetType().GetProperty(prop.Name)?.GetValue(context)).GetEnumDisplayName())
+                                        </div>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass-arrow-right"></i></span>
+                                                <select class="form-select" autofocus
+                                                        value="@GetFilter(prop.Name).value"
+                                                        @onchange="(e) => ChangeFilter(prop.Name, (e.Value, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))">
+                                                    <option value="">-- Please Select --</option>
+                                                    @{
+                                                        var subType = Nullable.GetUnderlyingType(prop.PropertyType);
+
+                                                        if (subType != null && subType.IsEnum)
+                                                        {
+                                                            var enums = Enum.GetValues(subType);
+
+                                                            if (enums != null)
+                                                            {
+                                                                foreach (Enum enumItem in enums)
+                                                                {
+                                                                    <option value="@enumItem">@enumItem.GetEnumDisplayName()</option>
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                            <select class="form-select" @onchange="(e) => ChangeFilter(prop.Name, (GetFilter(prop.Name).value, Enum.Parse<ComparisonOperator>(e.Value.ToString())))">
+                                                @foreach (var op in Enum.GetValues<ComparisonOperator>())
+                                                {
+                                                    <option value="@op" selected="@((GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals) == op)">@op.GetEnumDisplayName()</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+                            
+                            else if (prop.PropertyType.IsClass && prop.PropertyType != typeof(string))
+                            {
+                                //Another object
+                                string? sortProperty = $"{prop.Name}.Name";
+                                <TemplateColumn Title="@ModelFunctions.GetDisplayName(prop)" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetNestedSortExpression<TItem>(sortProperty))">
+                                    <ChildContent>
+                                        @{
+                                            var complexTypeValue = context?.GetType().GetProperty(prop.Name)?.GetValue(context);
+                                            var namePropertyValue = complexTypeValue?.GetType().GetProperty("Name")?.GetValue(complexTypeValue);
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <div @onclick="() => SelectItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" @ondblclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" class="@TableCSS(recordID, isEnabled, isOK)">
+                                            @namePropertyValue
+                                        </div>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass-arrow-right"></i></span>
+                                                <select class="form-select" autofocus
+                                                        value="@GetFilter(prop.Name + '.' + ModelFunctions.GetBaseType(prop).GetProperties().FirstOrDefault()?.Name).value"
+                                                        @onchange="(e) => ChangeFilter(prop.Name + '.' + ModelFunctions.GetBaseType(prop).GetProperties().FirstOrDefault()?.Name, (e.Value, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals))">
+                                                    <option value="">-- Please Select --</option>
+                                                    @{
+                                                        var options = DropDownValues?.Where(x => x?.GetType() == prop.PropertyType);
+                                                    }
+                                                    @if (options != null)
+                                                    {
+                                                        foreach (var option in options)
+                                                        {
+                                                            <option value="@option?.GetType().GetProperties().FirstOrDefault()?.GetValue(option)">@option?.GetType().GetProperty("Name")?.GetValue(option)</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                            <select class="form-select" @onchange="(e) => ChangeFilter(prop.Name, (GetFilter(prop.Name).value, Enum.Parse<ComparisonOperator>(e.Value.ToString())))">
+                                                @foreach (var op in Enum.GetValues<ComparisonOperator>())
+                                                {
+                                                    <option value="@op" selected="@((GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Equals) == op)">@op.GetEnumDisplayName()</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+
+                            else {
+                                //String fields
+                                <TemplateColumn Title="@ModelFunctions.GetDisplayName(prop)" Sortable="true" SortBy="GridSort<TItem>.ByAscending(GridFilterAndSort.GetSortExpression<TItem>(prop.Name))">
+                                    <ChildContent>
+                                        @{
+                                            bool? isEnabled = context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(DisabledItemFieldName ?? "")?.GetValue(context) : true;
+                                            bool? isOK = context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.Name != null ? (bool?)context?.GetType().GetProperty(ErrorItemFieldName ?? "")?.GetValue(context) : true;
+                                        }
+                                        <div @onclick="() => SelectItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" @ondblclick="() => EditItem((int?)(context?.GetType().GetProperties().FirstOrDefault()?.GetValue(context)) ?? 0)" class="@TableCSS(recordID, isEnabled, isOK)">
+                                            @context?.GetType().GetProperty(prop.Name)?.GetValue(context)
+                                        </div>
+                                    </ChildContent>
+                                    <ColumnOptions>
+                                        <div class="search-box">
+                                            @prop.Name.GetFieldNameWithSpaces(true):
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                                <input type="text" class="form-control" placeholder="Enter Text..." autofocus
+                                                       @bind-value:get="GetFilter(prop.Name).value"
+                                                       @bind-value:set="(e) => ChangeFilter(prop.Name, (e, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Contains))"
+                                                       @oninput="(e) => ChangeFilter(prop.Name, (e.Value, GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Contains))" />
+                                            </div>
+                                            <select class="form-select" @onchange="(e) => ChangeFilter(prop.Name, (GetFilter(prop.Name).value, Enum.Parse<ComparisonOperator>(e.Value.ToString())))">
+                                                @foreach (var op in Enum.GetValues<ComparisonOperator>())
+                                                {
+                                                    <option value="@op" selected="@((GetFilter(prop.Name).comparisonOperator ?? ComparisonOperator.Contains) == op)">@op.GetEnumDisplayName()</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </ColumnOptions>
+                                </TemplateColumn>
+                            }
+                        }
+                    }
+                </QuickGrid>
+            </div>
+        </div>
+        <div class="alert alert-secondary" role="alert">
+            <div class="row">
+                <div class="col-md">
+                    <div class="d-grid gap-2 d-md-block text-start">
+
+                        @if (ShowEditButtons == true)
+                        {
+                            <button type="button" class="btn btn-primary me-md-3" @onclick="()=>EditItem(0)"><i class="fa-solid fa-square-plus"></i> New...</button>
+                            <button type="button" class="btn btn-danger me-md-3" @onclick="DeleteItem" disabled="@(SelectedItemID > 0 ? false : true)"><i class="fa-solid fa-trash-can"></i> Delete...</button>
+                        }
+                        
+                        @if (SelectedItemID > 0)
+                        {
+                            <span>1 Record Selected</span>
+                        }
+                    </div>
+                </div>
+                <div class="col-md text-end">
+
+                    @if (Items != null)
+                    {
+                        if (FilterFields != null && FilterFields.Count > 0)
+                        {
+                            <div class="col-md text-end fw-bold text-primary">
+                                @Items?.Count() Records (Filtered)
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md text-end">
+                                @Items?.Count() Records
+                            </div>
+                        }
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public IQueryable<TItem>? Items { get; set; }
+
+    [Parameter]
+    public IList<string>? ExcludeFields { get; set; }
+
+    [Parameter]
+    public Dictionary<string, (object? value, ComparisonOperator? comparisonOperator)>? FilterFields { get; set; }
+
+    [Parameter]
+    public string? DisabledItemFieldName { get; set; }
+
+    [Parameter]
+    public string? ErrorItemFieldName { get; set; }
+
+    [Parameter]
+    public bool? ShowEditButtons { get; set; }
+
+    [Parameter]
+    public IList<object?>? DropDownValues { get; set; }
+
+    [Parameter]
+    public int? SelectedItemID { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> OnSelectItem { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> OnEditItem { get; set; }
+
+    [Parameter]
+    public EventCallback OnDeleteItem { get; set; }
+
+    [Parameter]
+    public EventCallback OnRemoveFilters { get; set; }
+
+    [Parameter]
+    public EventCallback OnRemoveLastFilter { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> OnRemoveFilter { get; set; }
+
+    [Parameter]
+    public EventCallback OnShowFilterHelp { get; set; }
+
+    [Parameter]
+    public EventCallback<(string, object?, ComparisonOperator?)> OnChangeFilter { get; set; }
+
+    public string TableCSS(int? recordID, bool? isEnabled, bool? isOK)
+    {
+        string css = "";
+        if (recordID == SelectedItemID)
+        {
+            css = "SelectedRow";
+        }
+        else if (isEnabled != true)
+        {
+            css = "DisabledRow";
+        }
+        else if (isOK != true)
+        {
+            css = "ErrorRow";
+        }
+
+        return css;
+    }
+
+    private async Task SelectItem(int? itemID)
+    {
+        if (itemID != null)
+        {
+            await OnSelectItem.InvokeAsync(itemID);
+        }
+    }
+
+    private async Task EditItem(int? itemID)
+    {
+        await OnEditItem.InvokeAsync(itemID);
+    }
+
+    private async Task DeleteItem()
+    {
+        await OnDeleteItem.InvokeAsync();
+    }
+
+    private async Task RemoveFilters()
+    {
+        await OnRemoveFilters.InvokeAsync();
+    }
+
+    private async Task RemoveLastFilter()
+    {
+        await OnRemoveLastFilter.InvokeAsync();
+    }
+
+    private async Task RemoveFilter(string? fieldName)
+    {
+        if (fieldName != null)
+        {
+            await OnRemoveFilter.InvokeAsync(fieldName);
+        }
+    }
+
+    private async Task ShowFilterHelp()
+    {
+        await OnShowFilterHelp.InvokeAsync();
+    }
+
+    private async Task ChangeFilter(string? fieldName, (object? value, ComparisonOperator? comparisonOperator)fieldValue)
+    {
+        if (fieldName != null)
+        {
+            await OnChangeFilter.InvokeAsync((fieldName, fieldValue.value, fieldValue.comparisonOperator));
+        }
+    }
+
+    public (string? value, ComparisonOperator? comparisonOperator) GetFilter(string? fieldName)
+    {
+        string? fieldValue = null;
+        ComparisonOperator? comparisonOperator = null;
+
+        if (FilterFields == null)
+        {
+            FilterFields = new Dictionary<string, (object? value, ComparisonOperator? comparisonOperator)>();
+        }
+        else if (fieldName != null)
+        {
+            if (!FilterFields.ContainsKey(fieldName))
+                FilterFields.Add(fieldName ?? "", (null, ComparisonOperator.Equals));
+            else
+            {
+                var filter = FilterFields[fieldName ?? ""];
+                if (filter.value != null)
+                {
+                    fieldValue = filter.value?.ToString();
+                    comparisonOperator = filter.comparisonOperator;
+                }
+            }
+        }
+
+        return (fieldValue, comparisonOperator);
+    }
+
+    public (bool? value, ComparisonOperator? comparisonOperator) GetFilterBool(string? fieldName)
+    {
+        bool? fieldValue = null;
+        ComparisonOperator? comparisonOperator = null;
+
+        var (value, compOperator) = GetFilter(fieldName);
+        if (bool.TryParse(value, out bool result))
+        {
+            fieldValue = result;
+        }
+        comparisonOperator = compOperator;
+
+        return (fieldValue, comparisonOperator);
+    }
+
+    public (DateTime? value, ComparisonOperator? comparisonOperator) GetFilterDate(string? fieldName)
+    {
+        DateTime? fieldValue = null;
+        ComparisonOperator? comparisonOperator = null;
+
+        var (value, compOperator) = GetFilter(fieldName);
+        if (DateTime.TryParse(value, out DateTime result))
+        {
+            fieldValue = result;
+        }
+        comparisonOperator = compOperator;
+
+        return (fieldValue, comparisonOperator);
+    }
+}

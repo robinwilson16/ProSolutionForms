@@ -1,13 +1,14 @@
 {
   "mainAssemblyName": "ProSolutionForms",
   "resources": {
-    "hash": "sha256-Q8lIC9p3yXeoekHIR1Dj+ZGZNl/06zK5I8Jsi+g3qw8=",
+    "hash": "sha256-FnC6JB+QRLRrVeQCoJVFqD0mbcd7ky7ZZhb54nEhDhI=",
     "fingerprinting": {
       "Blazored.FluentValidation.x0xsecpmtx.wasm": "Blazored.FluentValidation.wasm",
       "FluentValidation.a26tmul8eq.wasm": "FluentValidation.wasm",
       "Microsoft.AspNetCore.Authorization.qe23mgxr71.wasm": "Microsoft.AspNetCore.Authorization.wasm",
       "Microsoft.AspNetCore.Components.flveird317.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Forms.thhw8cz9wu.wasm": "Microsoft.AspNetCore.Components.Forms.wasm",
+      "Microsoft.AspNetCore.Components.QuickGrid.yg4rrwb45o.wasm": "Microsoft.AspNetCore.Components.QuickGrid.wasm",
       "Microsoft.AspNetCore.Components.Web.cx40wf47rk.wasm": "Microsoft.AspNetCore.Components.Web.wasm",
       "Microsoft.AspNetCore.Components.WebAssembly.5cygu8f0zf.wasm": "Microsoft.AspNetCore.Components.WebAssembly.wasm",
       "Microsoft.AspNetCore.Metadata.8r1tzxyzhv.wasm": "Microsoft.AspNetCore.Metadata.wasm",
@@ -28,6 +29,7 @@
       "Microsoft.Extensions.Primitives.3sx0y6ui4u.wasm": "Microsoft.Extensions.Primitives.wasm",
       "Microsoft.JSInterop.sk08br83jz.wasm": "Microsoft.JSInterop.wasm",
       "Microsoft.JSInterop.WebAssembly.fkdz83fr0b.wasm": "Microsoft.JSInterop.WebAssembly.wasm",
+      "TinyMCE.Blazor.ll1a586db2.wasm": "TinyMCE.Blazor.wasm",
       "Microsoft.CSharp.0krj4ve566.wasm": "Microsoft.CSharp.wasm",
       "Microsoft.VisualBasic.Core.bcw8auwqwc.wasm": "Microsoft.VisualBasic.Core.wasm",
       "Microsoft.VisualBasic.ezua2clavb.wasm": "Microsoft.VisualBasic.wasm",
@@ -198,23 +200,23 @@
       "netstandard.lij9csiyuf.wasm": "netstandard.wasm",
       "System.Private.CoreLib.u3k7k03qne.wasm": "System.Private.CoreLib.wasm",
       "dotnet.js": "dotnet.js",
-      "dotnet.native.8o8n7iomrf.js": "dotnet.native.js",
-      "dotnet.native.aep4lch3d1.wasm": "dotnet.native.wasm",
-      "dotnet.runtime.rubq0v1yiy.js": "dotnet.runtime.js",
+      "dotnet.native.8bti36lthm.js": "dotnet.native.js",
+      "dotnet.native.tr0cyonrwt.wasm": "dotnet.native.wasm",
+      "dotnet.runtime.tsg4gsv2hg.js": "dotnet.runtime.js",
       "icudt_CJK.tjcz0u77k5.dat": "icudt_CJK.dat",
       "icudt_EFIGS.tptq2av103.dat": "icudt_EFIGS.dat",
       "icudt_no_CJK.lfu7j35m59.dat": "icudt_no_CJK.dat",
-      "ProSolutionForms.jloxwus4ju.wasm": "ProSolutionForms.wasm",
-      "ProSolutionForms.6ezxcx6y7l.pdb": "ProSolutionForms.pdb"
+      "ProSolutionForms.cc05g0nsv8.wasm": "ProSolutionForms.wasm",
+      "ProSolutionForms.tyzzistmsd.pdb": "ProSolutionForms.pdb"
     },
     "jsModuleNative": {
-      "dotnet.native.8o8n7iomrf.js": "sha256-WIUiy49hHQ3kOAtRdCtUzm3Yg5BnOqCC+Q+kri9Fi1g="
+      "dotnet.native.8bti36lthm.js": "sha256-HFADmT26AarHu4tMjFaTPxINmQjBJGtdPN+CKjtNMFE="
     },
     "jsModuleRuntime": {
-      "dotnet.runtime.rubq0v1yiy.js": "sha256-gypqZnsxxUh4y4EJmawvOCaX4hoTaesVGwIgWXwZcNw="
+      "dotnet.runtime.tsg4gsv2hg.js": "sha256-82FoDmY+LsehdN2u8aSGEutGEKXJHcYaSX/3zptbsCw="
     },
     "wasmNative": {
-      "dotnet.native.aep4lch3d1.wasm": "sha256-bvHGVH9zAMOjdIvgvRKP4Bg793vWpedEYSWg32uUr3o="
+      "dotnet.native.tr0cyonrwt.wasm": "sha256-F3/BArijJUydqmwcdWeW3LYyYHBRSu2+pyy8GL1jTV0="
     },
     "icu": {
       "icudt_CJK.tjcz0u77k5.dat": "sha256-SZLtQnRc0JkwqHab0VUVP7T3uBPSeYzxzDnpxPpUnHk=",
@@ -231,6 +233,7 @@
       "Microsoft.AspNetCore.Authorization.qe23mgxr71.wasm": "sha256-8hTdrmR59LAJRrDu8LLRlNn641/iWIAjzG1GcCsAhR0=",
       "Microsoft.AspNetCore.Components.flveird317.wasm": "sha256-jTpt9y+Fzn6JeLtdS0PwW+fzVCyw2aJ8kFuDQAMFdcE=",
       "Microsoft.AspNetCore.Components.Forms.thhw8cz9wu.wasm": "sha256-b7dkg8tMPT2fEN10cgvga1DuG4BElomG5PE4E8Bv5B8=",
+      "Microsoft.AspNetCore.Components.QuickGrid.yg4rrwb45o.wasm": "sha256-noUQFi4aGw2cik5qKT8Af+4/PeJVQkTUYAWaM+ILXRQ=",
       "Microsoft.AspNetCore.Components.Web.cx40wf47rk.wasm": "sha256-ECvB9e5XSMH23qRbFlUaMQ7yi5lypoSEKbSDFgPrgfw=",
       "Microsoft.AspNetCore.Components.WebAssembly.5cygu8f0zf.wasm": "sha256-KwD9Lhu5DlaqdB2ceYX2LavpwSIAS5H07ZPT2jVbiu4=",
       "Microsoft.AspNetCore.Metadata.8r1tzxyzhv.wasm": "sha256-3EoL3qJCooyvJ92CEaRsAzHRf1isqMHQN+kOaKV9bKA=",
@@ -251,6 +254,7 @@
       "Microsoft.Extensions.Primitives.3sx0y6ui4u.wasm": "sha256-A0WIty9B3GNUBtsykg0eb3kD47r0/Cpfk8q1Ei8ECrc=",
       "Microsoft.JSInterop.sk08br83jz.wasm": "sha256-FNS+xvA0GFiM2CVWHljv47AO+crkl0V7XiidkkMbVSw=",
       "Microsoft.JSInterop.WebAssembly.fkdz83fr0b.wasm": "sha256-kSwbIGuYmzrEilFXnLY8mKBXXFQtVXKAF/Qa323+Fnk=",
+      "TinyMCE.Blazor.ll1a586db2.wasm": "sha256-mQsTm1or+jsATmWkhFb299cL4Tn/WigajeiYmp8+kdU=",
       "Microsoft.CSharp.0krj4ve566.wasm": "sha256-QJKG5agfskYhNg4CWMzF8EqwsNALoPtT7h5pO9k6aHk=",
       "Microsoft.VisualBasic.Core.bcw8auwqwc.wasm": "sha256-Raj1ha4M/EXL7zvyW9Evn28B9GxWHE0gaLR/NXPSrdk=",
       "Microsoft.VisualBasic.ezua2clavb.wasm": "sha256-Wn1A97sEio88/HfvTRdDM1pgRek6RfaNgVkwzSIvIAw=",
@@ -418,10 +422,16 @@
       "WindowsBase.ovqw333kan.wasm": "sha256-7LCr4nX9JSGuwzMr8Rk8TGvC6ApzQNxCDiMV/0I9JlI=",
       "mscorlib.l6md3pggqy.wasm": "sha256-jZgH0LixLeQKqaq33akQgDGhfE7vbXbHtvCId5HC0Yo=",
       "netstandard.lij9csiyuf.wasm": "sha256-DeeBl9s8G34N3IfYRQ+MoY807amodj8cvpuvUSNaWE4=",
-      "ProSolutionForms.jloxwus4ju.wasm": "sha256-Oe2qjK1Gz16gM0l8edpudlc5G8tAt8yKn/uoy0HmhWQ="
+      "ProSolutionForms.cc05g0nsv8.wasm": "sha256-BO/JjxCblJC+TNhgkSbDvxYTNOaFYx3qmIpW0fX4r04="
     },
     "pdb": {
-      "ProSolutionForms.6ezxcx6y7l.pdb": "sha256-kj6L6lwvwnqKaSprJbLB3pbIGzbmM8tdBxiSfb5BIB4="
+      "ProSolutionForms.tyzzistmsd.pdb": "sha256-1TJPClbJ25VFsldLUsqLzAWRv5aBVxCdzIzttbod0Pg="
+    },
+    "libraryInitializers": {
+      "_content/TinyMCE.Blazor/TinyMce.Blazor.lib.module.js": "sha256-XsRnQkvbM/leotRxAbM8p6giRHM1kT/1feTIEzpYil4="
+    },
+    "modulesAfterRuntimeReady": {
+      "../_content/TinyMCE.Blazor/TinyMce.Blazor.lib.module.js": "sha256-XsRnQkvbM/leotRxAbM8p6giRHM1kT/1feTIEzpYil4="
     }
   },
   "cacheBootResources": true,

@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\ProSolutionForms.csproj": {}
+    "C:\\Users\\robin.wilson\\source\\repos\\ProSolutionForms\\ProSolutionForms\\ProSolutionForms.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\ProSolutionForms.csproj": {
+    "C:\\Users\\robin.wilson\\source\\repos\\ProSolutionForms\\ProSolutionForms\\ProSolutionForms.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\ProSolutionForms.csproj",
+        "projectUniqueName": "C:\\Users\\robin.wilson\\source\\repos\\ProSolutionForms\\ProSolutionForms\\ProSolutionForms.csproj",
         "projectName": "ProSolutionForms",
-        "projectPath": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\ProSolutionForms.csproj",
-        "packagesPath": "C:\\Users\\Robin.Wilson.SHCG\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Robin.Wilson.SHCG\\source\\repos\\ProSolutionForms\\ProSolutionForms\\obj\\",
+        "projectPath": "C:\\Users\\robin.wilson\\source\\repos\\ProSolutionForms\\ProSolutionForms\\ProSolutionForms.csproj",
+        "packagesPath": "C:\\Users\\robin.wilson\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\robin.wilson\\source\\repos\\ProSolutionForms\\ProSolutionForms\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Robin.Wilson.SHCG\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\robin.wilson\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -55,6 +55,10 @@
               "target": "Package",
               "version": "[2.2.0, )"
             },
+            "Microsoft.AspNetCore.Components.QuickGrid": {
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
             "Microsoft.AspNetCore.Components.WebAssembly": {
               "target": "Package",
               "version": "[9.0.1, )"
@@ -71,14 +75,22 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.1, )",
+              "version": "[9.0.2, )",
               "autoReferenced": true
             },
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.1, )",
+              "version": "[9.0.2, )",
               "autoReferenced": true
+            },
+            "TinyMCE": {
+              "target": "Package",
+              "version": "[7.6.1, )"
+            },
+            "TinyMCE.Blazor": {
+              "target": "Package",
+              "version": "[2.0.0, )"
             }
           },
           "imports": [
@@ -92,12 +104,18 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
+              "version": "[9.0.2, 9.0.2]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.103/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {

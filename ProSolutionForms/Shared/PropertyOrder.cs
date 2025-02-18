@@ -1,0 +1,37 @@
+using ProSolutionForms.Models;
+using System.Collections.Generic;
+
+namespace ProSolutionForms.Shared
+{
+    public static class PropertyOrder
+    {
+        public static readonly Dictionary<string, string[]> Orders = new Dictionary<string, string[]>
+        {
+            {
+                nameof(StudentDetailModel), new[]
+                {
+                    "StudentRef",
+                    "Surname",
+                    "Forename",
+                    "CollegeCode",
+                    "DirectorateCode",
+                    "CAMCode",
+                    "DeptCode",
+                    "DeptName",
+                    "CourseCode",
+                    "CourseTitle",
+                    "ApplicationDate",
+                    "MedicalFormCompleted",
+                    "MedicalFormLatestSubmission",
+                    "MedicalFormNumberOfSubmissions",
+                    "CriminalConvictionFormCompleted",
+                    "CriminalConvictionFormLatestSubmission",
+                    "CriminalConvictionFormNumberOfSubmissions",
+                    "FundingEligibilityFormCompleted",
+                    "FundingEligibilityFormLatestSubmission",
+                    "FundingEligibilityFormNumberOfSubmissions"
+                }
+            },
+        };
+    }
+}
