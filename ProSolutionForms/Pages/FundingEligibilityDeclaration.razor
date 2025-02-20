@@ -1,6 +1,7 @@
 ﻿@page "/FundingEligibilityDeclaration"
 @page "/FundingEligibilityDeclaration/{StudentGUID}"
 @page "/FundingEligibilityDeclaration/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
+@page "/FundingEligibilityDeclaration/View/{StudentGUID}/{FundingEligibilityDeclarationID:int}"
 
 @using ProSolutionForms.Components
 @using ProSolutionForms.Models
@@ -94,6 +95,25 @@
                         <div>
                             <p>
                                 @loadDataErrorMsg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (FundingEligibilityDeclarationID != null && fundingEligibilityDeclaration == null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                Unfortunately this form cannot be loaded as the Funding Eligibility Declaration Form ID is invalid or not for this student.
                             </p>
                         </div>
                     </div>
@@ -572,6 +592,8 @@
     public int? AcademicYearIDPart1 { get; set; }
     [Parameter]
     public int? AcademicYearIDPart2 { get; set; }
+    [Parameter]
+    public int? FundingEligibilityDeclarationID { get; set; }
 
     public string? AcademicYearID { get; set; }
 
@@ -650,23 +672,32 @@
 
             if (isError != true)
             {
-                string fundingEligibilityEndPoint = $"{configuration["APIEndpoint"]}/FundingEligibilityDeclaration/{student?.AcademicYearID}/{student?.StudentGUID}";
+                string fundingEligibilityEndPoint;
 
                 try
                 {
-                    existingFundingEligibilityDeclaration = await Http.GetFromJsonAsync<FundingEligibilityDeclarationModel>(fundingEligibilityEndPoint);
+                    if (FundingEligibilityDeclarationID != null)
+                    {
+                        fundingEligibilityEndPoint = $"{configuration["APIEndpoint"]}/FundingEligibilityDeclaration/{FundingEligibilityDeclarationID}";
+                        fundingEligibilityDeclaration = await Http.GetFromJsonAsync<FundingEligibilityDeclarationModel>(fundingEligibilityEndPoint);
+                    }
+                    else
+                    {
+                        fundingEligibilityEndPoint = $"{configuration["APIEndpoint"]}/FundingEligibilityDeclaration/{student?.AcademicYearID}/{student?.StudentGUID}";
+                        existingFundingEligibilityDeclaration = await Http.GetFromJsonAsync<FundingEligibilityDeclarationModel>(fundingEligibilityEndPoint);
+
+                        //Create objects to hold form entries
+                        CreateNewObjects();
+
+                        //Populate Drop-Downs
+                        await LoadFeeExemptionReasons();
+                    }
                 }
                 catch (HttpRequestException ex)
                 {
                     //Not Found
                 }
             }
-
-            //Create objects to hold form entries
-            CreateNewObjects();
-
-            //Populate Drop-Downs
-            await LoadFeeExemptionReasons();
         }
     }
 

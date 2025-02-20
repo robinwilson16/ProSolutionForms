@@ -282,9 +282,9 @@
                     <div class="row">
                         <div class="col-md">
                             <div class="d-grid gap-2 d-md-block">
-                                <a class="btn btn-secondary mb-1" href="/MedicalLearningSupportAndTripConsent/Edit/@selectedRecordCopy?.StudentDetailID" target="_blank" role="button"><i class="fa-solid fa-notes-medical"></i> Medical, Learning Support And Trip Consent Form</a>
-                                <a class="btn btn-warning mb-1" href="/CriminalConviction/Edit/@selectedRecordCopy?.StudentDetailID" target="_blank" role="button"><i class="fa-solid fa-building-shield"></i> Criminal Conviction Form</a>
-                                <a class="btn btn-success mb-1" href="/FundingEligibilityDeclaration/Edit/@selectedRecordCopy?.StudentDetailID" target="_blank" role="button"><i class="fa-solid fa-hand-holding-dollar"></i> Funding Eligibility Declaration Form</a>
+                                <a class="btn btn-secondary mb-1 @(selectedRecordCopy?.MedicalFormLatestSubmissionID == null ? "disabled" : "")" href="/MedicalLearningSupportAndTripConsent/View/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.MedicalFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-notes-medical"></i> Medical, Learning Support And Trip Consent Form</a>
+                                <a class="btn btn-warning mb-1 @(selectedRecordCopy?.CriminalConvictionFormLatestSubmissionID == null ? "disabled" : "")" href="/CriminalConviction/View/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.CriminalConvictionFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-building-shield"></i> Criminal Conviction Form</a>
+                                <a class="btn btn-success mb-1 @(selectedRecordCopy?.FundingEligibilityFormLatestSubmissionID == null ? "disabled" : "")" href="/FundingEligibilityDeclaration/View/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.FundingEligibilityFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-hand-holding-dollar"></i> Funding Eligibility Declaration Form</a>
                                 
                             </div>
                         </div>
@@ -389,7 +389,7 @@
 
 @if (HideContent != true)
 {
-    <h3><i class="fa-solid fa-users"></i> Students</h3>
+    <h3><i class="fa-solid fa-users"></i> Potential Active Applicants for @AcademicYearID</h3>
 
     @if (loadDataErrorMsg != null) 
     {
@@ -427,7 +427,7 @@
     else {
         <div class="container-fluid">
             @{
-                IList<string> ExcludeMainFields = new List<string> { "StudentDetailID", "StudentID", "CollegeName", "DirectorateName", "CAMName" };
+                IList<string> ExcludeMainFields = new List<string> { "StudentDetailID", "StudentID", "StudentGUID", "CollegeName", "DirectorateName", "CAMName", "MedicalFormLatestSubmissionID", "CriminalConvictionFormLatestSubmissionID", "FundingEligibilityFormLatestSubmissionID", "MedicalConsentFormReceivedCode", "TripPhotographicCosentObtainedCode" };
                 string? DisabledItemFieldName = null;
                 string? ErrorItemFieldName = null;
             }
@@ -502,6 +502,9 @@
     //Related datasets
     protected override async Task OnInitializedAsync()
     {
+        if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
+            AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
+        
         //CheckAuthentication();
 
         SetEditorContextMain();

@@ -1,6 +1,7 @@
 ﻿@page "/CriminalConviction"
 @page "/CriminalConviction/{StudentGUID}"
 @page "/CriminalConviction/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
+@page "/CriminalConviction/View/{StudentGUID}/{CriminalConvictionID:int}"
 
 @using ProSolutionForms.Components
 @using ProSolutionForms.Models
@@ -93,6 +94,25 @@
                         <div>
                             <p>
                                 @loadDataErrorMsg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (CriminalConvictionID != null && criminalConviction == null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                Unfortunately this form cannot be loaded as the Criminal Conviction Form ID is invalid or not for this student.
                             </p>
                         </div>
                     </div>
@@ -417,6 +437,8 @@
     public int? AcademicYearIDPart1 { get; set; }
     [Parameter]
     public int? AcademicYearIDPart2 { get; set; }
+    [Parameter]
+    public int? CriminalConvictionID { get; set; }
 
     public string? AcademicYearID { get; set; }
 
@@ -484,9 +506,6 @@
             try
             {
                 student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
-
-                //Create objects to hold form entries
-                CreateNewObjects();
             }
             catch (HttpRequestException ex)
             {
@@ -496,12 +515,23 @@
 
             if (isError != true)
             {
-                string criminalConvictionEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/{student?.AcademicYearID}/{student?.StudentGUID}";
-                Console.WriteLine($"Load data from {criminalConvictionEndPoint}");
+                string criminalConvictionEndPoint;
 
                 try
                 {
-                    existingCriminalConviction = await Http.GetFromJsonAsync<CriminalConvictionModel>(criminalConvictionEndPoint);
+                    if (CriminalConvictionID != null)
+                    {
+                        criminalConvictionEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/{CriminalConvictionID}";
+                        criminalConviction = await Http.GetFromJsonAsync<CriminalConvictionModel>(criminalConvictionEndPoint);
+                    }
+                    else
+                    {
+                        criminalConvictionEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/{student?.AcademicYearID}/{student?.StudentGUID}";
+                        existingCriminalConviction = await Http.GetFromJsonAsync<CriminalConvictionModel>(criminalConvictionEndPoint);
+
+                        //Create objects to hold form entries
+                        CreateNewObjects();
+                    }
                 }
                 catch (HttpRequestException ex)
                 {

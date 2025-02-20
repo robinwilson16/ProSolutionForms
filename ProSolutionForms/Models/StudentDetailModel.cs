@@ -12,6 +12,7 @@ namespace ProSolutionForms.Models
         public string? StudentRef { get; set; }
         public string? Surname { get; set; }
         public string? Forename { get; set; }
+        public Guid? StudentGUID { get; set; }
         public string? CollegeCode { get; set; }
         public string? CollegeName { get; set; }
         public string? DirectorateCode { get; set; }
@@ -28,18 +29,20 @@ namespace ProSolutionForms.Models
 
         [Display(Name = "Med Comp")]
         public bool? MedicalFormCompleted { get; set; }
+        public int? MedicalFormLatestSubmissionID { get; set; }
 
         [Display(Name = "Med Latest")]
-        public DateTime? MedicalFormLatestSubmission { get; set; }
+        public DateTime? MedicalFormLatestSubmissionDate { get; set; }
 
         [Display(Name = "Med Num Sub")]
         public int? MedicalFormNumberOfSubmissions { get; set; }
 
         [Display(Name = "Crim Comp")]
         public bool? CriminalConvictionFormCompleted { get; set; }
+        public int? CriminalConvictionFormLatestSubmissionID { get; set; }
 
         [Display(Name = "Crim Latest")]
-        public DateTime? CriminalConvictionFormLatestSubmission { get; set; }
+        public DateTime? CriminalConvictionFormLatestSubmissionDate { get; set; }
 
         [Display(Name = "Crim Num Sub")]
         public int? CriminalConvictionFormNumberOfSubmissions { get; set; }
@@ -47,10 +50,21 @@ namespace ProSolutionForms.Models
         [Display(Name = "Fund Comp")]
         public bool? FundingEligibilityFormCompleted { get; set; }
 
+        public int? FundingEligibilityFormLatestSubmissionID { get; set; }
+
         [Display(Name = "Fund Latest")]
-        public DateTime? FundingEligibilityFormLatestSubmission { get; set; }
+        public DateTime? FundingEligibilityFormLatestSubmissionDate { get; set; }
 
         [Display(Name = "Fund Num Sub")]
         public int? FundingEligibilityFormNumberOfSubmissions { get; set; }
+
+        public string? MedicalConsentFormReceivedCode { get; set; }
+
+        [Display(Name = "Med Approved")]
+        public string? MedicalConsentFormReceivedName { get; set; }
+        public string? TripPhotographicCosentObtainedCode { get; set; }
+
+        [Display(Name = "Trip Approved")]
+        public string? TripPhotographicCosentObtainedName { get; set; }
     }
 }

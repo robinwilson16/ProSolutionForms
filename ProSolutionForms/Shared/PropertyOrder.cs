@@ -13,6 +13,7 @@ namespace ProSolutionForms.Shared
                     "StudentRef",
                     "Surname",
                     "Forename",
+                    "StudentGUID",
                     "CollegeCode",
                     "DirectorateCode",
                     "CAMCode",
@@ -22,14 +23,21 @@ namespace ProSolutionForms.Shared
                     "CourseTitle",
                     "ApplicationDate",
                     "MedicalFormCompleted",
-                    "MedicalFormLatestSubmission",
+                    "MedicalFormLatestSubmissionID",
+                    "MedicalFormLatestSubmissionDate",
                     "MedicalFormNumberOfSubmissions",
                     "CriminalConvictionFormCompleted",
-                    "CriminalConvictionFormLatestSubmission",
+                    "CriminalConvictionFormLatestSubmissionID",
+                    "CriminalConvictionFormLatestSubmissionDate",
                     "CriminalConvictionFormNumberOfSubmissions",
                     "FundingEligibilityFormCompleted",
-                    "FundingEligibilityFormLatestSubmission",
-                    "FundingEligibilityFormNumberOfSubmissions"
+                    "FundingEligibilityFormLatestSubmissionID",
+                    "FundingEligibilityFormLatestSubmissionDate",
+                    "FundingEligibilityFormNumberOfSubmissions",
+                    "MedicalConsentFormReceivedCode",
+                    "MedicalConsentFormReceivedName",
+                    "TripPhotographicCosentObtainedCode",
+                    "TripPhotographicCosentObtainedName"
                 }
             },
         };

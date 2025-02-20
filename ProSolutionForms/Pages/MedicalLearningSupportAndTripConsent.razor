@@ -1,6 +1,7 @@
 ﻿@page "/MedicalLearningSupportAndTripConsent"
 @page "/MedicalLearningSupportAndTripConsent/{StudentGUID}"
 @page "/MedicalLearningSupportAndTripConsent/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
+@page "/MedicalLearningSupportAndTripConsent/View/{StudentGUID}/{MedicalLearningSupportAndTripConsentID:int}"
 
 @using ProSolutionForms.Components
 @using ProSolutionForms.Models
@@ -84,6 +85,25 @@
                         <div>
                             <p>
                                 @loadDataErrorMsg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (MedicalLearningSupportAndTripConsentID != null && medicalLearningSupportAndTripConsent == null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                Unfortunately this form cannot be loaded as the Medical, Learning Support And Trip Consent Form ID is invalid or not for this student.
                             </p>
                         </div>
                     </div>
@@ -1313,6 +1333,8 @@
     public int? AcademicYearIDPart1 { get; set; }
     [Parameter]
     public int? AcademicYearIDPart2 { get; set; }
+    [Parameter]
+    public int? MedicalLearningSupportAndTripConsentID { get; set; }
 
     public string? AcademicYearID { get; set; }
 
@@ -1394,26 +1416,35 @@
 
             if (isError != true) 
             {
-                string medicalEndPoint = $"{configuration["APIEndpoint"]}/MedicalLearningSupportAndTripConsent/{student?.AcademicYearID}/{student?.StudentGUID}";
+                string medicalEndPoint;
 
                 try
                 {
-                    existingMedicalLearningSupportAndTripConsent = await Http.GetFromJsonAsync<MedicalLearningSupportAndTripConsentModel>(medicalEndPoint);
+                    if (MedicalLearningSupportAndTripConsentID != null)
+                    {
+                        medicalEndPoint = $"{configuration["APIEndpoint"]}/MedicalLearningSupportAndTripConsent/ID/{student?.StudentGUID}/{MedicalLearningSupportAndTripConsentID}";
+                        medicalLearningSupportAndTripConsent = await Http.GetFromJsonAsync<MedicalLearningSupportAndTripConsentModel>(medicalEndPoint);
+                    }
+                    else
+                    {
+                        medicalEndPoint = $"{configuration["APIEndpoint"]}/MedicalLearningSupportAndTripConsent/{student?.AcademicYearID}/{student?.StudentGUID}";
+                        existingMedicalLearningSupportAndTripConsent = await Http.GetFromJsonAsync<MedicalLearningSupportAndTripConsentModel>(medicalEndPoint);
+
+                        //Create objects to hold form entries
+                        CreateNewObjects();
+
+                        //Populate Drop-Downs
+                        await LoadDisabilityCategories();
+                        await LoadMedicalConditionTypes();
+                        await LoadTitles();
+                        await LoadRelationships();
+                    }
                 }
                 catch (HttpRequestException ex)
                 {
                     //Not Found
                 }
             }
-
-            //Create objects to hold form entries
-            CreateNewObjects();
-
-            //Populate Drop-Downs
-            await LoadDisabilityCategories();
-            await LoadMedicalConditionTypes();
-            await LoadTitles();
-            await LoadRelationships();
         }
     }
 

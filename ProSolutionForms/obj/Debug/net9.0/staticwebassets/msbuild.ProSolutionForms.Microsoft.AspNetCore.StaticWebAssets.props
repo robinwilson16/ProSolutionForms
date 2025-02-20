@@ -84,8 +84,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>krvk04bfx8</Fingerprint>
-      <Integrity>MCJaB2pqnLmJkqD/HdiGf2o1Qvnvm7Id6BnPTu/OIdc=</Integrity>
+      <Fingerprint>k7xhvf3oxw</Fingerprint>
+      <Integrity>oPLUUCktOjqBg96/1AjGFtk3Re8rFYMR1Y+bH9DigTA=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\Grid.css'))</OriginalItemSpec>

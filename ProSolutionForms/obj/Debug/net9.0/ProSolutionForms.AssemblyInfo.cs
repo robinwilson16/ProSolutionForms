@@ -17,7 +17,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Forms for data capture using a secure GUID link to link each entry to a specific " +
     "student")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.7")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6119689b7b35afdd4520d816f6c4484e27ad50d5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a7ed2b8b1f2233d773ce10e539a62c0199ef88ee")]
 [assembly: System.Reflection.AssemblyProductAttribute("ProSolutionForms")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ProSolutionForms")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.7")]
