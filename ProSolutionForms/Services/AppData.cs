@@ -4,8 +4,8 @@ namespace ProSolutionForms.Services
 {
     public class AppData
     {
-        private UserModel? _currentUser;
-        public UserModel? CurrentUser
+        private SystemUserModel? _currentUser;
+        public SystemUserModel? CurrentUser
         {
             get
             {
@@ -20,7 +20,7 @@ namespace ProSolutionForms.Services
 
         public AppData()
         {
-            CurrentUser = new UserModel();
+            CurrentUser = new SystemUserModel();
         }
 
         public event Action? OnChange;

@@ -1,0 +1,341 @@
+﻿@page "/Admin/Login/{TokenExpired:bool}"
+@page "/Admin/Login/{TokenExpired:bool}/{ReturnToPage}"
+
+@page "/Admin/Login"
+@page "/Admin/Login/{ReturnToPage}"
+
+@using Microsoft.AspNetCore.WebUtilities
+@using ProSolutionForms.Models
+@using ProSolutionForms.Services
+@using ProSolutionForms.Shared
+
+@inject HttpClient Http
+@inject IConfiguration configuration
+@inject NavigationManager NavManager
+@inject ILogger<Login> Logger
+@inject AppData appData
+@inject IJSRuntime JSRuntime
+
+<h3>Login</h3>
+
+@SystemUser?.AccessToken
+
+<hr />
+
+@SystemUser?.CodeToken
+
+<hr />
+
+@SystemUser?.BearerToken
+
+<hr />
+@LoginType
+@SystemUser?.Email
+@IsPermitted
+@SystemUser?.Groups?.Count()
+
+<a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(SystemUser?.Photo ?? new byte[0]), "image/jpeg")" type="image/jpeg" download="Profile Photo for @(SystemUser?.Name).jpeg">
+    <img src="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(SystemUser?.PhotoThumbnail ?? new byte[0]), "image/jpeg")" class="img-fluid img-thumbnail" alt="Download Profile Photo for @SystemUser?.Name">
+</a>
+
+@code {
+    [Parameter]
+    public string? ReturnToPage { get; set; }
+    [Parameter]
+    public bool? TokenExpired { get; set; }
+
+    [Parameter]
+    public string? AccessToken { get; set; }
+    public string? IDToken { get; set; }
+    public string? CodeToken { get; set; } //Needed to generate a bearer token
+    public string? BearerToken { get; set; } //Needed to access the API
+    public string? LoginType { get; set; }
+
+    public SystemUserModel? SystemUser { get; set; }
+    public SystemUserModel? alreadyLoggedInUser { get; set; }
+    public SystemUserTokenModel? SystemUserToken { get; set; }
+
+    public bool? IsLoggedIn { get; set; }
+    public bool? IsPermitted { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoggedIn = false;
+
+        //Clear the logged in user if the token has expired so new ones will be generated
+        if (TokenExpired == true)
+        {
+            await ClearLoggedInUser();
+        }
+
+        alreadyLoggedInUser = await LocalStorageFunctions.GetItem<SystemUserModel>(JSRuntime, Logger, "CurrentUser");
+
+        //Get User Details
+        if (appData.CurrentUser?.Email != null)
+        {
+            //Check if user is already logged in
+
+            SystemUser = appData.CurrentUser;
+
+            IsLoggedIn = true;
+            LoginType = "CurrentUser";
+            IsPermitted = IsUserPermitted();
+        }
+        else if (alreadyLoggedInUser?.Email != null)
+        {
+            //Check if user logged in previously
+
+            SystemUser = alreadyLoggedInUser;
+
+            IsLoggedIn = true;
+            LoginType = "PreviousUser";
+            IsPermitted = IsUserPermitted();
+        }
+        else
+        {
+            //Redirect user to Microsoft Online Login if not already logged in
+            LoginType = "NewUser";
+            await LogUserIn();
+        }
+
+        if (IsPermitted != true)
+        {
+            //User is not authorised to access the system so redirect to unauthorised page
+            NavManager.NavigateTo("Admin/Unauthorised");
+        }
+
+        //Get Code for Bearer Token
+        if (SystemUser != null)
+        {
+            if (SystemUser.CodeToken == null)
+            {
+                await GetCodeToken();
+            }
+        }
+
+        if (SystemUser != null)
+        {
+            if (SystemUser.BearerToken == null)
+            {
+                await ObtainBearerToken();
+            }
+        }
+
+        if (SystemUser?.BearerToken != null)
+        {
+            //After a bearer token has been obtained return back to where we were
+            GoToLoggedInArea();
+        }
+    }
+
+    public async Task LogUserIn()
+    {
+        //Check if user has been redirected from Microsoft Online Login
+        RetrieveAccessTokenFromURL();
+
+        //If no access token then login has not been attempted or possibly failed (may need to avoid a redirect loop here)
+        if (AccessToken == null)
+        {
+            ObtainAccessToken();
+        }
+        else
+        {
+            //If an access token has been provided then the user is logged in
+            IsLoggedIn = true;
+
+            await ObtainUserDetails();
+
+            IsPermitted = IsUserPermitted();
+        }
+    }
+
+    public async Task GetCodeToken()
+    {
+        //Check if user has been redirected from Microsoft Online Login
+        await RetrieveCodeTokenFromURL();
+
+        //If no code token then login has not been atempted or possibly failed (may need to avoid a redirect loop here)
+        if (CodeToken == null)
+        {
+            ObtainCodeToken();
+        }
+        else
+        {
+            await UpdateUser();
+        }
+    }
+
+    public void ObtainAccessToken()
+    {
+        var graphAPI = configuration.GetSection("GraphAPI");
+        var login_endpoint = graphAPI["login_endpoint"];
+        var domain = graphAPI["domain"];
+        var client_id = graphAPI["client_id"];
+        var redirect_uri = graphAPI["redirect_uri"];
+
+        NavManager.NavigateTo($"{login_endpoint}/{domain}/oauth2/v2.0/authorize?client_id={client_id}&response_type=token+id_token&redirect_uri={redirect_uri}&scope=user.read+openid+profile+email&response_mode=fragment&state=12345&nonce=678910");
+    }
+
+    public void RetrieveAccessTokenFromURL()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        var uriQuery = QueryHelpers.ParseQuery(uri.Query); //The return url is not a query string so this does not work due to the hash
+        string? bookmark = uri.Fragment; //The part after the hash
+        var bookmarkQuery = bookmark.TrimStart('#').Split("&");
+
+        var bookmarkDictionary = new Dictionary<string, string>();
+        foreach (var item in bookmarkQuery)
+        {
+            var keyValue = item.Split('=');
+            if (keyValue.Length == 2)
+            {
+                bookmarkDictionary[keyValue[0]] = keyValue[1];
+            }
+        }
+
+        //Attempt to obtain access token from bookmark (how it is sent)
+        if (bookmarkDictionary.TryGetValue("access_token", out var accessToken))
+        {
+            AccessToken = accessToken;
+        }
+
+        if (bookmarkDictionary.TryGetValue("id_token", out var idToken))
+        {
+            IDToken = idToken;
+        }
+    }
+
+    public void ObtainCodeToken()
+    {
+        var graphAPI = configuration.GetSection("GraphAPI");
+        var login_endpoint = graphAPI["login_endpoint"];
+        var domain = graphAPI["domain"];
+        var client_id = graphAPI["client_id"];
+        var redirect_uri = graphAPI["redirect_uri"];
+
+        NavManager.NavigateTo($"{login_endpoint}/{domain}/oauth2/v2.0/authorize?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope=user.read+openid+profile+email&response_mode=fragment&state=12345&nonce=678910");
+    }
+
+    public async Task RetrieveCodeTokenFromURL()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        var uriQuery = QueryHelpers.ParseQuery(uri.Query); //The return url is not a query string so this does not work due to the hash
+        string? bookmark = uri.Fragment; //The part after the hash
+        var bookmarkQuery = bookmark.TrimStart('#').Split("&");
+
+        var bookmarkDictionary = new Dictionary<string, string>();
+        foreach (var item in bookmarkQuery)
+        {
+            var keyValue = item.Split('=');
+            if (keyValue.Length == 2)
+            {
+                bookmarkDictionary[keyValue[0]] = keyValue[1];
+            }
+        }
+
+        //Attempt to obtain code token from bookmark (how it is sent)
+        if (bookmarkDictionary.TryGetValue("code", out var codeToken))
+        {
+            CodeToken = codeToken;
+        }
+
+        if (CodeToken != null && SystemUser != null)
+        {
+            SystemUser.CodeToken = CodeToken;
+
+            //Save the user details
+            await UpdateUser();
+        }
+        
+    }
+
+    public async Task ObtainUserDetails()
+    {
+        string userEndPoint = $"{configuration["APIEndpoint"]}/SystemUser/{AccessToken}";
+
+        if (AccessToken != null)
+        {
+            SystemUser = await Http.GetFromJsonAsync<SystemUserModel>(userEndPoint);
+        }
+
+        //Save the user details
+        await UpdateUser();
+    }
+
+    public async Task ObtainBearerToken()
+    {
+        string tokenEndPoint = $"{configuration["APIEndpoint"]}/SystemUserToken/{SystemUser?.CodeToken}";
+
+        if (SystemUser != null && SystemUser?.CodeToken != null)
+        {
+            SystemUserToken = await Http.GetFromJsonAsync<SystemUserTokenModel>(tokenEndPoint);
+
+            if (SystemUserToken != null)
+            {
+                SystemUser.BearerToken = SystemUserToken.BearerToken;
+                //Save the user details
+                await UpdateUser();
+            }
+        }
+    }
+
+    public bool IsUserPermitted()
+    {
+        if (IsUserInGroup("Admissions") == true)
+        {
+            return true;
+        }
+        else if (IsUserInGroup("MIS") == true)
+        {
+            return true;
+        }
+        else if (SystemUser?.Email?.ToLower() == "robin.wilson@shcg.ac.uk" || SystemUser?.Email?.ToLower() == "mark.smith@shcg.ac.uk" || SystemUser?.Email?.ToLower() == "linda.fletcher@shcg.ac.uk")
+        {
+            //Fix whilst waiting for IT to approve Entra Permissions to Read Group Memberships
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool IsUserInGroup(string groupName)
+    {
+        return SystemUser?.Groups?.Any(g => g.GroupName == groupName) ?? false;
+    }
+
+    public async Task UpdateUser()
+    {
+        if (SystemUser != null)
+        {
+            appData.CurrentUser = SystemUser;
+            await LocalStorageFunctions.SetItem(JSRuntime, Logger, "CurrentUser", SystemUser ?? new SystemUserModel());
+        }
+    }
+
+    private void GoToLoggedInArea()
+    {
+        if (ReturnToPage != null)
+        {
+            var RedirectPath = Path.Combine(NavManager.BaseUri, "Admin", ReturnToPage);
+            NavManager.NavigateTo(RedirectPath);
+        }
+        else
+        {
+            var AdminPath = Path.Combine(NavManager.BaseUri, "Admin");
+            NavManager.NavigateTo(AdminPath);
+        }
+    }
+
+    private async Task ClearLoggedInUser()
+    {
+        //Clear object
+        appData.CurrentUser = null;
+
+        if (appData.CurrentUser == null)
+        {
+            await LocalStorageFunctions.RemoveItem(JSRuntime, Logger, "CurrentUser");
+        }
+    }
+}

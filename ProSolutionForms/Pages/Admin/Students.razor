@@ -466,6 +466,9 @@
     [Parameter]
     public bool? HideContent { get; set; }
 
+    public SystemUserModel? SystemUser { get; set; }
+    public SystemUserModel? AlreadyLoggedInUser { get; set; }
+
     public EditContext? EditContextMain { get; set; }
     public FluentValidationValidator? _fluentValidationValidator;
 
@@ -505,15 +508,17 @@
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
             AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
         
-        //CheckAuthentication();
-
         SetEditorContextMain();
+
+        await GetUser();
+        CheckAuthentication();
 
         bool? isError = false;
         studentDetailEndPoint = $"{configuration["APIEndpoint"]}/StudentDetail";
 
         try
         {
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", SystemUser?.BearerToken);
             mainRecords = await Http.GetFromJsonAsync<List<StudentDetailModel>>(studentDetailEndPoint);
         }
         catch (HttpRequestException ex)
@@ -551,9 +556,9 @@
 
     private void CheckAuthentication()
     {
-        if (appData?.CurrentUser?.Email == null)
+        if (SystemUser?.Email == null)
         {
-            NavManager.NavigateTo("/Login");
+            NavManager.NavigateTo($"Admin/Login/Students");
         }
     }
 
@@ -1260,7 +1265,7 @@
             loadDataErrorMsg = $"You are not authorised to view this page";
 
             //Redirect to login screen
-            NavManager.NavigateTo($"Login/Vehicles");
+            NavManager.NavigateTo($"Admin/Login/Students");
         }
         else if (ex.Message.Contains("404 (Not Found)"))
         {
@@ -1269,10 +1274,25 @@
         else if (ex.Message.Contains("400 (Bad Request)"))
         {
             loadDataErrorMsg = $"The {objectName} \"{objectID}\" resulted in an invalid request";
+
+            //Redirect to login screen
+            NavManager.NavigateTo($"Admin/Login/True/Students");
         }
         else
         {
             loadDataErrorMsg = $"Error: {ex.Message}";
         }
+    }
+
+    public async Task GetUser()
+    {
+        AlreadyLoggedInUser = await LocalStorageFunctions.GetItem<SystemUserModel>(JSRuntime, Logger, "CurrentUser");
+
+        if (appData.CurrentUser?.Email != null)
+            SystemUser = appData.CurrentUser;
+        else if (AlreadyLoggedInUser?.Email != null)
+            SystemUser = AlreadyLoggedInUser;
+        else
+            SystemUser = null;
     }
 }

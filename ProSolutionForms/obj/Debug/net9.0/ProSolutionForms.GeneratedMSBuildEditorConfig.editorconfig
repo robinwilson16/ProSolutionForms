@@ -13,69 +13,81 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = browser
 build_property.RootNamespace = ProSolutionForms
 build_property.RootNamespace = ProSolutionForms
-build_property.ProjectDir = C:\Users\robin.wilson\source\repos\ProSolutionForms\ProSolutionForms\
+build_property.ProjectDir = C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = false
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\robin.wilson\source\repos\ProSolutionForms\ProSolutionForms
+build_property.MSBuildProjectDirectory = C:\Users\Robin.Wilson.SHCG\source\repos\ProSolutionForms\ProSolutionForms
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/App.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/App.razor]
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Components/Grid.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Components/Grid.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xHcmlkLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Components/Modal.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Components/Modal.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xNb2RhbC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Components/Toast.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Components/Toast.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xUb2FzdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Pages/Admin/Students.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/Admin/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cTG9naW4ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/Admin/Logout.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cTG9nb3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/Admin/Students.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cU3R1ZGVudHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Pages/Counter.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/Admin/Unauthorised.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cVW5hdXRob3Jpc2VkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/Counter.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ291bnRlci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Pages/CriminalConviction.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/CriminalConviction.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ3JpbWluYWxDb252aWN0aW9uLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Pages/FundingEligibilityDeclaration.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/FundingEligibilityDeclaration.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRnVuZGluZ0VsaWdpYmlsaXR5RGVjbGFyYXRpb24ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Pages/Home.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/Home.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Pages/MedicalLearningSupportAndTripConsent.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/MedicalLearningSupportAndTripConsent.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTWVkaWNhbExlYXJuaW5nU3VwcG9ydEFuZFRyaXBDb25zZW50LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Pages/Weather.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Pages/Weather.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcV2VhdGhlci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/_Imports.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Layout/MainLayout.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Layout/MainLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-p520psltql
 
-[C:/Users/robin.wilson/source/repos/ProSolutionForms/ProSolutionForms/Layout/NavMenu.razor]
+[C:/Users/Robin.Wilson.SHCG/source/repos/ProSolutionForms/ProSolutionForms/Layout/NavMenu.razor]
 build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE5hdk1lbnUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-4cszjamost

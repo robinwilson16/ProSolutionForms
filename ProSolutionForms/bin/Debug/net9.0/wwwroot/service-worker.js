@@ -1,4 +1,4 @@
-/* Manifest version: FWu34Zlf */
+/* Manifest version: lK+BghxT */
 // In development, always fetch from the network and do not enable offline support.
 // This is because caching would make development more difficult (changes would not
 // be reflected on the first load after each change).
@@ -16,4 +16,4 @@ self.addEventListener('message', (event) => {
     }
 });
 
-self.versionNumber = '1.0.7.0';
+self.versionNumber = '1.1.0.0';
