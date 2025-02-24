@@ -1265,7 +1265,7 @@
             loadDataErrorMsg = $"You are not authorised to view this page";
 
             //Redirect to login screen
-            NavManager.NavigateTo($"Admin/Login/Students");
+            NavManager.NavigateTo($"Admin/Login/True/Students");
         }
         else if (ex.Message.Contains("404 (Not Found)"))
         {

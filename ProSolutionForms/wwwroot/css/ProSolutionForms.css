@@ -58,6 +58,22 @@
     background-color: #CCCCCC;
 }
 
+.BackgroundEffect {
+    background-image: url("../images/Background01.webp");
+    background-repeat: no-repeat;
+    background-color: #383838;
+    background-size: 100% auto;
+}
+
+.ProfilePhoto {
+    border-radius: 50%;
+    max-width: 50px;
+}
+
+.ProfilePhotoLarge {
+    border-radius: 50%;
+}
+
 .Text {
     background-color: #FFFFFF;
     padding: 5px;

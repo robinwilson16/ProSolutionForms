@@ -1,13 +1,17 @@
 ﻿@inherits LayoutComponentBase
 @using ProSolutionForms.Components
+@using ProSolutionForms.Models
+@using ProSolutionForms.Services
 @using ProSolutionForms.Shared
 @using System.Reflection;
 
 @inject NavigationManager NavigationManager
+@inject ILogger<StudentDetailModel> Logger
+@inject AppData appData
 @inject IJSRuntime JSRuntime
 
 <CascadingValue Value="this">
-    <div class="page">
+    <div class="page @Background">
         @if (ShowNavMenu != false) {
             <div class="sidebar" style="@IconMenuCssClass">
                 <NavMenu ShowIconMenu="ToggleIconMenu" />
@@ -16,8 +20,29 @@
 
         <main>
             <div class="top-row px-4">
-                @* <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a> *@
-                <img class="img-fluid CollegeLogoHeader" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+                <div class="row h-100 w-100">
+                    @if (SystemUser?.Email != null)
+                    {
+                        <div class="col-md align-content-center">
+                            @* <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a> *@
+                            <img class="img-fluid CollegeLogoHeader" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+                        </div>
+                        <div class="col-md align-content-center text-end">
+                            <img src="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(SystemUser?.PhotoThumbnail ?? new byte[0]), "image/jpeg")" class="img-fluid ProfilePhoto" alt="Download Profile Photo for @SystemUser?.Name" /> 
+                            <span class="ms-3">@SystemUser?.Name</span>
+                            <a class="btn btn-secondary" href="Admin/Logout" role="button"><i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i> Log Out</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-md align-content-center text-end">
+                            @* <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a> *@
+                            <img class="img-fluid CollegeLogoHeader" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+                        </div>
+                    }
+                    
+                </div>
+                
             </div>
 
             <article class="content px-4">
@@ -44,6 +69,10 @@
 </CascadingValue>
 
 @code {
+    private string? PageAndParams;
+    private IList<string>? PageParts;
+    private string? PageRef;
+    private string? Background;
     public bool? ShowNavMenu { get; set; }
 
     private bool _iconMenuActive { get; set; }
@@ -54,9 +83,16 @@
     public string? toastNewVersionAvailableSubtitle = null;
     public MarkupString? toastNewVersionAvailableText = null;
 
+    public SystemUserModel? SystemUser { get; set; }
+    public SystemUserModel? AlreadyLoggedInUser { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
+        await GetUser();
+
         ShowNav();
+
+        ApplyBackground();
 
         ActiveVersion = await ServiceWorkerFunctions.GetCurrentVersionNumber(JSRuntime);
 
@@ -73,7 +109,40 @@
     {
         ShowNav();
 
+        ApplyBackground();
+
         StateHasChanged();
+    }
+
+    public void ApplyBackground()
+    {
+        PageAndParams = NavigationManager.Uri.Replace(NavigationManager.BaseUri, "");
+        PageParts = PageAndParams.Split("/");
+        if (PageParts.Count > 0)
+        {
+            if (PageParts[0] == "Admin" && PageParts.Count >= 2)
+            {
+                PageRef = PageParts[1];
+            }
+            else
+            {
+                PageRef = PageParts[0];
+            }
+            
+        }
+        else
+        {
+            PageRef = PageAndParams;
+        }
+
+        if (PageRef == "Login" || PageRef == "Logout" || PageRef == "")
+        {
+            Background = "BackgroundEffect";
+        }
+        else
+        {
+            Background = "";
+        }
     }
 
     public void Dispose()
@@ -116,5 +185,17 @@
     protected void ToggleIconMenu(bool iconMenuActive)
     {
         _iconMenuActive = iconMenuActive;
+    }
+
+    public async Task GetUser()
+    {
+        AlreadyLoggedInUser = await LocalStorageFunctions.GetItem<SystemUserModel>(JSRuntime, Logger, "CurrentUser");
+
+        if (appData.CurrentUser?.Email != null)
+            SystemUser = appData.CurrentUser;
+        else if (AlreadyLoggedInUser?.Email != null)
+            SystemUser = AlreadyLoggedInUser;
+        else
+            SystemUser = null;
     }
 }

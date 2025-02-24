@@ -16,27 +16,68 @@
 @inject AppData appData
 @inject IJSRuntime JSRuntime
 
-<h3>Login</h3>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 m-auto">
+            <div class="card GreyBackground">
+                <div class="card-body pb-0">
+                    <div class="row">
+                        <div class="col-md">
+                            <h5 class="card-title text-center mb-5"><i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i> Log Into ProSolution Forms</h5>
 
-@SystemUser?.AccessToken
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md text-center">
+                                        @if (SystemUser?.Photo != null)
+                                        {
+                                            <a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(SystemUser?.Photo ?? new byte[0]), "image/jpeg")" type="image/jpeg" download="Profile Photo for @(SystemUser?.Name).jpeg">
+                                                <img src="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(SystemUser?.PhotoThumbnail ?? new byte[0]), "image/jpeg")" class="img-fluid ProfilePhotoLarge" alt="Download Profile Photo for @SystemUser?.Name" />
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md text-center">
+                                        <h5>@SystemUser?.Name</h5>
+                                    </div>
+                                </div>
+                            </div>
 
-<hr />
+                            <div class="container mt-3">
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="alert alert-primary text-center" role="alert">
+                                            <h1>
+                                                <i class="fa-solid fa-spinner fa-spin"></i> 
+                                            </h1>
+                                            <h4>
+                                                @Message
+                                            </h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-@SystemUser?.CodeToken
+                            <div class="container mt-3 mb-3">
+                                <div class="row">
+                                    <div class="col-md text-center">
+                                        <div class="progress" role="progressbar" aria-label="Login Progress" aria-valuenow="@Progress" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar" style="width: @Progress%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-<hr />
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-@SystemUser?.BearerToken
 
-<hr />
-@LoginType
-@SystemUser?.Email
-@IsPermitted
-@SystemUser?.Groups?.Count()
-
-<a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(SystemUser?.Photo ?? new byte[0]), "image/jpeg")" type="image/jpeg" download="Profile Photo for @(SystemUser?.Name).jpeg">
-    <img src="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(SystemUser?.PhotoThumbnail ?? new byte[0]), "image/jpeg")" class="img-fluid img-thumbnail" alt="Download Profile Photo for @SystemUser?.Name">
-</a>
 
 @code {
     [Parameter]
@@ -50,6 +91,9 @@
     public string? CodeToken { get; set; } //Needed to generate a bearer token
     public string? BearerToken { get; set; } //Needed to access the API
     public string? LoginType { get; set; }
+    public string? Action { get; set; }
+    public string? Message { get; set; }
+    public int? Progress { get; set; }
 
     public SystemUserModel? SystemUser { get; set; }
     public SystemUserModel? alreadyLoggedInUser { get; set; }
@@ -58,13 +102,22 @@
     public bool? IsLoggedIn { get; set; }
     public bool? IsPermitted { get; set; }
 
+    //For Testing
+    public bool? DisableRedirection { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         IsLoggedIn = false;
+        DisableRedirection = false;
+        Progress = 0;
 
         //Clear the logged in user if the token has expired so new ones will be generated
         if (TokenExpired == true)
         {
+            Action = "GetToken";
+            Message = "Getting New Access Token";
+            Progress = 50;
+
             await ClearLoggedInUser();
         }
 
@@ -79,6 +132,11 @@
 
             IsLoggedIn = true;
             LoginType = "CurrentUser";
+
+            Action = "RedirectUser";
+            Message = "Already Authenticated - Redirecting...";
+            Progress = 50;
+
             IsPermitted = IsUserPermitted();
         }
         else if (alreadyLoggedInUser?.Email != null)
@@ -89,6 +147,11 @@
 
             IsLoggedIn = true;
             LoginType = "PreviousUser";
+
+            Action = "RedirectUser";
+            Message = "Already Authenticated - Redirecting...";
+            Progress = 50;
+
             IsPermitted = IsUserPermitted();
         }
         else
@@ -101,7 +164,8 @@
         if (IsPermitted != true)
         {
             //User is not authorised to access the system so redirect to unauthorised page
-            NavManager.NavigateTo("Admin/Unauthorised");
+            if (DisableRedirection != true)
+                NavManager.NavigateTo("Admin/Unauthorised");
         }
 
         //Get Code for Bearer Token
@@ -117,12 +181,20 @@
         {
             if (SystemUser.BearerToken == null)
             {
+                Action = "GetBearerToken";
+                Message = "Getting New Token To Securely Access System...";
+                Progress = 80;
+                
                 await ObtainBearerToken();
             }
         }
 
         if (SystemUser?.BearerToken != null)
         {
+            Action = "RedirectUser";
+            Message = "Authetication Process Complete - Redirecting...";
+            Progress = 90;
+            
             //After a bearer token has been obtained return back to where we were
             GoToLoggedInArea();
         }
@@ -136,12 +208,20 @@
         //If no access token then login has not been attempted or possibly failed (may need to avoid a redirect loop here)
         if (AccessToken == null)
         {
+            Action = "GetUser";
+            Message = "Authenticate User...";
+            Progress = 10;
+            
             ObtainAccessToken();
         }
         else
         {
             //If an access token has been provided then the user is logged in
             IsLoggedIn = true;
+
+            Action = "CheckUser";
+            Message = "Check User Details...";
+            Progress = 20;
 
             await ObtainUserDetails();
 
@@ -157,10 +237,18 @@
         //If no code token then login has not been atempted or possibly failed (may need to avoid a redirect loop here)
         if (CodeToken == null)
         {
+            Action = "GetCodeToken";
+            Message = "Obtain Access Token...";
+            Progress = 40;
+            
             ObtainCodeToken();
         }
         else
         {
+            Action = "CheckCodeToken";
+            Message = "Check Access Token...";
+            Progress = 60;
+            
             await UpdateUser();
         }
     }
@@ -173,7 +261,8 @@
         var client_id = graphAPI["client_id"];
         var redirect_uri = graphAPI["redirect_uri"];
 
-        NavManager.NavigateTo($"{login_endpoint}/{domain}/oauth2/v2.0/authorize?client_id={client_id}&response_type=token+id_token&redirect_uri={redirect_uri}&scope=user.read+openid+profile+email&response_mode=fragment&state=12345&nonce=678910");
+        if (DisableRedirection != true)
+            NavManager.NavigateTo($"{login_endpoint}/{domain}/oauth2/v2.0/authorize?client_id={client_id}&response_type=token+id_token&redirect_uri={redirect_uri}&scope=user.read+openid+profile+email&response_mode=fragment&state=12345&nonce=678910");
     }
 
     public void RetrieveAccessTokenFromURL()
@@ -213,7 +302,8 @@
         var client_id = graphAPI["client_id"];
         var redirect_uri = graphAPI["redirect_uri"];
 
-        NavManager.NavigateTo($"{login_endpoint}/{domain}/oauth2/v2.0/authorize?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope=user.read+openid+profile+email&response_mode=fragment&state=12345&nonce=678910");
+        if (DisableRedirection != true)
+            NavManager.NavigateTo($"{login_endpoint}/{domain}/oauth2/v2.0/authorize?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope=user.read+openid+profile+email&response_mode=fragment&state=12345&nonce=678910");
     }
 
     public async Task RetrieveCodeTokenFromURL()
@@ -319,12 +409,16 @@
         if (ReturnToPage != null)
         {
             var RedirectPath = Path.Combine(NavManager.BaseUri, "Admin", ReturnToPage);
-            NavManager.NavigateTo(RedirectPath);
+            
+            if (DisableRedirection != true)
+                NavManager.NavigateTo(RedirectPath);
         }
         else
         {
             var AdminPath = Path.Combine(NavManager.BaseUri, "Admin");
-            NavManager.NavigateTo(AdminPath);
+
+            if (DisableRedirection != true)
+                NavManager.NavigateTo(AdminPath);
         }
     }
 
