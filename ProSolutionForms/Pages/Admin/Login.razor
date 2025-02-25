@@ -43,6 +43,67 @@
                                 </div>
                             </div>
 
+                            <div class="container">
+                                <div class="row">
+
+                                    @if (SystemUser?.Groups?.Count > 0)
+                                    {
+                                        <div class="col-md">
+                                            <div class="accordion" id="accordionGroups">
+
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroups" aria-expanded="false" aria-controls="collapseGroups">
+                                                            Your Groups
+                                                        </button>
+                                                    </h2>
+                                                    <div id="collapseGroups" class="accordion-collapse collapse hide" data-bs-parent="#accordionGroups">
+                                                        <div class="accordion-body">
+                                                            <ul class="list-group">
+
+                                                                @if (SystemUser?.Groups != null)
+                                                                {
+                                                                    foreach (var group in SystemUser?.Groups!.OrderBy(g => g.GroupName ?? "")!)
+                                                                    {
+                                                                        if (RequiredPermissionGroupForFullAccess != null && group.GroupName == RequiredPermissionGroupForFullAccess)
+                                                                        {
+                                                                            <li class="list-group-item bg-success">@group.GroupName</li>
+                                                                        }
+                                                                        else if (MISPermissionGroupForFullAccess != null && group.GroupName == MISPermissionGroupForFullAccess)
+                                                                        {
+                                                                            <li class="list-group-item bg-info">@group.GroupName</li>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <li class="list-group-item">@group.GroupName</li>
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdvancedDetails" aria-expanded="false" aria-controls="collapseAdvancedDetails">
+                                                            Advanced Details
+                                                        </button>
+                                                    </h2>
+                                                    <div id="collapseAdvancedDetails" class="accordion-collapse collapse" data-bs-parent="#accordionGroups">
+                                                        <div class="accordion-body">
+                                                            <pre class="pre-scrollable InfoDetails p-3">@AdvancedDetails</pre>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+
                             <div class="container mt-3">
                                 <div class="row">
                                     <div class="col-md">
@@ -70,7 +131,7 @@
 
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
@@ -94,6 +155,7 @@
     public string? Action { get; set; }
     public string? Message { get; set; }
     public int? Progress { get; set; }
+    public MarkupString? AdvancedDetails { get; set; }
 
     public SystemUserModel? SystemUser { get; set; }
     public SystemUserModel? alreadyLoggedInUser { get; set; }
@@ -101,14 +163,21 @@
 
     public bool? IsLoggedIn { get; set; }
     public bool? IsPermitted { get; set; }
+    public string? RequiredPermissionGroupForFullAccess { get; set; }
+    public string? MISPermissionGroupForFullAccess { get; set; }
 
     //For Testing
-    public bool? DisableRedirection { get; set; }
+    public bool? DisableSelfRedirection { get; set; }
+    public bool? DisableRedirectionToOtherPage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        RequiredPermissionGroupForFullAccess = configuration["RequiredPermissionGroupForFullAccess"];
+        MISPermissionGroupForFullAccess = configuration["MISPermissionGroupForFullAccess"];
+
         IsLoggedIn = false;
-        DisableRedirection = false;
+        DisableSelfRedirection = false;
+        DisableRedirectionToOtherPage = false;
         Progress = 0;
 
         //Clear the logged in user if the token has expired so new ones will be generated
@@ -129,6 +198,7 @@
             //Check if user is already logged in
 
             SystemUser = appData.CurrentUser;
+            UpdateAdvancedDetails();
 
             IsLoggedIn = true;
             LoginType = "CurrentUser";
@@ -144,6 +214,7 @@
             //Check if user logged in previously
 
             SystemUser = alreadyLoggedInUser;
+            UpdateAdvancedDetails();
 
             IsLoggedIn = true;
             LoginType = "PreviousUser";
@@ -164,12 +235,12 @@
         if (IsPermitted != true)
         {
             //User is not authorised to access the system so redirect to unauthorised page
-            if (DisableRedirection != true)
+            if (DisableSelfRedirection != true)
                 NavManager.NavigateTo("Admin/Unauthorised");
         }
 
         //Get Code for Bearer Token
-        if (SystemUser != null)
+        if (SystemUser != null && IsPermitted == true)
         {
             if (SystemUser.CodeToken == null)
             {
@@ -177,24 +248,24 @@
             }
         }
 
-        if (SystemUser != null)
+        if (SystemUser != null && IsPermitted == true)
         {
             if (SystemUser.BearerToken == null)
             {
                 Action = "GetBearerToken";
                 Message = "Getting New Token To Securely Access System...";
                 Progress = 80;
-                
+
                 await ObtainBearerToken();
             }
         }
 
-        if (SystemUser?.BearerToken != null)
+        if (SystemUser?.BearerToken != null && IsPermitted == true)
         {
             Action = "RedirectUser";
             Message = "Authetication Process Complete - Redirecting...";
             Progress = 90;
-            
+
             //After a bearer token has been obtained return back to where we were
             GoToLoggedInArea();
         }
@@ -211,7 +282,7 @@
             Action = "GetUser";
             Message = "Authenticate User...";
             Progress = 10;
-            
+
             ObtainAccessToken();
         }
         else
@@ -227,6 +298,8 @@
 
             IsPermitted = IsUserPermitted();
         }
+
+        UpdateAdvancedDetails();
     }
 
     public async Task GetCodeToken()
@@ -240,7 +313,7 @@
             Action = "GetCodeToken";
             Message = "Obtain Access Token...";
             Progress = 40;
-            
+
             ObtainCodeToken();
         }
         else
@@ -248,9 +321,11 @@
             Action = "CheckCodeToken";
             Message = "Check Access Token...";
             Progress = 60;
-            
+
             await UpdateUser();
         }
+
+        UpdateAdvancedDetails();
     }
 
     public void ObtainAccessToken()
@@ -261,7 +336,7 @@
         var client_id = graphAPI["client_id"];
         var redirect_uri = graphAPI["redirect_uri"];
 
-        if (DisableRedirection != true)
+        if (DisableSelfRedirection != true)
             NavManager.NavigateTo($"{login_endpoint}/{domain}/oauth2/v2.0/authorize?client_id={client_id}&response_type=token+id_token&redirect_uri={redirect_uri}&scope=user.read+openid+profile+email&response_mode=fragment&state=12345&nonce=678910");
     }
 
@@ -292,6 +367,8 @@
         {
             IDToken = idToken;
         }
+
+        UpdateAdvancedDetails();
     }
 
     public void ObtainCodeToken()
@@ -302,7 +379,7 @@
         var client_id = graphAPI["client_id"];
         var redirect_uri = graphAPI["redirect_uri"];
 
-        if (DisableRedirection != true)
+        if (DisableSelfRedirection != true)
             NavManager.NavigateTo($"{login_endpoint}/{domain}/oauth2/v2.0/authorize?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope=user.read+openid+profile+email&response_mode=fragment&state=12345&nonce=678910");
     }
 
@@ -336,7 +413,7 @@
             //Save the user details
             await UpdateUser();
         }
-        
+
     }
 
     public async Task ObtainUserDetails()
@@ -371,11 +448,13 @@
 
     public bool IsUserPermitted()
     {
-        if (IsUserInGroup("Admissions") == true)
+        
+        
+        if (RequiredPermissionGroupForFullAccess != null && IsUserInGroup(RequiredPermissionGroupForFullAccess) == true)
         {
             return true;
         }
-        else if (IsUserInGroup("MIS") == true)
+        else if (MISPermissionGroupForFullAccess != null && IsUserInGroup(MISPermissionGroupForFullAccess) == true)
         {
             return true;
         }
@@ -409,15 +488,15 @@
         if (ReturnToPage != null)
         {
             var RedirectPath = Path.Combine(NavManager.BaseUri, "Admin", ReturnToPage);
-            
-            if (DisableRedirection != true)
+
+            if (DisableRedirectionToOtherPage != true)
                 NavManager.NavigateTo(RedirectPath);
         }
         else
         {
             var AdminPath = Path.Combine(NavManager.BaseUri, "Admin");
 
-            if (DisableRedirection != true)
+            if (DisableRedirectionToOtherPage != true)
                 NavManager.NavigateTo(AdminPath);
         }
     }
@@ -431,5 +510,19 @@
         {
             await LocalStorageFunctions.RemoveItem(JSRuntime, Logger, "CurrentUser");
         }
+    }
+
+    private void UpdateAdvancedDetails()
+    {
+        AdvancedDetails = (MarkupString)"<p><strong>Log of Progress Logging In:</strong></p>";
+
+        if (SystemUser?.AccessToken != null)
+            AdvancedDetails += $"<p>Access Token:<br />{SystemUser?.AccessToken}</p>";
+
+        if (SystemUser?.CodeToken != null)
+            AdvancedDetails += $"<p>Code Token:<br />{SystemUser?.CodeToken}</p>";
+
+        if (SystemUser?.BearerToken != null)
+            AdvancedDetails += $"<p>Bearer Token:<br />{SystemUser?.BearerToken}</p>";
     }
 }

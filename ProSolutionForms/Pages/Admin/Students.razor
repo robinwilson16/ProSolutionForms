@@ -274,6 +274,16 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md">
+                                Course Code (from Medical Form)
+                            </div>
+                            <div class="col-md Text">
+                                @selectedRecordCopy?.MedicalFormCourseCode
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -285,7 +295,7 @@
                                 <a class="btn btn-secondary mb-1 @(selectedRecordCopy?.MedicalFormLatestSubmissionID == null ? "disabled" : "")" href="/MedicalLearningSupportAndTripConsent/View/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.MedicalFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-notes-medical"></i> Medical, Learning Support And Trip Consent Form</a>
                                 <a class="btn btn-warning mb-1 @(selectedRecordCopy?.CriminalConvictionFormLatestSubmissionID == null ? "disabled" : "")" href="/CriminalConviction/View/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.CriminalConvictionFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-building-shield"></i> Criminal Conviction Form</a>
                                 <a class="btn btn-success mb-1 @(selectedRecordCopy?.FundingEligibilityFormLatestSubmissionID == null ? "disabled" : "")" href="/FundingEligibilityDeclaration/View/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.FundingEligibilityFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-hand-holding-dollar"></i> Funding Eligibility Declaration Form</a>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -389,7 +399,24 @@
 
 @if (HideContent != true)
 {
-    <h3><i class="fa-solid fa-users"></i> Potential Active Applicants for @AcademicYearID</h3>
+    <div class="row">
+        <div class="col-md-11">
+            <h3><i class="fa-solid fa-users"></i> Potential Active Applicants for @AcademicYearID</h3>
+        </div>
+        <div class="col-md-1 text-right">
+            <InputSelect class="form-select" @bind-Value="@AcademicYearID" @bind-Value:after="ChangeAcademicYearID">
+
+                @if (AcademicYears != null)
+                {
+                    foreach (var academicYear in AcademicYears)
+                    {
+                        <option value="@academicYear.Code">@academicYear.Description</option>
+                    }
+                }
+
+            </InputSelect>
+        </div>
+    </div>
 
     @if (loadDataErrorMsg != null) 
     {
@@ -507,14 +534,31 @@
     {
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
             AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
-        
+        else
+            AcademicYearID = configuration["DefaultAcademicYearID"];
+
         SetEditorContextMain();
 
         await GetUser();
         CheckAuthentication();
 
         bool? isError = false;
-        studentDetailEndPoint = $"{configuration["APIEndpoint"]}/StudentDetail";
+
+        isError = await LoadMainData();
+
+        if (isError != true)
+        {
+            //Load other objects
+            await LoadAcademicYears();
+        }
+
+        PopulateDropDownValuesMain();
+    }
+
+    public async Task<bool?> LoadMainData()
+    {
+        bool? isError = false;
+        studentDetailEndPoint = $"{configuration["APIEndpoint"]}/StudentDetail/{AcademicYearID}";
 
         try
         {
@@ -527,13 +571,7 @@
             HandleJsonException(ex, "StudentDetail", StudentDetailID.ToString() ?? "");
         }
 
-        if (isError != true)
-        {
-            //Load other objects
-
-        }
-
-        PopulateDropDownValuesMain();
+        return isError;
     }
 
     public void SetMainRecords(List<StudentDetailModel> updatedStudentDetails)
@@ -593,36 +631,36 @@
     {
         //if (await SaveMainRecord(false) == true)
         //{
-            int? currentRecordID = selectedRecord?.StudentDetailID;
-            StudentDetailModel? nextRecord = new StudentDetailModel();
+        int? currentRecordID = selectedRecord?.StudentDetailID;
+        StudentDetailModel? nextRecord = new StudentDetailModel();
 
-            if (numRecords > 0)
-            {
-                nextRecord =
+        if (numRecords > 0)
+        {
+            nextRecord =
+            ItemsMain?
+            .SkipWhile(obj => obj.StudentDetailID != currentRecordID)
+            .Skip(numRecords)
+            .FirstOrDefault();
+        }
+        else if (numRecords < 0)
+        {
+            int numRecordsBack = Math.Abs(numRecords);
+            nextRecord =
                 ItemsMain?
+                .Reverse()
                 .SkipWhile(obj => obj.StudentDetailID != currentRecordID)
-                .Skip(numRecords)
+                .Skip(numRecordsBack)
                 .FirstOrDefault();
-            }
-            else if (numRecords < 0)
-            {
-                int numRecordsBack = Math.Abs(numRecords);
-                nextRecord =
-                    ItemsMain?
-                    .Reverse()
-                    .SkipWhile(obj => obj.StudentDetailID != currentRecordID)
-                    .Skip(numRecordsBack)
-                    .FirstOrDefault();
-            }
+        }
 
-            if (nextRecord != null)
+        if (nextRecord != null)
+        {
+            if (nextRecord?.StudentDetailID != null)
             {
-                if (nextRecord?.StudentDetailID != null)
-                {
-                    selectedRecord = nextRecord;
-                    selectedRecordCopy = nextRecord;
-                }
+                selectedRecord = nextRecord;
+                selectedRecordCopy = nextRecord;
             }
+        }
         //}
     }
 
@@ -645,7 +683,7 @@
     {
         if (selectedRecordCopy != null)
         {
-            
+
         }
     }
 
@@ -1069,8 +1107,21 @@
     }
 
     //Additional Functions
+    public static List<DropDownStringModel>? AcademicYears { get; private set; }
+    public async Task LoadAcademicYears()
+    {
+        string endPoint = $"{configuration["APIEndpoint"]}/AcademicYear";
+        try
+        {
+            AcademicYears = await Http.GetFromJsonAsync<List<DropDownStringModel>>(endPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            AcademicYears = new List<DropDownStringModel>();
+            HandleJsonException(ex, "AcademicYear", "0");
+        }
+    }
 
-    
     //Common Code
     private void CancelMainRecordConfirm()
     {
@@ -1256,6 +1307,15 @@
     {
 
         modalFormat!.OpenOnTop1();
+    }
+
+    public async Task<int> ChangeAcademicYearID()
+    {
+        mainRecords = null;
+
+        await LoadMainData();
+
+        return 1;
     }
 
     private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)

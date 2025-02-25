@@ -42,6 +42,10 @@
     border-left-color: #1B5E20 !important;
 }
 
+.TableArea {
+    background-color: #84b9e5;
+}
+
 .WhiteBackground {
     background-color: #FFFFFF;
 }
@@ -50,8 +54,59 @@
     background-color: #F5F5F5;
 }
 
+.GreyHeader {
+    background-color: #CCCCCC;
+}
+
+.BackgroundEffect {
+    background-image: url("../images/Background01.webp");
+    background-repeat: no-repeat;
+    background-color: #383838;
+    background-size: 100% auto;
+}
+
+.ProfilePhoto {
+    border-radius: 50%;
+    max-width: 50px;
+}
+
+.ProfilePhotoLarge {
+    border-radius: 50%;
+}
+
+.Text {
+    background-color: #FFFFFF;
+    padding: 5px;
+}
+
+.TextYes {
+    background-color: #198754;
+    color: #FFFFFF;
+}
+
+.TextNo {
+    background-color: #dc3545;
+    color: #FFFFFF;
+}
+
+.Textarea {
+    background-color: #FFFFFF;
+    border: 1px solid #0d6efd;
+    padding: 5px;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+.pre-scrollable {
+    max-height: 340px;
+    overflow-y: scroll;
+}
+
 .ErrorDetails {
-    max-height: 240px;
+    background-color: #CCCCCC;
+}
+
+.InfoDetails {
     background-color: #CCCCCC;
 }
 

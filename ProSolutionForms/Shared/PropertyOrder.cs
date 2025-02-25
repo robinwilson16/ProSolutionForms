@@ -26,6 +26,7 @@ namespace ProSolutionForms.Shared
                     "MedicalFormLatestSubmissionID",
                     "MedicalFormLatestSubmissionDate",
                     "MedicalFormNumberOfSubmissions",
+                    "MedicalFormCourseCode",
                     "CriminalConvictionFormCompleted",
                     "CriminalConvictionFormLatestSubmissionID",
                     "CriminalConvictionFormLatestSubmissionDate",

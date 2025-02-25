@@ -448,13 +448,6 @@
     [CascadingParameter]
     public MainLayout? Layout { get; set; }
 
-    protected override void OnInitialized()
-    {
-        if (Layout != null) {
-            Layout.HideNav();
-        }
-    }
-
     public int? criminalConvictionOffenceID { get; set; }
     public string? action { get; set; }
 
@@ -488,6 +481,14 @@
 
     protected override async Task OnInitializedAsync()
     {
+        //Needs to be set at the top to avoid errors with EditForm having a NULL model
+        criminalConviction = new CriminalConvictionModel();
+        
+        if (Layout != null)
+        {
+            Layout.HideNav();
+        }
+        
         bool isError = false;
 
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)

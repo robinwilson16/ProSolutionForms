@@ -1,7 +1,177 @@
 ﻿@page "/Admin/Unauthorised"
 
-<h3>Unauthorised</h3>
+@using ProSolutionForms.Models
+@using ProSolutionForms.Services
+@using ProSolutionForms.Shared
+
+@inject AppData appData
+@inject IConfiguration configuration
+@inject ILogger<Unauthorised> Logger
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 m-auto">
+            <div class="card GreyBackground">
+                <div class="card-body pb-0">
+                    <div class="row">
+                        <div class="col-md">
+                            <h5 class="card-title text-center mb-5"><i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i> Log Into ProSolution Forms</h5>
+
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md text-center">
+                                        @if (SystemUser?.Photo != null)
+                                        {
+                                            <a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(SystemUser?.Photo ?? new byte[0]), "image/jpeg")" type="image/jpeg" download="Profile Photo for @(SystemUser?.Name).jpeg">
+                                                <img src="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(SystemUser?.PhotoThumbnail ?? new byte[0]), "image/jpeg")" class="img-fluid ProfilePhotoLarge" alt="Download Profile Photo for @SystemUser?.Name" />
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md text-center">
+                                        <h5>@SystemUser?.Name</h5>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="container">
+                                <div class="row">
+
+                                    @if (SystemUser?.Groups?.Count > 0)
+                                    {
+                                        <div class="col-md">
+                                            <div class="accordion" id="accordionGroups">
+
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroups" aria-expanded="false" aria-controls="collapseGroups">
+                                                            Your Groups
+                                                        </button>
+                                                    </h2>
+                                                    <div id="collapseGroups" class="accordion-collapse collapse hide" data-bs-parent="#accordionGroups">
+                                                        <div class="accordion-body">
+                                                            <ul class="list-group">
+
+                                                                @if (SystemUser?.Groups != null)
+                                                                {
+                                                                    foreach (var group in SystemUser?.Groups!.OrderBy(g => g.GroupName ?? "")!)
+                                                                    {
+                                                                        if (RequiredPermissionGroupForFullAccess != null && group.GroupName == RequiredPermissionGroupForFullAccess)
+                                                                        {
+                                                                            <li class="list-group-item bg-success">@group.GroupName</li>
+                                                                        }
+                                                                        else if (MISPermissionGroupForFullAccess != null && group.GroupName == MISPermissionGroupForFullAccess)
+                                                                        {
+                                                                            <li class="list-group-item bg-info">@group.GroupName</li>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <li class="list-group-item">@group.GroupName</li>
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+
+                            <div class="container mt-3">
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="alert alert-danger hstack gap-3" role="alert">
+                                            <div>
+                                                <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                                            </div>
+                                            <div>
+                                                <p>
+                                                    Sorry, @(SystemUser?.Forename ?? "Unknown User"), you have not been granted access to this system.
+                                                </p>
+                                                <p>
+                                                    If you believe you should have access then please contact the MIS Department.
+                                                </p>
+
+                                                @if (RequiredPermissionGroupForFullAccess != null || MISPermissionGroupForFullAccess != null)
+                                                {
+                                                    if (RequiredPermissionGroupForFullAccess != null && MISPermissionGroupForFullAccess != null)
+                                                    {
+                                                        <p>
+                                                            You need to be a member of the group <strong>@RequiredPermissionGroupForFullAccess</strong> or <strong>@MISPermissionGroupForFullAccess</strong> to access this system.
+                                                        </p>
+                                                    }
+                                                    else if (RequiredPermissionGroupForFullAccess != null)
+                                                    {
+                                                        <p>
+                                                            You need to be a member of the group <strong>@RequiredPermissionGroupForFullAccess</strong> to access this system.
+                                                        </p>
+                                                    }
+                                                    else if (MISPermissionGroupForFullAccess != null)
+                                                    {
+                                                        <p>
+                                                            You need to be a member of the group <strong>@MISPermissionGroupForFullAccess</strong> to access this system.
+                                                        </p>
+                                                    }
+                                                    else
+                                                    {
+                                                        <p>
+                                                            You need to be a member of the correct group to access this system.
+                                                        </p>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <p>
+                                                        The required permission group for granting access has not been configured.
+                                                    </p>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
+    public string? RequiredPermissionGroupForFullAccess { get; set; }
+    public string? MISPermissionGroupForFullAccess { get; set; }
 
+    public SystemUserModel? SystemUser { get; set; }
+    public SystemUserModel? AlreadyLoggedInUser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        RequiredPermissionGroupForFullAccess = configuration["RequiredPermissionGroupForFullAccess"];
+        MISPermissionGroupForFullAccess = configuration["MISPermissionGroupForFullAccess"];
+
+        await GetUser();
+    }
+
+    public async Task GetUser()
+    {
+        AlreadyLoggedInUser = await LocalStorageFunctions.GetItem<SystemUserModel>(JSRuntime, Logger, "CurrentUser");
+
+        if (appData.CurrentUser?.Email != null)
+            SystemUser = appData.CurrentUser;
+        else if (AlreadyLoggedInUser?.Email != null)
+            SystemUser = AlreadyLoggedInUser;
+        else
+            SystemUser = null;
+    }
 }

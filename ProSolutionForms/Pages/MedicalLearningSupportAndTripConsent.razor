@@ -1,6 +1,8 @@
 ﻿@page "/MedicalLearningSupportAndTripConsent"
 @page "/MedicalLearningSupportAndTripConsent/{StudentGUID}"
 @page "/MedicalLearningSupportAndTripConsent/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
+@page "/MedicalLearningSupportAndTripConsent/{StudentGUID}/{CourseCode}"
+@page "/MedicalLearningSupportAndTripConsent/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{CourseCode}"
 @page "/MedicalLearningSupportAndTripConsent/View/{StudentGUID}/{MedicalLearningSupportAndTripConsentID:int}"
 
 @using ProSolutionForms.Components
@@ -126,7 +128,8 @@
                             @if (existingMedicalLearningSupportAndTripConsent?.StudentDetailID != null)
                             {
                                 <p>
-                                    You have already declared your Medical Information.
+                                    You have already declared your Medical Information so do not need to complete this again for additional and future applications during the current academic year.<br />
+                                    However if anything has changed since you completed your form please contact the Admissions Team to let us know.
                                 </p>
                             }
                             else {
@@ -134,8 +137,16 @@
                                     Thank you for declaring your Medical Information.
                                 </p>
                             }
+
+                        </div>
+                    </div>
+                    <div class="alert alert-warning hstack gap-3" role="alert">
+                        <div class="ms-auto me-3">
+                            <h1><i class="fa-solid fa-layer-group"></i></h1>
+                        </div>
+                        <div class="me-auto">
                             <p>
-                                We will be in touch with you soon to discuss the next steps.
+                                If you have applied for multiple courses within South Hampshire College Group, please contact us to confirm which course you wish to proceed with.
                             </p>
                         </div>
                     </div>
@@ -1335,21 +1346,17 @@
     public int? AcademicYearIDPart2 { get; set; }
     [Parameter]
     public int? MedicalLearningSupportAndTripConsentID { get; set; }
+    [Parameter]
+    public string? CourseCode { get; set; }
 
     public string? AcademicYearID { get; set; }
+    
 
     bool formSubmitted = false;
 
     //Hide navbar in layout component
     [CascadingParameter]
     public MainLayout? Layout { get; set; }
-
-    protected override void OnInitialized()
-    {
-        if (Layout != null) {
-            Layout.HideNav();
-        }
-    }
 
     public int? medicalConditionID { get; set; }
     public int? learningDifficultyDisabilityID { get; set; }
@@ -1387,6 +1394,13 @@
 
     protected override async Task OnInitializedAsync()
     {
+        //Needs to be set at the top to avoid errors with EditForm having a NULL model
+        medicalLearningSupportAndTripConsent = new MedicalLearningSupportAndTripConsentModel();
+
+        if (Layout != null) {
+            Layout.HideNav();
+        }
+
         bool isError = false;
 
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
@@ -1473,6 +1487,9 @@
         newMedical.AcademicYearID = student?.AcademicYearID;
         newMedical.StudentRef = student?.StudentRef;
         newMedical.StudentGUID = student?.StudentGUID;
+
+        if (CourseCode != null)
+            newMedical.CourseCode = CourseCode;
 
         return newMedical;
     }

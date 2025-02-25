@@ -90,6 +90,12 @@
     {
         await GetUser();
 
+        //Hide navigation for students
+        if (SystemUser?.Email != null)
+            ShowNav();
+        else
+            HideNav();
+
         ShowNav();
 
         ApplyBackground();
@@ -135,7 +141,7 @@
             PageRef = PageAndParams;
         }
 
-        if (PageRef == "Login" || PageRef == "Logout" || PageRef == "")
+        if (PageRef == "Login" || PageRef == "Logout" || PageRef == "Unauthorised" || PageRef == "")
         {
             Background = "BackgroundEffect";
         }

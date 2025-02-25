@@ -97,8 +97,16 @@
     max-height: 300px;
 }
 
+.pre-scrollable {
+    max-height: 340px;
+    overflow-y: scroll;
+}
+
 .ErrorDetails {
-    max-height: 240px;
+    background-color: #CCCCCC;
+}
+
+.InfoDetails {
     background-color: #CCCCCC;
 }
 
