@@ -2,6 +2,7 @@
 @page "/CriminalConviction/{StudentGUID}"
 @page "/CriminalConviction/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
 @page "/CriminalConviction/View/{StudentGUID}/{CriminalConvictionID:int}"
+@page "/CriminalConviction/View/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{CriminalConvictionID:int}"
 
 @using ProSolutionForms.Components
 @using ProSolutionForms.Models
@@ -154,7 +155,7 @@
             </div>
         </div>
     }
-    else if(student == null) {
+    else if(student == null || criminalConviction == null) {
         <div class="container">
             <div class="row">
                 <div class="col-md">
@@ -480,15 +481,12 @@
     private string? submitEndPoint;
 
     protected override async Task OnInitializedAsync()
-    {
-        //Needs to be set at the top to avoid errors with EditForm having a NULL model
-        criminalConviction = new CriminalConvictionModel();
-        
+    {     
         if (Layout != null)
         {
             Layout.HideNav();
         }
-        
+
         bool isError = false;
 
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
@@ -522,21 +520,26 @@
                 {
                     if (CriminalConvictionID != null)
                     {
-                        criminalConvictionEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/{CriminalConvictionID}";
+                        criminalConvictionEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/ID/{student?.StudentGUID}/{CriminalConvictionID}";
                         criminalConviction = await Http.GetFromJsonAsync<CriminalConvictionModel>(criminalConvictionEndPoint);
                     }
                     else
                     {
-                        criminalConvictionEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/{student?.AcademicYearID}/{student?.StudentGUID}";
-                        existingCriminalConviction = await Http.GetFromJsonAsync<CriminalConvictionModel>(criminalConvictionEndPoint);
-
                         //Create objects to hold form entries
                         CreateNewObjects();
+
+                        criminalConvictionEndPoint = $"{configuration["APIEndpoint"]}/CriminalConviction/{student?.AcademicYearID}/{student?.StudentGUID}";
+                        existingCriminalConviction = await Http.GetFromJsonAsync<CriminalConvictionModel>(criminalConvictionEndPoint);
                     }
                 }
                 catch (HttpRequestException ex)
                 {
                     //Not Found
+                }
+                finally
+                {
+                    //Test email is working for existing form
+                    //await SendEmailMain();
                 }
             }
         }
@@ -608,7 +611,7 @@
                             offence.CriminalConvictionOffenceID = 0;
                         }
                     }
-                    
+
                     HttpResponseMessage formResponse = await Http.PostAsJsonAsync<CriminalConvictionModel>(submitEndPoint, criminalConviction);
 
                     if (formResponse.IsSuccessStatusCode != true)
@@ -621,6 +624,26 @@
                         msgErrorStackTrace = responseBody;
 
                         modalError!.Open();
+                    }
+                    else
+                    {
+                        CriminalConvictionModel insertedCriminalConviction = await formResponse.Content.ReadFromJsonAsync<CriminalConvictionModel>() ?? new CriminalConvictionModel();
+
+                        if (insertedCriminalConviction.CriminalConvictionID > 0)
+                        {
+                            //If insert successful
+                            await SendEmailMain();
+                        }
+                        else
+                        {
+                            action = "Error";
+
+                            msgErrorTitle = $"Cannot Submit Form";
+                            msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                            msgErrorStackTrace = null;
+
+                            modalError!.Open();
+                        }
                     }
                 }
                 else
@@ -827,6 +850,138 @@
 
             modalError!.Open();
         }
+    }
+
+    public async Task<bool?> SendEmailMain()
+    {
+        bool? IsSuccessful = false;
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        //Main Email With Details
+        SystemEmailModel emailMessage = NewEmailMessage();
+
+        //Main Email With Details
+        string? message = EmailTemplateMain();
+        emailMessage.EmailMessage = message;
+
+        HttpResponseMessage formResponse = new HttpResponseMessage();
+
+        if (emailMessage != null)
+        {
+            Logger.LogInformation("Id = {Id}", emailMessage?.SystemEmailID);
+
+            //Send the Message
+            string? sendEmailEndPoint = $"{configuration["APIEndpoint"]}/SystemEmail";
+            formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
+
+            if (formResponse.IsSuccessStatusCode != true)
+            {
+                IsSuccessful = false;
+            }
+            else
+            {
+                IsSuccessful = true;
+            }
+        }
+
+        return IsSuccessful;
+    }
+
+    public SystemEmailModel NewEmailMessage()
+    {
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        SystemEmailModel emailMessage = new SystemEmailModel
+        {
+            SystemEmailID = 1,
+            EmailFrom = emailSettings["FromAddress"],
+            EmailFromName = emailSettings["FromName"],
+            EmailTo = emailSettings["ToAddress"],
+            EmailToName = emailSettings["ToName"],
+            EmailSubject = $"Criminal Conviction Form Completed by {student?.Forename} {student?.Surname}",
+            EmailMessage = null, //Add this later
+            IsEmailMessageHTML = true,
+            EmailKey = emailSettings["EmailKey"]
+        };
+
+        //Set correct reciption based on Student College
+        if (student?.CollegeCode == "EC")
+        {
+            emailMessage.EmailTo = emailSettings["CriminalConvictionsEmailAddressEC"];
+            emailMessage.EmailToName = "Eastleigh College";
+        }
+        else if (student?.CollegeCode == "FC" || student?.CollegeCode == "CM" || student?.CollegeCode == "CT")
+        {
+            emailMessage.EmailTo = emailSettings["CriminalConvictionsEmailAddressFC"];
+            emailMessage.EmailToName = "Fareham College";
+        }
+        else if (student?.CollegeCode == "SC" || student?.CollegeCode == "MC")
+        {
+            emailMessage.EmailTo = emailSettings["CriminalConvictionsEmailAddressSC"];
+            emailMessage.EmailToName = "Southampton College";
+        }
+
+        if (!string.IsNullOrEmpty(emailSettings["CCAddress"]))
+        {
+            emailMessage.EmailCC = emailSettings["CCAddress"];
+        }
+
+        return emailMessage;
+    }
+
+    public string? EmailTemplateMain()
+    {
+        string? Template;
+
+        string? FormDetails = "";
+
+        if (criminalConviction != null)
+        {
+            FormDetails += $@"
+                <li>Student Ref: {criminalConviction.StudentRef}</li>
+            ";
+
+            if (criminalConviction?.Offences?.Count > 0)
+            {
+                foreach (var offence in criminalConviction?.Offences!)
+                {
+                    FormDetails += $@"
+                    <li>Offence Date: {offence.DateOfOffence}</li>
+                    <li>
+                        <ul>
+                            <li>Offence: {offence.Offence}</li>
+                            <li>Penalty: {offence.Penalty}</li>
+                            <li>Comments: {offence.Comments}</li>3
+                            <li>Contact Name: {offence.ContactName}</li>
+                        </ul>
+                    </li>
+                ";
+                }
+            }
+            
+            FormDetails += $@"
+                <li>Signed Student: {criminalConviction?.SignedStudent}</li>
+                <li>Signed Student Date: {criminalConviction?.SignedStudentDate}</li>
+            ";
+        }
+
+        Template = $@"
+            <html>
+                <head>
+                    <title>Criminal Conviction Form Completed by {student?.Forename} {student?.Surname}</title>
+                </head>
+                <body>
+                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300px"" />
+                    <h1>Criminal Conviction Form Completed</h1>
+                    <p>The Criminal Conviction Form has been completed by {student?.Forename} {student?.Surname}.</p>
+                    <p>Details:</p>
+                    <ul>
+                        {FormDetails}
+                    </ul>
+                </body>
+            </html>";
+
+        return Template;
     }
 
     private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)

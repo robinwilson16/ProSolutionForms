@@ -4,6 +4,7 @@
 @page "/MedicalLearningSupportAndTripConsent/{StudentGUID}/{CourseCode}"
 @page "/MedicalLearningSupportAndTripConsent/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{CourseCode}"
 @page "/MedicalLearningSupportAndTripConsent/View/{StudentGUID}/{MedicalLearningSupportAndTripConsentID:int}"
+@page "/MedicalLearningSupportAndTripConsent/View/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{MedicalLearningSupportAndTripConsentID:int}"
 
 @using ProSolutionForms.Components
 @using ProSolutionForms.Models
@@ -161,7 +162,7 @@
             </div>
         </div>
     }
-    else if(student == null) {
+    else if(student == null || medicalLearningSupportAndTripConsent == null) {
         <div class="container">
             <div class="row">
                 <div class="col-md">
@@ -478,7 +479,7 @@
 
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
-                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Name of Doctor's Practice'</label>
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Name of Doctor's Practice</label>
                                 </div>
                                 <div class="col-md-8">
                                     <InputText @bind-Value="medicalLearningSupportAndTripConsent!.NameOfDoctorsPractice" class="form-control" />
@@ -1350,7 +1351,6 @@
     public string? CourseCode { get; set; }
 
     public string? AcademicYearID { get; set; }
-    
 
     bool formSubmitted = false;
 
@@ -1394,9 +1394,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //Needs to be set at the top to avoid errors with EditForm having a NULL model
-        medicalLearningSupportAndTripConsent = new MedicalLearningSupportAndTripConsentModel();
-
         if (Layout != null) {
             Layout.HideNav();
         }
@@ -1438,25 +1435,31 @@
                     {
                         medicalEndPoint = $"{configuration["APIEndpoint"]}/MedicalLearningSupportAndTripConsent/ID/{student?.StudentGUID}/{MedicalLearningSupportAndTripConsentID}";
                         medicalLearningSupportAndTripConsent = await Http.GetFromJsonAsync<MedicalLearningSupportAndTripConsentModel>(medicalEndPoint);
+
                     }
                     else
                     {
-                        medicalEndPoint = $"{configuration["APIEndpoint"]}/MedicalLearningSupportAndTripConsent/{student?.AcademicYearID}/{student?.StudentGUID}";
-                        existingMedicalLearningSupportAndTripConsent = await Http.GetFromJsonAsync<MedicalLearningSupportAndTripConsentModel>(medicalEndPoint);
-
                         //Create objects to hold form entries
                         CreateNewObjects();
 
-                        //Populate Drop-Downs
-                        await LoadDisabilityCategories();
-                        await LoadMedicalConditionTypes();
-                        await LoadTitles();
-                        await LoadRelationships();
+                        medicalEndPoint = $"{configuration["APIEndpoint"]}/MedicalLearningSupportAndTripConsent/{student?.AcademicYearID}/{student?.StudentGUID}";
+                        existingMedicalLearningSupportAndTripConsent = await Http.GetFromJsonAsync<MedicalLearningSupportAndTripConsentModel>(medicalEndPoint);
                     }
                 }
                 catch (HttpRequestException ex)
                 {
                     //Not Found
+                }
+                finally
+                {
+                    //Populate Drop-Downs
+                    await LoadDisabilityCategories();
+                    await LoadMedicalConditionTypes();
+                    await LoadTitles();
+                    await LoadRelationships();
+
+                    //Test email is working for existing form
+                    //await SendEmailMain();
                 }
             }
         }
@@ -1591,7 +1594,7 @@
                             contact.MedicalLearningSupportAndTripConsentEmergencyContactID = 0;
                         }
                     }
-                    
+
                     if (medicalLearningSupportAndTripConsent?.MedicalConditions != null)
                     {
                         foreach (var medicalCondition in medicalLearningSupportAndTripConsent?.MedicalConditions!)
@@ -1627,6 +1630,7 @@
                         if (insertedmedicalLearningSupportAndTripConsent.MedicalLearningSupportAndTripConsentID > 0)
                         {
                             //If insert successful
+                            await SendEmailMain();
                         }
                         else
                         {
@@ -2019,6 +2023,217 @@
         }
     }
     public static List<DropDownIntModel> GetRelationships() => Relationships ?? new List<DropDownIntModel>();
+
+    public async Task<bool?> SendEmailMain()
+    {
+        bool? IsSuccessful = false;
+
+        //Main Email With Details
+        SystemEmailModel emailMessage = NewEmailMessage();
+
+        //Main Email With Details
+        string? message = EmailTemplateMain();
+        emailMessage.EmailMessage = message;
+
+        HttpResponseMessage formResponse = new HttpResponseMessage();
+
+        if (emailMessage != null)
+        {
+            Logger.LogInformation("Id = {Id}", emailMessage?.SystemEmailID);
+
+            //Send the Message
+            string? sendEmailEndPoint = $"{configuration["APIEndpoint"]}/SystemEmail";
+            formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
+
+            if (formResponse.IsSuccessStatusCode != true)
+            {
+                IsSuccessful = false;
+            }
+            else
+            {
+                IsSuccessful = true;
+            }
+        }
+
+        return IsSuccessful;
+    }
+
+    public SystemEmailModel NewEmailMessage()
+    {
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        SystemEmailModel emailMessage = new SystemEmailModel
+        {
+            SystemEmailID = 1,
+            EmailFrom = emailSettings["FromAddress"],
+            EmailFromName = emailSettings["FromName"],
+            EmailTo = emailSettings["ToAddress"],
+            EmailToName = emailSettings["ToName"],
+            EmailSubject = $"Medical, Learning Support And Trip Consent Form Completed by {student?.Forename} {student?.Surname}",
+            EmailMessage = null, //Add this later
+            IsEmailMessageHTML = true,
+            EmailKey = emailSettings["EmailKey"]
+        };
+
+        //Set correct reciption based on Student College
+        if (student?.CollegeCode == "EC")
+        {
+            emailMessage.EmailTo = emailSettings["MedicalEmailAddressEC"];
+            emailMessage.EmailToName = "Eastleigh College";
+        }
+        else if (student?.CollegeCode == "FC" || student?.CollegeCode == "CM" || student?.CollegeCode == "CT")
+        {
+            emailMessage.EmailTo = emailSettings["MedicalEmailAddressFC"];
+            emailMessage.EmailToName = "Fareham College";
+        }
+        else if (student?.CollegeCode == "SC" || student?.CollegeCode == "MC")
+        {
+            emailMessage.EmailTo = emailSettings["MedicalEmailAddressSC"];
+            emailMessage.EmailToName = "Southampton College";
+        }
+
+        if (!string.IsNullOrEmpty(emailSettings["CCAddress"]))
+        {
+            emailMessage.EmailCC = emailSettings["CCAddress"];
+        }
+
+        return emailMessage;
+    }
+
+    public string? EmailTemplateMain()
+    {
+        string? Template;
+
+        string? FormDetails = "";
+
+        if (medicalLearningSupportAndTripConsent != null)
+        {
+            FormDetails += $@"
+                <li>Student Ref: {medicalLearningSupportAndTripConsent.StudentRef}</li>
+                <li>Course Code: {medicalLearningSupportAndTripConsent.CourseCode}</li>
+                <li>Has Medical Condition: {medicalLearningSupportAndTripConsent.HasMedicalCondition.GetYesNo()}</li>
+            ";
+            
+            if (medicalLearningSupportAndTripConsent?.MedicalConditions?.Count > 0)
+            {
+                foreach (var condition in medicalLearningSupportAndTripConsent?.MedicalConditions!)
+                {
+                    string? medicalCondition = MedicalConditionTypes?.Where(c => c.Code == condition.MedicalConditionTypeID).FirstOrDefault()?.Description;
+                    
+                    FormDetails += $@"
+                    <li>Medical Condition: {medicalCondition}</li>
+                    <li>
+                        <ul>
+                            <li>Details: {condition.MedicationDetails}</li>
+                            <li>Schedule: {condition.MedicationSchedule}</li>
+                            <li>Notes: {condition.Notes}</li>
+                        </ul>
+                    </li>";
+                }
+            }
+
+            FormDetails += $@"
+                <li>Agree To Keep College Informed: {medicalLearningSupportAndTripConsent?.AgreeToKeepCollegeInformed.GetYesNo()}</li>
+                <li>Has Been Hospitalised In Last Year: {medicalLearningSupportAndTripConsent?.HasBeenHospitalisedInLastYear.GetYesNo()}</li>
+                <li>Hospitalisation Notes: {medicalLearningSupportAndTripConsent?.HospitalisationNotes}</li>
+                <li>Requires Learning Support: {medicalLearningSupportAndTripConsent?.RequiresLearningSupport.GetYesNo()}</li>
+                <li>Has EHCP: {medicalLearningSupportAndTripConsent?.HasEHCP.GetYesNo()}</li>
+                <li>Name Of Doctor: {medicalLearningSupportAndTripConsent?.NameOfDoctor}</li>
+                <li>Name Of Doctor's Practice: {medicalLearningSupportAndTripConsent?.NameOfDoctorsPractice}</li>
+            ";
+            
+            if (medicalLearningSupportAndTripConsent?.EmergencyContacts?.Count > 0)
+            {
+                foreach (var contact in medicalLearningSupportAndTripConsent?.EmergencyContacts!)
+                {
+                    string? relationship = Relationships?.Where(r => r.Code == contact.RelationshipToStudent).FirstOrDefault()?.Description;
+
+                    FormDetails += $@"
+                    <li>Emergency Contact {contact.ContactOrder}:</li>
+                    <li>
+                        <ul>
+                            <li>Forename: {contact.Forename}</li>
+                            <li>Surname: {contact.Surname}</li>
+                            <li>Title: {contact.Title}</li>
+                            <li>Relationship: {relationship}</li>
+                            <li>Address 1: {contact.Address1}</li>
+                            <li>Address 2: {contact.Address2}</li>
+                            <li>Town: {contact.Address3}</li>
+                            <li>County: {contact.Address4}</li>
+                            <li>Post Code: {contact.PostCode}</li>
+                            <li>Mobile: {contact.TelMobile}</li>
+                            <li>Home: {contact.TelHome}</li>
+                            <li>Work: {contact.TelWork}</li>
+                            <li>Email: {contact.Email}</li>
+                        </ul>
+                    </li>";
+                }
+            }
+
+            FormDetails += $@"
+                <li>Has Learning Difficulty/Disability: {medicalLearningSupportAndTripConsent?.HasLearningDifficultyDisability.GetYesNo()}</li>
+            ";
+
+            if (medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities?.Count > 0)
+            {
+                foreach (var difficulty in medicalLearningSupportAndTripConsent?.LearningDifficultiesDisabilities!)
+                {
+                    string? difficultyDisability = DisabilityCategories?.Where(c => c.Code == difficulty.DisabilityCategoryID).FirstOrDefault()?.Description;
+                    
+                    FormDetails += $@"
+                    <li>Difficulty/Disability: {difficultyDisability}</li>
+                    <li>
+                        <ul>
+                            <li>Notes: {difficulty.Notes}</li>
+                            <li>Is Primary: {difficulty.IsPrimary.GetYesNo()}</li>
+                        </ul>
+                    </li>";
+                }
+            }
+            
+            FormDetails += $@"
+                <li>Is LAC: {medicalLearningSupportAndTripConsent?.IsLAC.GetYesNo()}</li>
+                <li>Is Care Leaver: {medicalLearningSupportAndTripConsent?.IsCareLeaver.GetYesNo()}</li>
+                <li>Is Young Carer: {medicalLearningSupportAndTripConsent?.IsYoungCarer.GetYesNo()}</li>
+                <li>Has FSM: {medicalLearningSupportAndTripConsent?.HasFSM.GetYesNo()}</li>
+                <li>Is From Military Service Family: {medicalLearningSupportAndTripConsent?.IsFromMilitaryServiceFamily.GetYesNo()}</li>
+                <li>Has Access Arrangements: {medicalLearningSupportAndTripConsent?.HasAccessArrangements.GetYesNo()}</li>
+                <li>Had Further Support At School Or College: {medicalLearningSupportAndTripConsent?.HadFurtherSupportAtSchoolOrCollege.GetYesNo()}</li>
+                <li>Further Support At School Or College Details: {medicalLearningSupportAndTripConsent?.FurtherSupportAtSchoolOrCollegeDetails}</li>
+                <li>Has Given Trip Consent (Student): {medicalLearningSupportAndTripConsent?.HasGivenTripConsentStudent.GetYesNo()}</li>
+                <li>Has Given Trip Consent (Parent/Carer): {medicalLearningSupportAndTripConsent?.HasGivenTripConsentParentCarer.GetYesNo()}</li>
+                <li>Has Given Photographic Images Consent: {medicalLearningSupportAndTripConsent?.HasGivenPhotographicImagesConsent.GetYesNo()}</li>
+                <li>Can Contact Prior School Or College: {medicalLearningSupportAndTripConsent?.CanContactPriorSchoolOrCollege.GetYesNo()}</li>
+                <li>Has Criminal Convictions: {medicalLearningSupportAndTripConsent?.HasCriminalConvictions.GetYesNo()}</li>
+                <li>Criminal Conviction Details: {medicalLearningSupportAndTripConsent?.CriminalConvictionDetails}</li>
+                <li>Can Share Information With Potential Employers: {medicalLearningSupportAndTripConsent?.CanShareInformationWithPotentialEmployers.GetYesNo()}</li>
+                <li>Agree Information is Correct (Parent/Carer): {medicalLearningSupportAndTripConsent?.AgreeInfoIsCorrectParentCarer.GetYesNo()}</li>
+                <li>Parent/Carer Name: {medicalLearningSupportAndTripConsent?.SignedParentCarer}</li>
+                <li>Parent/Carer Date: {medicalLearningSupportAndTripConsent?.SignedParentCarerDate}</li>
+                <li>Agree Information is Correct (Student): {medicalLearningSupportAndTripConsent?.AgreeInfoIsCorrectStudent.GetYesNo()}</li>
+                <li>Student Name: {medicalLearningSupportAndTripConsent?.SignedStudent}</li>
+                <li>Student Date: {medicalLearningSupportAndTripConsent?.SignedStudentDate}</li>
+            ";
+        }
+
+        Template = $@"
+            <html>
+                <head>
+                    <title>Medical, Learning Support And Trip Consent Form Completed by {student?.Forename} {student?.Surname}</title>
+                </head>
+                <body>
+                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300px"" />
+                    <h1>Medical, Learning Support And Trip Consent Form Completed</h1>
+                    <p>The Medical, Learning Support And Trip Consent Form has been completed by {student?.Forename} {student?.Surname}.</p>
+                    <p>Details:</p>
+                    <ul>
+                        {FormDetails}
+                    </ul>
+                </body>
+            </html>";
+
+        return Template;
+    }
 
     private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
     {

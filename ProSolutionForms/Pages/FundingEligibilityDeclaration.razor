@@ -2,6 +2,7 @@
 @page "/FundingEligibilityDeclaration/{StudentGUID}"
 @page "/FundingEligibilityDeclaration/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
 @page "/FundingEligibilityDeclaration/View/{StudentGUID}/{FundingEligibilityDeclarationID:int}"
+@page "/FundingEligibilityDeclaration/View/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{FundingEligibilityDeclarationID:int}"
 
 @using ProSolutionForms.Components
 @using ProSolutionForms.Models
@@ -161,7 +162,7 @@
             </div>
         </div>
     }
-    else if(student == null) {
+    else if(student == null || fundingEligibilityDeclaration == null) {
         <div class="container">
             <div class="row">
                 <div class="col-md">
@@ -635,15 +636,12 @@
     private string? submitEndPoint;
 
     protected override async Task OnInitializedAsync()
-    {
-        //Needs to be set at the top to avoid errors with EditForm having a NULL model
-        fundingEligibilityDeclaration = new FundingEligibilityDeclarationModel();
-        
+    {      
         if (Layout != null)
         {
             Layout.HideNav();
         }
-        
+
         bool isError = false;
 
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
@@ -679,24 +677,29 @@
                 {
                     if (FundingEligibilityDeclarationID != null)
                     {
-                        fundingEligibilityEndPoint = $"{configuration["APIEndpoint"]}/FundingEligibilityDeclaration/{FundingEligibilityDeclarationID}";
+                        fundingEligibilityEndPoint = $"{configuration["APIEndpoint"]}/FundingEligibilityDeclaration/ID/{student?.StudentGUID}/{FundingEligibilityDeclarationID}";
                         fundingEligibilityDeclaration = await Http.GetFromJsonAsync<FundingEligibilityDeclarationModel>(fundingEligibilityEndPoint);
                     }
                     else
                     {
-                        fundingEligibilityEndPoint = $"{configuration["APIEndpoint"]}/FundingEligibilityDeclaration/{student?.AcademicYearID}/{student?.StudentGUID}";
-                        existingFundingEligibilityDeclaration = await Http.GetFromJsonAsync<FundingEligibilityDeclarationModel>(fundingEligibilityEndPoint);
-
                         //Create objects to hold form entries
                         CreateNewObjects();
 
-                        //Populate Drop-Downs
-                        await LoadFeeExemptionReasons();
+                        fundingEligibilityEndPoint = $"{configuration["APIEndpoint"]}/FundingEligibilityDeclaration/{student?.AcademicYearID}/{student?.StudentGUID}";
+                        existingFundingEligibilityDeclaration = await Http.GetFromJsonAsync<FundingEligibilityDeclarationModel>(fundingEligibilityEndPoint); 
                     }
                 }
                 catch (HttpRequestException ex)
                 {
                     //Not Found
+                }
+                finally
+                {
+                    //Populate Drop-Downs
+                    await LoadFeeExemptionReasons();
+
+                    //Test email is working for existing form
+                    //await SendEmailMain();
                 }
             }
         }
@@ -819,6 +822,7 @@
                         if (insertedFundingEligibilityDeclaration.FundingEligibilityDeclarationID > 0)
                         {
                             //If insert successful
+                            await SendEmailMain();
                         }
                         else
                         {
@@ -1071,6 +1075,139 @@
         }
     }
     public static List<DropDownIntModel> GetFeeExemptionReasons() => FeeExemptionReasons ?? new List<DropDownIntModel>();
+
+    public async Task<bool?> SendEmailMain()
+    {
+        bool? IsSuccessful = false;
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        //Main Email With Details
+        SystemEmailModel emailMessage = NewEmailMessage();
+
+        //Main Email With Details
+        string? message = EmailTemplateMain();
+        emailMessage.EmailMessage = message;
+
+        HttpResponseMessage formResponse = new HttpResponseMessage();
+
+        if (emailMessage != null)
+        {
+            Logger.LogInformation("Id = {Id}", emailMessage?.SystemEmailID);
+
+            //Send the Message
+            string? sendEmailEndPoint = $"{configuration["APIEndpoint"]}/SystemEmail";
+            formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
+
+            if (formResponse.IsSuccessStatusCode != true)
+            {
+                IsSuccessful = false;
+            }
+            else
+            {
+                IsSuccessful = true;
+            }
+        }
+
+        return IsSuccessful;
+    }
+
+    public SystemEmailModel NewEmailMessage()
+    {
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        SystemEmailModel emailMessage = new SystemEmailModel
+        {
+            SystemEmailID = 1,
+            EmailFrom = emailSettings["FromAddress"],
+            EmailFromName = emailSettings["FromName"],
+            EmailTo = emailSettings["ToAddress"],
+            EmailToName = emailSettings["ToName"],
+            EmailSubject = $"Funding Eligibility Declaration Form Completed by {student?.Forename} {student?.Surname}",
+            EmailMessage = null, //Add this later
+            IsEmailMessageHTML = true,
+            EmailKey = emailSettings["EmailKey"]
+        };
+
+        //Set correct reciption based on Student College
+        if (student?.CollegeCode == "EC")
+        {
+            emailMessage.EmailTo = emailSettings["FundingEligibilityEmailAddressEC"];
+            emailMessage.EmailToName = "Eastleigh College";
+        }
+        else if (student?.CollegeCode == "FC" || student?.CollegeCode == "CM" || student?.CollegeCode == "CT")
+        {
+            emailMessage.EmailTo = emailSettings["FundingEligibilityEmailAddressFC"];
+            emailMessage.EmailToName = "Fareham College";
+        }
+        else if (student?.CollegeCode == "SC" || student?.CollegeCode == "MC")
+        {
+            emailMessage.EmailTo = emailSettings["FundingEligibilityEmailAddressSC"];
+            emailMessage.EmailToName = "Southampton College";
+        }
+
+        if (!string.IsNullOrEmpty(emailSettings["CCAddress"]))
+        {
+            emailMessage.EmailCC = emailSettings["CCAddress"];
+        }
+
+        return emailMessage;
+    }
+
+    public string? EmailTemplateMain()
+    {
+        string? Template;
+
+        string? FormDetails = "";
+
+        if (fundingEligibilityDeclaration != null)
+        {
+            FormDetails += $@"
+                <li>Student Ref: {fundingEligibilityDeclaration.StudentRef}</li>
+            ";
+            
+            string? feeExemptionReason = FeeExemptionReasons?.Where(r => r.Code == fundingEligibilityDeclaration?.FeeExemptionReasonID).FirstOrDefault()?.Description;
+            
+            FormDetails += $@"
+                <li>Fee Exemption Reason: {feeExemptionReason}</li>
+                <li>Signed Student: {fundingEligibilityDeclaration?.SignedStudent}</li>
+                <li>Signed Student Date: {fundingEligibilityDeclaration?.SignedStudentDate}</li>
+            ";
+
+            if (fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence?.Count > 0)
+            {
+                foreach (var evidence in fundingEligibilityDeclaration?.FundingEligibilityDeclarationEvidence!)
+                {
+                    FormDetails += $@"
+                        <li>Evidence: {evidence.EvidenceTypeID.GetEnumDisplayName()}</li>
+                        <li>
+                            <ul>
+                                <li>File Name: {evidence.EvidenceFileName}</li>
+                                <li>Notes: {evidence.Notes}</li>
+                            </ul>
+                        </li>
+                    ";
+                }
+            }
+        }
+
+        Template = $@"
+            <html>
+                <head>
+                    <title>Funding Eligibility Declaration Form Completed by {student?.Forename} {student?.Surname}</title>
+                </head>
+                <body>
+                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300px"" />
+                    <h1>Funding Eligibility Declaration Form Completed</h1>
+                    <p>The Funding Eligibility Declaration Form has been completed by {student?.Forename} {student?.Surname}.</p>
+                    <p>Details:</p>
+                    <ul>
+                        {FormDetails}
+                    </ul>
+                </body>
+            </html>";
+
+        return Template;
+    }
 
     private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
     {

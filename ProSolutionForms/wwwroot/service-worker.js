@@ -15,4 +15,4 @@ self.addEventListener('message', (event) => {
     }
 });
 
-self.versionNumber = '1.1.2.0';
+self.versionNumber = '1.2.0.0';

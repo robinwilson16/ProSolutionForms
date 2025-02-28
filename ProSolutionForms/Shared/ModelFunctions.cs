@@ -281,5 +281,17 @@ namespace ProSolutionForms.Shared
             //throw new ArgumentException("value");
             return string.Empty;
         }
+
+        public static string? GetYesNo(this bool? value)
+        {
+            if (value == true)
+            {
+                return "Yes";
+            }
+            else
+            {
+                return "No";
+            }
+        }
     }
 }
