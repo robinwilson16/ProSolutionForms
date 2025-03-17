@@ -953,8 +953,7 @@
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <label class="col-form-label">
-                                        <i class="fa-solid fa-angles-right"></i> Have you had any access arrangements for
-                                        your exams in the past?
+                                        <i class="fa-solid fa-angles-right"></i> Have you had any access arrangements for your exams in the past?
                                     </label>
                                 </div>
                                 <div class="col-md-8">
@@ -1182,9 +1181,7 @@
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <label class="col-form-label">
-                                        <i class="fa-solid fa-angles-right"></i> Do you have any pending, ongoing, or outstanding
-                                        criminal investigations or
-                                        convictions?
+                                        <i class="fa-solid fa-angles-right"></i> Do you have any pending, ongoing, or outstanding criminal investigations or convictions?
                                     </label>
                                 </div>
                                 <div class="col-md-8">
@@ -1459,7 +1456,8 @@
                     await LoadRelationships();
 
                     //Test email is working for existing form
-                    //await SendEmailMain();
+                    //await SendEmailCollege();
+                    await SendEmailStudent();
                 }
             }
         }
@@ -1630,7 +1628,8 @@
                         if (insertedmedicalLearningSupportAndTripConsent.MedicalLearningSupportAndTripConsentID > 0)
                         {
                             //If insert successful
-                            await SendEmailMain();
+                            await SendEmailCollege();
+                            await SendEmailStudent();
                         }
                         else
                         {
@@ -2024,26 +2023,26 @@
     }
     public static List<DropDownIntModel> GetRelationships() => Relationships ?? new List<DropDownIntModel>();
 
-    public async Task<bool?> SendEmailMain()
+    public async Task<bool?> SendEmailCollege()
     {
         bool? IsSuccessful = false;
 
         //Main Email With Details
-        SystemEmailModel emailMessage = NewEmailMessage();
+        SystemEmailModel emailMessage = NewEmailMessageCollege();
 
-        //Main Email With Details
-        string? message = EmailTemplateMain();
+        //Add Message To Email
+        string? message = EmailTemplateCollege();
         emailMessage.EmailMessage = message;
 
         HttpResponseMessage formResponse = new HttpResponseMessage();
 
-        if (emailMessage != null)
+        if (emailMessage != null && !string.IsNullOrEmpty(emailMessage.EmailTo))
         {
             Logger.LogInformation("Id = {Id}", emailMessage?.SystemEmailID);
 
             //Send the Message
             string? sendEmailEndPoint = $"{configuration["APIEndpoint"]}/SystemEmail";
-            formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
+            //formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
 
             if (formResponse.IsSuccessStatusCode != true)
             {
@@ -2058,7 +2057,7 @@
         return IsSuccessful;
     }
 
-    public SystemEmailModel NewEmailMessage()
+    public SystemEmailModel NewEmailMessageCollege()
     {
         var emailSettings = configuration.GetSection("EmailSettings");
 
@@ -2076,31 +2075,89 @@
         };
 
         //Set correct reciption based on Student College
+        string? alsEmail = null;
+        string? safeguardingEmail = null;
         if (student?.CollegeCode == "EC")
         {
-            emailMessage.EmailTo = emailSettings["MedicalEmailAddressEC"];
+            emailMessage.EmailTo = emailSettings["MedicalEmailAddressToEC"];
             emailMessage.EmailToName = "Eastleigh College";
+
+            alsEmail = emailSettings["ALSEmailAddressCCEC"];
+            safeguardingEmail = emailSettings["SafeguardingEmailAddressCCEC"];
         }
         else if (student?.CollegeCode == "FC" || student?.CollegeCode == "CM" || student?.CollegeCode == "CT")
         {
-            emailMessage.EmailTo = emailSettings["MedicalEmailAddressFC"];
+            emailMessage.EmailTo = emailSettings["MedicalEmailAddressToFC"];
             emailMessage.EmailToName = "Fareham College";
+
+            alsEmail = emailSettings["ALSEmailAddressCCFC"];
+            safeguardingEmail = emailSettings["SafeguardingEmailAddressCCFC"];
         }
         else if (student?.CollegeCode == "SC" || student?.CollegeCode == "MC")
         {
-            emailMessage.EmailTo = emailSettings["MedicalEmailAddressSC"];
+            emailMessage.EmailTo = emailSettings["MedicalEmailAddressToSC"];
             emailMessage.EmailToName = "Southampton College";
+
+            alsEmail = emailSettings["ALSEmailAddressCCSC"];
+            safeguardingEmail = emailSettings["SafeguardingEmailAddressCCSC"];
         }
 
-        if (!string.IsNullOrEmpty(emailSettings["CCAddress"]))
+        //Check if ALS need to be CCd
+        bool? CCALS = false;
+        if (medicalLearningSupportAndTripConsent!.RequiresLearningSupport == true)
         {
-            emailMessage.EmailCC = emailSettings["CCAddress"];
+            CCALS = true;
+        }
+        if (medicalLearningSupportAndTripConsent!.HasEHCP == true)
+        {
+            CCALS = true;
+        }
+        if (medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability == true)
+        {
+            CCALS = true;
+        }
+        if (medicalLearningSupportAndTripConsent!.HasAccessArrangements == true)
+        {
+            CCALS = true;
+        }
+
+        //Check if Safeguarding need to be CCd
+        bool? CCSafeguarding = false;
+        if (medicalLearningSupportAndTripConsent!.IsLAC == true)
+        {
+            CCSafeguarding = true;
+        }
+        if (medicalLearningSupportAndTripConsent!.IsCareLeaver == true)
+        {
+            CCSafeguarding = true;
+        }
+        if (medicalLearningSupportAndTripConsent!.IsYoungCarer == true)
+        {
+            CCSafeguarding = true;
+        }
+        if (medicalLearningSupportAndTripConsent!.HasCriminalConvictions == true)
+        {
+            CCSafeguarding = true;
+        }
+
+        //Add CC Email Address to Email
+        if (CCALS == true && CCSafeguarding == true)
+        {
+            emailMessage.EmailCC = $"{alsEmail}; {safeguardingEmail}";
+        }
+        else if (CCALS == true)
+        {
+            emailMessage.EmailCC = alsEmail;
+        }
+        else if (CCSafeguarding == true)
+        {
+            emailMessage.EmailCC = safeguardingEmail;        
         }
 
         return emailMessage;
     }
 
-    public string? EmailTemplateMain()
+    public string? EmailTemplateCollege()
     {
         string? Template;
 
@@ -2231,6 +2288,83 @@
                     </ul>
                 </body>
             </html>";
+
+        return Template;
+    }
+
+    public async Task<bool?> SendEmailStudent()
+    {
+        bool? IsSuccessful = false;
+
+        //Main Email With Details
+        SystemEmailModel emailMessage = NewEmailMessageStudent();
+
+        //Add Message To Email
+        string? message = EmailTemplateStudent();
+        emailMessage.EmailMessage = message;
+
+        HttpResponseMessage formResponse = new HttpResponseMessage();
+
+        if (emailMessage != null && !string.IsNullOrEmpty(emailMessage.EmailTo))
+        {
+            Logger.LogInformation("Id = {Id}", emailMessage?.SystemEmailID);
+
+            //Send the Message
+            string? sendEmailEndPoint = $"{configuration["APIEndpoint"]}/SystemEmail";
+            formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
+
+            if (formResponse.IsSuccessStatusCode != true)
+            {
+                IsSuccessful = false;
+            }
+            else
+            {
+                IsSuccessful = true;
+            }
+        }
+
+        return IsSuccessful;
+    }
+
+    public SystemEmailModel NewEmailMessageStudent()
+    {
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        SystemEmailModel emailMessage = new SystemEmailModel
+            {
+                SystemEmailID = 1,
+                EmailFrom = emailSettings["FromAddress"],
+                EmailFromName = emailSettings["FromName"],
+                EmailTo = student?.Email,
+                EmailToName = $"{student?.Forename} {student?.Surname}",
+                EmailSubject = $"Medical, Learning Support And Trip Consent Form Completed",
+                EmailMessage = null, //Add this later
+                IsEmailMessageHTML = true,
+                EmailKey = emailSettings["EmailKey"]
+            };
+
+        return emailMessage;
+    }
+
+    public string? EmailTemplateStudent()
+    {
+        string? Template = "";
+
+        if (medicalLearningSupportAndTripConsent != null)
+        {
+            Template = $@"
+                <html>
+                    <head>
+                        <title>Medical, Learning Support And Trip Consent Form Completed by {student?.Forename} {student?.Surname}</title>
+                    </head>
+                    <body>
+                        <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300px"" />
+                        <h1>Medical, Learning Support And Trip Consent Form Completed</h1>
+                        <p>{student?.Forename}, thank you for declaring your Medical Information.</p>
+                        <p>We will be in touch soon with details of our next welcome day.</p>
+                    </body>
+                </html>";
+        }
 
         return Template;
     }

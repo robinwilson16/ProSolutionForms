@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "3FPgFhkM",
+  "version": "xC5tpGrl",
   "assets": [
     {
       "hash": "sha256-IsM1UdhMPjCN5yD9EraLdftli5Oye8JLeFDIjF1qsEM=",
@@ -102,8 +102,8 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.JSInterop.uu8izyvyxp.wasm"
     },
     {
-      "hash": "sha256-unlEUkMiNaTgIAEJKaxNnFpduM2pBdWSigm7oXVmJxk=",
-      "url": "_framework/ProSolutionForms.mgzf1t3rc6.wasm"
+      "hash": "sha256-+IpiJvZJXK8OBprq2riMBqJ1oKIkHFJOb+QQcnhp9OU=",
+      "url": "_framework/ProSolutionForms.c3wuxv3f2k.wasm"
     },
     {
       "hash": "sha256-Kk/NKIAZ2GmWeOzDxEcKJYz6LRV93xK6VW/67qXJaoo=",
@@ -230,7 +230,7 @@ self.assetsManifest = {
       "url": "_framework/TinyMCE.Blazor.ll1a586db2.wasm"
     },
     {
-      "hash": "sha256-LuOJnbHQOEHJKp3XW4EFWxrUgVA4+K8kVOdcEaHCGdc=",
+      "hash": "sha256-VUbGd4MIf0ZGiVz95AwBljzbp3VUK8fCiQHHRDck/II=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -270,7 +270,7 @@ self.assetsManifest = {
       "url": "appsettings.Development.json"
     },
     {
-      "hash": "sha256-kewnSu5uEFKqE9XvDbejLbwI1rzhj+/PQwAUErtDxkI=",
+      "hash": "sha256-voZbZL3jVL2Q2kT3OMQxNCiuq4RJubwwHZaklpHtMJ0=",
       "url": "appsettings.json"
     },
     {

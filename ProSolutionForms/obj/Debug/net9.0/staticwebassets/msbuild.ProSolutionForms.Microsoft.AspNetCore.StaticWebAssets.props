@@ -12,8 +12,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName>WasmResource</AssetTraitName>
       <AssetTraitValue>settings</AssetTraitValue>
-      <Fingerprint>7yujo2hi95</Fingerprint>
-      <Integrity>kewnSu5uEFKqE9XvDbejLbwI1rzhj+/PQwAUErtDxkI=</Integrity>
+      <Fingerprint>6nom7f5kx6</Fingerprint>
+      <Integrity>voZbZL3jVL2Q2kT3OMQxNCiuq4RJubwwHZaklpHtMJ0=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\appsettings.json'))</OriginalItemSpec>

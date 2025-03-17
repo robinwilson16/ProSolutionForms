@@ -24,10 +24,7 @@ namespace ProSolutionForms.Models
         public string? DeptName { get; set; }
         public string? CourseCode { get; set; }
         public string? CourseTitle { get; set; }
-        public string? CompletionStatusCode { get; set; }
-        public string? CompletionStatusName { get; set; }
         public DateTime? StartDate { get; set; }
-        public DateTime? ExpEndDate { get; set; }
-        public DateTime? ActEndDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }
