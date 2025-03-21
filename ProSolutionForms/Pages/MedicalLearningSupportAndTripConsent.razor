@@ -253,8 +253,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasMedicalCondition == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasMedicalConditionToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasMedicalCondition == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasMedicalConditionToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasMedicalCondition == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasMedicalConditionToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasMedicalCondition == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasMedicalConditionToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasMedicalCondition)" />
                                 </div>
@@ -391,8 +391,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeToKeepCollegeInformed == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => AgreeToKeepCollegeInformedToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeToKeepCollegeInformed == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => AgreeToKeepCollegeInformedToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeToKeepCollegeInformed == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => AgreeToKeepCollegeInformedToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeToKeepCollegeInformed == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => AgreeToKeepCollegeInformedToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.AgreeToKeepCollegeInformed)" />
                                 </div>
@@ -409,8 +409,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasBeenHospitalisedInLastYearToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasBeenHospitalisedInLastYearToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasBeenHospitalisedInLastYearToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasBeenHospitalisedInLastYearToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasBeenHospitalisedInLastYear)" />
                                 </div>
@@ -437,8 +437,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.RequiresLearningSupport == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => RequiresLearningSupportToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.RequiresLearningSupport == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => RequiresLearningSupportToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.RequiresLearningSupport == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => RequiresLearningSupportToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.RequiresLearningSupport == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => RequiresLearningSupportToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.RequiresLearningSupport)" />
                                 </div>
@@ -460,8 +460,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasEHCP == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasEHCPToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasEHCP == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasEHCPToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasEHCP == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasEHCPToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasEHCP == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasEHCPToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasEHCP)" />
                                 </div>
@@ -740,8 +740,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasLearningDifficultyDisabilityToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasLearningDifficultyDisabilityToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasLearningDifficultyDisabilityToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasLearningDifficultyDisabilityToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasLearningDifficultyDisability)" />
                                 </div>
@@ -811,7 +811,7 @@
                                                                     <option value="false">No</option>
                                                                 </CustomBoolInputSelect>
                                                                 <div class="d-grid gap-2 d-md-block">
-                                                                    <button type="button" class="btn @(learningDifficultyDisability!.IsPrimary == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsPrimaryLearningDifficultyDisabilityToggle(learningDifficultyDisability, true)"><i class="@(learningDifficultyDisability!.IsPrimary == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                                                    <button type="button" class="btn @(learningDifficultyDisability!.IsPrimary == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => IsPrimaryLearningDifficultyDisabilityToggle(learningDifficultyDisability, true)"><i class="@(learningDifficultyDisability!.IsPrimary == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
                                                                 </div>
                                                                 <ValidationMessage For="@(() => learningDifficultyDisability!.IsPrimary)" />
                                                             </div>
@@ -868,8 +868,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsLAC == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsLACToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsLAC == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => IsLACToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsLAC == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => IsLACToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsLAC == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => IsLACToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.IsLAC)" />
                                 </div>
@@ -889,8 +889,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsCareLeaver == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsCareLeaverToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsCareLeaver == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => IsCareLeaverToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsCareLeaver == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => IsCareLeaverToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsCareLeaver == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => IsCareLeaverToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.IsCareLeaver)" />
                                 </div>
@@ -907,8 +907,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsYoungCarer == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsYoungCarerToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsYoungCarer == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => IsYoungCarerToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsYoungCarer == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => IsYoungCarerToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsYoungCarer == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => IsYoungCarerToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.IsYoungCarer)" />
                                 </div>
@@ -925,8 +925,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasFSM == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasFSMToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasFSM == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasFSMToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasFSM == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasFSMToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasFSM == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasFSMToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasFSM)" />
                                 </div>
@@ -943,8 +943,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => IsFromMilitaryServiceFamilyToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => IsFromMilitaryServiceFamilyToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => IsFromMilitaryServiceFamilyToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => IsFromMilitaryServiceFamilyToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.IsFromMilitaryServiceFamily)" />
                                 </div>
@@ -963,8 +963,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasAccessArrangements == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasAccessArrangementsToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasAccessArrangements == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasAccessArrangementsToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasAccessArrangements == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasAccessArrangementsToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasAccessArrangements == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasAccessArrangementsToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasAccessArrangements)" />
                                 </div>
@@ -983,8 +983,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HadFurtherSupportAtSchoolOrCollegeToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HadFurtherSupportAtSchoolOrCollegeToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HadFurtherSupportAtSchoolOrCollegeToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HadFurtherSupportAtSchoolOrCollegeToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege)" />
                                 </div>
@@ -1061,8 +1061,8 @@
                                             <option value="false">No</option>
                                         </CustomBoolInputSelect>
                                         <div class="d-grid gap-2 d-md-block">
-                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasGivenTripConsentParentCarerToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasGivenTripConsentParentCarerToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasGivenTripConsentParentCarerToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasGivenTripConsentParentCarerToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                         </div>
                                         <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasGivenTripConsentParentCarer)" />
                                     </div>
@@ -1103,8 +1103,8 @@
                                             <option value="false">No</option>
                                         </CustomBoolInputSelect>
                                         <div class="d-grid gap-2 d-md-block">
-                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasGivenTripConsentStudentToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasGivenTripConsentStudentToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasGivenTripConsentStudentToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasGivenTripConsentStudentToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                         </div>
                                         <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent)" />
                                     </div>
@@ -1132,8 +1132,8 @@
                                             <option value="false">No</option>
                                         </CustomBoolInputSelect>
                                         <div class="d-grid gap-2 d-md-block">
-                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasGivenPhotographicImagesConsentToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasGivenPhotographicImagesConsentToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasGivenPhotographicImagesConsentToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                            <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasGivenPhotographicImagesConsentToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                         </div>
                                         <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasGivenPhotographicImagesConsent)" />
                                     </div>
@@ -1171,8 +1171,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => CanContactPriorSchoolOrCollegeToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => CanContactPriorSchoolOrCollegeToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => CanContactPriorSchoolOrCollegeToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => CanContactPriorSchoolOrCollegeToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege)" />
                                 </div>
@@ -1191,8 +1191,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasCriminalConvictions == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => HasCriminalConvictionsToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasCriminalConvictions == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => HasCriminalConvictionsToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasCriminalConvictions == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasCriminalConvictionsToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.HasCriminalConvictions == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasCriminalConvictionsToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.HasCriminalConvictions)" />
                                 </div>
@@ -1235,8 +1235,8 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers == true? "btn-primary" : "btn-outline-primary") YesNoButton me-md-3" @onclick="() => CanShareInformationWithPotentialEmployersToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers == false? "btn-secondary" : "btn-outline-secondary") YesNoButton" @onclick="() => CanShareInformationWithPotentialEmployersToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => CanShareInformationWithPotentialEmployersToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => CanShareInformationWithPotentialEmployersToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers)" />
                                 </div>
@@ -1253,7 +1253,7 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer == true? "btn-primary" : "btn-outline-primary") me-md-3" @onclick="(e) => AgreeInfoIsCorrectParentCarerToggle()"><i class="@(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer == true? ButtonYesTrueCSS : ButtonYesFalseCSS) me-md-3" @onclick="(e) => AgreeInfoIsCorrectParentCarerToggle()"><i class="@(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer)" />
                                 </div>
@@ -1290,7 +1290,7 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectStudent == true? "btn-primary" : "btn-outline-primary") me-md-3" @onclick="(e) => AgreeInfoIsCorrectStudentToggle()"><i class="@(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectStudent == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectStudent == true? ButtonYesTrueCSS : ButtonYesFalseCSS) me-md-3" @onclick="(e) => AgreeInfoIsCorrectStudentToggle()"><i class="@(medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectStudent == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
                                     </div>
                                     <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectStudent)" />
                                 </div>
@@ -1389,6 +1389,12 @@
 
     private string? submitEndPoint;
 
+    private string? ButtonYesTrueCSS;
+    private string? ButtonYesFalseCSS;
+    private string? ButtonNoTrueCSS;
+    private string? ButtonNoFalseCSS;
+
+
     protected override async Task OnInitializedAsync()
     {
         if (Layout != null) {
@@ -1399,6 +1405,21 @@
 
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
             AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
+
+        if (MedicalLearningSupportAndTripConsentID != null)
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
+        else
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
 
         if (StudentGUID == null)
         {
@@ -1457,7 +1478,7 @@
 
                     //Test email is working for existing form
                     //await SendEmailCollege();
-                    await SendEmailStudent();
+                    //await SendEmailStudent();
                 }
             }
         }

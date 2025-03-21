@@ -1,4 +1,5 @@
 ﻿@page "/Admin/Unauthorised"
+@page "/Admin/Unauthorised/{Reason}"
 
 @using ProSolutionForms.Models
 @using ProSolutionForms.Services
@@ -66,6 +67,10 @@
                                                                         {
                                                                             <li class="list-group-item bg-info">@group.GroupName</li>
                                                                         }
+                                                                        else if (SafeguardingPermissionGroupForFullAccess != null && group.GroupName == SafeguardingPermissionGroupForFullAccess)
+                                                                        {
+                                                                            <li class="list-group-item bg-info">@group.GroupName</li>
+                                                                        }
                                                                         else
                                                                         {
                                                                             <li class="list-group-item">@group.GroupName</li>
@@ -93,39 +98,53 @@
                                                 <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
                                             </div>
                                             <div>
-                                                <p>
-                                                    Sorry, @(SystemUser?.Forename ?? "Unknown User"), you have not been granted access to this system.
-                                                </p>
-                                                <p>
-                                                    If you believe you should have access then please contact the MIS Department.
-                                                </p>
-
-                                                @if (RequiredPermissionGroupForFullAccess != null || MISPermissionGroupForFullAccess != null)
+                                                @if (Reason != null)
                                                 {
-                                                    if (RequiredPermissionGroupForFullAccess != null && MISPermissionGroupForFullAccess != null)
+                                                    if (Reason == "Safeguarding")
                                                     {
                                                         <p>
-                                                            You need to be a member of the group <strong>@RequiredPermissionGroupForFullAccess</strong> or <strong>@MISPermissionGroupForFullAccess</strong> to access this system.
-                                                        </p>
-                                                    }
-                                                    else if (RequiredPermissionGroupForFullAccess != null)
-                                                    {
-                                                        <p>
-                                                            You need to be a member of the group <strong>@RequiredPermissionGroupForFullAccess</strong> to access this system.
-                                                        </p>
-                                                    }
-                                                    else if (MISPermissionGroupForFullAccess != null)
-                                                    {
-                                                        <p>
-                                                            You need to be a member of the group <strong>@MISPermissionGroupForFullAccess</strong> to access this system.
+                                                            Sorry, @(SystemUser?.Forename ?? "Unknown User"), this part of the system is only accessible to people in the Safeguarding group.
                                                         </p>
                                                     }
                                                     else
                                                     {
                                                         <p>
-                                                            You need to be a member of the correct group to access this system.
+                                                            Sorry, @(SystemUser?.Forename ?? "Unknown User"), you have not been granted access to this part of the system.
                                                         </p>
                                                     }
+                                                }
+                                                else
+                                                {
+                                                    <p>
+                                                        Sorry, @(SystemUser?.Forename ?? "Unknown User"), you have not been granted access to this system.
+                                                    </p>
+                                                }
+                                                
+                                                <p>
+                                                    If you believe you should have access then please contact the MIS Department.
+                                                </p>
+
+                                                @if (RequiredPermissionGroupForFullAccess != null || MISPermissionGroupForFullAccess != null || SafeguardingPermissionGroupForFullAccess != null)
+                                                {
+                                                    <p>
+                                                        You need to be a member of the following groups:
+                                                        <ul>
+                                                            @if (RequiredPermissionGroupForFullAccess != null)
+                                                            {
+                                                                <li><strong>@RequiredPermissionGroupForFullAccess</strong></li>
+                                                            }
+                                                            @if (MISPermissionGroupForFullAccess != null)
+                                                            {
+                                                                <li><strong>@MISPermissionGroupForFullAccess</strong></li>
+                                                            }
+                                                            @if (SafeguardingPermissionGroupForFullAccess != null)
+                                                            {
+                                                                <li><strong>@SafeguardingPermissionGroupForFullAccess</strong></li>
+                                                            }
+                                                        </ul>
+
+                                                        to access this system.
+                                                    </p>
                                                 }
                                                 else
                                                 {
@@ -149,8 +168,12 @@
 </div>
 
 @code {
+    [Parameter]
+    public string? Reason { get; set; }
+
     public string? RequiredPermissionGroupForFullAccess { get; set; }
     public string? MISPermissionGroupForFullAccess { get; set; }
+    public string? SafeguardingPermissionGroupForFullAccess { get; set; }
 
     public SystemUserModel? SystemUser { get; set; }
     public SystemUserModel? AlreadyLoggedInUser { get; set; }
@@ -159,6 +182,7 @@
     {
         RequiredPermissionGroupForFullAccess = configuration["RequiredPermissionGroupForFullAccess"];
         MISPermissionGroupForFullAccess = configuration["MISPermissionGroupForFullAccess"];
+        SafeguardingPermissionGroupForFullAccess = configuration["SafeguardingPermissionGroupForFullAccess"];
 
         await GetUser();
     }

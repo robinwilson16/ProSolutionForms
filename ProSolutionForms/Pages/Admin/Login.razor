@@ -73,6 +73,10 @@
                                                                         {
                                                                             <li class="list-group-item bg-info">@group.GroupName</li>
                                                                         }
+                                                                        else if (SafeguardingPermissionGroupForFullAccess != null && group.GroupName == SafeguardingPermissionGroupForFullAccess)
+                                                                        {
+                                                                            <li class="list-group-item bg-info">@group.GroupName</li>
+                                                                        }
                                                                         else
                                                                         {
                                                                             <li class="list-group-item">@group.GroupName</li>
@@ -165,6 +169,7 @@
     public bool? IsPermitted { get; set; }
     public string? RequiredPermissionGroupForFullAccess { get; set; }
     public string? MISPermissionGroupForFullAccess { get; set; }
+    public string? SafeguardingPermissionGroupForFullAccess { get; set; }
 
     //For Testing
     public bool? DisableSelfRedirection { get; set; }
@@ -174,6 +179,7 @@
     {
         RequiredPermissionGroupForFullAccess = configuration["RequiredPermissionGroupForFullAccess"];
         MISPermissionGroupForFullAccess = configuration["MISPermissionGroupForFullAccess"];
+        SafeguardingPermissionGroupForFullAccess = configuration["SafeguardingPermissionGroupForFullAccess"];
 
         IsLoggedIn = false;
         DisableSelfRedirection = false;
@@ -458,11 +464,15 @@
         {
             return true;
         }
-        else if (SystemUser?.Email?.ToLower() == "robin.wilson@shcg.ac.uk" || SystemUser?.Email?.ToLower() == "mark.smith@shcg.ac.uk" || SystemUser?.Email?.ToLower() == "linda.fletcher@shcg.ac.uk")
+        else if (SafeguardingPermissionGroupForFullAccess != null && IsUserInGroup(SafeguardingPermissionGroupForFullAccess) == true)
         {
-            //Fix whilst waiting for IT to approve Entra Permissions to Read Group Memberships
             return true;
         }
+        // else if (SystemUser?.Email?.ToLower() == "robin.wilson@shcg.ac.uk" || SystemUser?.Email?.ToLower() == "mark.smith@shcg.ac.uk" || SystemUser?.Email?.ToLower() == "linda.fletcher@shcg.ac.uk")
+        // {
+        //     //Fix whilst waiting for IT to approve Entra Permissions to Read Group Memberships
+        //     return true;
+        // }
         else
         {
             return false;

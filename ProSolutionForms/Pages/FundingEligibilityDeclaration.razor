@@ -635,6 +635,11 @@
 
     private string? submitEndPoint;
 
+    private string? ButtonYesTrueCSS;
+    private string? ButtonYesFalseCSS;
+    private string? ButtonNoTrueCSS;
+    private string? ButtonNoFalseCSS;
+
     protected override async Task OnInitializedAsync()
     {      
         if (Layout != null)
@@ -646,6 +651,21 @@
 
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
             AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
+
+        if (FundingEligibilityDeclarationID != null)
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
+        else
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
 
         if (StudentGUID == null)
         {

@@ -6,12 +6,16 @@
 
 @using ProSolutionForms.Components
 @using ProSolutionForms.Models
+@using ProSolutionForms.Services
 @using ProSolutionForms.Shared
 @using System.Net
+
 @inject HttpClient Http
 @inject IConfiguration configuration
 @inject NavigationManager NavManager
 @inject ILogger<CriminalConviction> Logger
+@inject AppData appData
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Criminal Conviction Form</PageTitle>
 
@@ -262,7 +266,7 @@
                                                 <option value="false">No</option>
                                             </CustomBoolInputSelect>
                                             <div class="d-grid gap-2 d-md-block">
-                                                <button type="button" class="btn @(criminalConviction!.NoOffencesToDeclare == true? "btn-primary" : "btn-outline-primary") me-md-3" @onclick="(e) => NoOffencesToDeclareToggle()"><i class="@(criminalConviction!.NoOffencesToDeclare == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                                <button type="button" class="btn @(criminalConviction!.NoOffencesToDeclare == true? ButtonYesTrueCSS : ButtonYesFalseCSS) me-md-3" @onclick="(e) => NoOffencesToDeclareToggle()"><i class="@(criminalConviction!.NoOffencesToDeclare == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
                                             </div>
                                             <ValidationMessage For="@(() => criminalConviction!.NoOffencesToDeclare)" />
                                         </div>
@@ -368,7 +372,7 @@
                                         <option value="false">No</option>
                                     </CustomBoolInputSelect>
                                     <div class="d-grid gap-2 d-md-block">
-                                        <button type="button" class="btn @(criminalConviction!.AgreeInfoIsCorrectStudent == true? "btn-primary" : "btn-outline-primary") me-md-3" @onclick="(e) => AgreeInfoIsCorrectStudentToggle()"><i class="@(criminalConviction!.AgreeInfoIsCorrectStudent == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                        <button type="button" class="btn @(criminalConviction!.AgreeInfoIsCorrectStudent == true? ButtonYesTrueCSS : ButtonYesFalseCSS) me-md-3" @onclick="(e) => AgreeInfoIsCorrectStudentToggle()"><i class="@(criminalConviction!.AgreeInfoIsCorrectStudent == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
                                     </div>
                                     <ValidationMessage For="@(() => criminalConviction!.AgreeInfoIsCorrectStudent)" />
                                 </div>
@@ -480,6 +484,11 @@
 
     private string? submitEndPoint;
 
+    private string? ButtonYesTrueCSS;
+    private string? ButtonYesFalseCSS;
+    private string? ButtonNoTrueCSS;
+    private string? ButtonNoFalseCSS;
+
     protected override async Task OnInitializedAsync()
     {     
         if (Layout != null)
@@ -492,9 +501,30 @@
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
             AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
 
+        if (CriminalConvictionID != null)
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
+        else
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
+
+        await GetUser();
+
         if (StudentGUID == null) {
             isError = true;
             loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
+        }
+        else if (IsUserPermitted() != true)
+        {
+            NavManager.NavigateTo("Admin/Unauthorised/Safeguarding");
         }
         else {
             if (AcademicYearID != null)
@@ -960,7 +990,7 @@
                 ";
                 }
             }
-            
+
             FormDetails += $@"
                 <li>Signed Student: {criminalConviction?.SignedStudent}</li>
                 <li>Signed Student Date: {criminalConviction?.SignedStudentDate}</li>
@@ -978,7 +1008,7 @@
                     <p>The Criminal Conviction Form has been completed by {student?.Forename} {student?.Surname}.</p>
                     <p>Details:</p>
                     <ul>
-                        {FormDetails}
+                {FormDetails}
                     </ul>
                 </body>
             </html>";
@@ -1060,6 +1090,49 @@
         }
 
         return Template;
+    }
+
+    public SystemUserModel? SystemUser { get; set; }
+    public SystemUserModel? AlreadyLoggedInUser { get; set; }
+
+    public async Task GetUser()
+    {
+        AlreadyLoggedInUser = await LocalStorageFunctions.GetItem<SystemUserModel>(JSRuntime, Logger, "CurrentUser");
+
+        if (appData.CurrentUser?.Email != null)
+            SystemUser = appData.CurrentUser;
+        else if (AlreadyLoggedInUser?.Email != null)
+            SystemUser = AlreadyLoggedInUser;
+        else
+            SystemUser = null;
+    }
+
+    public bool IsUserPermitted()
+    {
+        string? SafeguardingPermissionGroupForFullAccess = configuration["SafeguardingPermissionGroupForFullAccess"];
+        if (appData?.CurrentUser?.Email == null && CriminalConvictionID == null)
+        {
+            //Anonymous users can access the form if the form is blank
+            return true;
+        }
+        else if (SafeguardingPermissionGroupForFullAccess != null && IsUserInGroup(SafeguardingPermissionGroupForFullAccess) == true)
+        {
+            return true;
+        }
+        // else if (SystemUser?.Email?.ToLower() == "robin.wilson@shcg.ac.uk" || SystemUser?.Email?.ToLower() == "mark.smith@shcg.ac.uk" || SystemUser?.Email?.ToLower() == "linda.fletcher@shcg.ac.uk")
+        // {
+        //     //Fix whilst waiting for IT to approve Entra Permissions to Read Group Memberships
+        //     return true;
+        // }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool IsUserInGroup(string groupName)
+    {
+        return SystemUser?.Groups?.Any(g => g.GroupName == groupName) ?? false;
     }
 
     private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
