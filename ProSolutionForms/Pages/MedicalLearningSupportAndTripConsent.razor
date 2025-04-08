@@ -1181,6 +1181,26 @@
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <label class="col-form-label">
+                                        <i class="fa-solid fa-angles-right"></i> If you are aged <strong>over 18</strong>, can we contact your next of kin to discuss your progress or welfare. If you are aged under 18 please select the Yes option.
+                                    </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.CanContactStudent18PlusNOK" class="form-select d-none">
+                                        <option value="">-- Please Select --</option>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </CustomBoolInputSelect>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanContactStudent18PlusNOK == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => CanContactStudent18PlusNOKToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                        <button type="button" class="btn @(medicalLearningSupportAndTripConsent!.CanContactStudent18PlusNOK == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => CanContactStudent18PlusNOKToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                    </div>
+                                    <ValidationMessage For="@(() => medicalLearningSupportAndTripConsent!.CanContactStudent18PlusNOK)" />
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="col-form-label">
                                         <i class="fa-solid fa-angles-right"></i> Do you have any pending, ongoing, or outstanding criminal investigations or convictions?
                                     </label>
                                 </div>
@@ -1733,6 +1753,7 @@
     public void HasAccessArrangementsToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasAccessArrangements = trueOrFalse;
     public void HadFurtherSupportAtSchoolOrCollegeToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HadFurtherSupportAtSchoolOrCollege = trueOrFalse;
     public void CanContactPriorSchoolOrCollegeToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.CanContactPriorSchoolOrCollege = trueOrFalse;
+    public void CanContactStudent18PlusNOKToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.CanContactStudent18PlusNOK = trueOrFalse;
     public void HasCriminalConvictionsToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasCriminalConvictions = trueOrFalse;
     public void CanShareInformationWithPotentialEmployersToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.CanShareInformationWithPotentialEmployers = trueOrFalse;
     public void HasGivenTripConsentStudentToggle(bool? trueOrFalse) => medicalLearningSupportAndTripConsent!.HasGivenTripConsentStudent = trueOrFalse;

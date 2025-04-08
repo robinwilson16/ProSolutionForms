@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "ProSolutionForms",
   "resources": {
-    "hash": "sha256-Zy+3uyfus1NlUkDNylCqoMC6pzOrVXY/tY9W0g02Y8Y=",
+    "hash": "sha256-v7F/YDGJV6p7UC7iHZsM3J065NmNINz2TGTzt0RTR+o=",
     "fingerprinting": {
       "Blazored.FluentValidation.x0xsecpmtx.wasm": "Blazored.FluentValidation.wasm",
       "FluentValidation.a26tmul8eq.wasm": "FluentValidation.wasm",
@@ -23,7 +23,7 @@
       "Microsoft.Extensions.Primitives.iwuwfb4xug.wasm": "Microsoft.Extensions.Primitives.wasm",
       "Microsoft.JSInterop.uu8izyvyxp.wasm": "Microsoft.JSInterop.wasm",
       "Microsoft.JSInterop.WebAssembly.p386u0jty9.wasm": "Microsoft.JSInterop.WebAssembly.wasm",
-      "ProSolutionForms.w30yiuqq83.wasm": "ProSolutionForms.wasm",
+      "ProSolutionForms.kq7stkeu46.wasm": "ProSolutionForms.wasm",
       "System.Collections.Concurrent.o4mkomk0s5.wasm": "System.Collections.Concurrent.wasm",
       "System.Collections.Immutable.arkvqw8u9c.wasm": "System.Collections.Immutable.wasm",
       "System.Collections.NonGeneric.lr3hvles3o.wasm": "System.Collections.NonGeneric.wasm",
@@ -102,7 +102,7 @@
       "Microsoft.Extensions.Primitives.iwuwfb4xug.wasm": "sha256-jqBiRQYX22mszZWeW7gI0bX+TeVhNzGOag/lKbW9ba4=",
       "Microsoft.JSInterop.uu8izyvyxp.wasm": "sha256-qsd7mmvxSN+titwo7yemRryk0nqW7vfS1mopEm2vjoc=",
       "Microsoft.JSInterop.WebAssembly.p386u0jty9.wasm": "sha256-hbzWuXrlepIqY/y+nQ2ZAFer2/njy1dc+Y4LUaAaL5E=",
-      "ProSolutionForms.w30yiuqq83.wasm": "sha256-DN9yZNIhjn1jw4IA+AvCXdgCXAcM8g4eCmkKsjet22E=",
+      "ProSolutionForms.kq7stkeu46.wasm": "sha256-LIP6QwzoUWUduv10H6fYm1gFG1ka2mrz9Tc11KnBfYk=",
       "System.Collections.Concurrent.o4mkomk0s5.wasm": "sha256-CB3dKoWP048/7vSYxRx09oMaeanS2Q1WIrv4uGnYb7g=",
       "System.Collections.Immutable.arkvqw8u9c.wasm": "sha256-1lTyDCKEWiMWYvI6NCUcrrDIyacBPSUg7IOU1PVPtgM=",
       "System.Collections.NonGeneric.lr3hvles3o.wasm": "sha256-r//0hppeM5e0mIISYzXtFoWj7ns4I3bAJrqVDBzh9sY=",
