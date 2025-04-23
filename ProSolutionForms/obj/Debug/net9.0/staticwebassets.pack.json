@@ -81,6 +81,10 @@
       "PackagePath": "staticwebassets\\js\\toastInterop.js"
     },
     {
+      "Id": "C:\\Users\\robin.wilson\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\js\\windowInterop.js",
+      "PackagePath": "staticwebassets\\js\\windowInterop.js"
+    },
+    {
       "Id": "C:\\Users\\robin.wilson\\source\\repos\\ProSolutionForms\\ProSolutionForms\\wwwroot\\lib\\bootstrap-icons\\bootstrap-icons.svg",
       "PackagePath": "staticwebassets\\lib\\bootstrap-icons\\bootstrap-icons.svg"
     },

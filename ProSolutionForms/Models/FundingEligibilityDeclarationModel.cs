@@ -23,6 +23,7 @@ namespace ProSolutionForms.Models
         public string? AcademicYearID { get; set; }
         public string? StudentRef { get; set; }
         public Guid? StudentGUID { get; set; }
+        public string? CourseCode { get; set; }
     }
 
     public class FundingEligibilityDeclarationValidator : AbstractValidator<FundingEligibilityDeclarationModel>

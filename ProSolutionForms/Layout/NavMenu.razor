@@ -61,6 +61,26 @@
                 }
             </NavLink>
         </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="InterviewHE/25/26/05a13fa1-22a3-457e-86be-389806731e3f">
+                <i class="fa-solid fa-clipboard-question @(IconMenuActive == true? "" : "WithDescription")"></i>
+                @if (!@IconMenuActive)
+                {
+                    <label> HE Interview Form</label>
+                }
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="OfferHE/25/26/05a13fa1-22a3-457e-86be-389806731e3f/28918">
+                <i class="fa-solid fa-handshake @(IconMenuActive == true? "" : "WithDescription")"></i>
+                @if (!@IconMenuActive)
+                {
+                    <label> HE Offer Form</label>
+                }
+            </NavLink>
+        </div>
     </nav>
     @* <div class="fixed-bottom VersionText m-3">Version @ProductVersion</div> *@
 </div>

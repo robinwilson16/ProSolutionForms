@@ -17,14 +17,15 @@ namespace ProSolutionForms.Shared
                     "ApplicationSourceID",
                     "ApplicationSourceCode",
                     "ApplicationSourceName",
-                    "ApplicationDate",
-                    "CourseCode",
-                    "CourseTitle",
                     "MedicalFormCompleted",
                     "MedicalConsentFormReceivedCode",
                     "MedicalConsentFormReceivedName",
                     "TripPhotographicCosentObtainedCode",
                     "TripPhotographicCosentObtainedName",
+                    "ApplicationDate",
+                    "CourseCode",
+                    "CourseTitle",
+                    "MedicalFormHasDeclaredCriminalConvictions",
                     "CriminalConvictionFormCompleted",
                     "FundingEligibilityFormCompleted",
                     "StudentGUID",
@@ -41,9 +42,39 @@ namespace ProSolutionForms.Shared
                     "CriminalConvictionFormNumberOfSubmissions",
                     "FundingEligibilityFormLatestSubmissionID",
                     "FundingEligibilityFormLatestSubmissionDate",
-                    "FundingEligibilityFormNumberOfSubmissions"
+                    "FundingEligibilityFormNumberOfSubmissions",
+                    "InterviewHEFormLatestSubmissionID",
+                    "InterviewHEFormLatestSubmissionDate",
+                    "InterviewHEFormNumberOfSubmissions",
+                    "OfferHEFormLatestSubmissionID",
+                    "OfferHEFormLatestSubmissionDate",
+                    "OfferHEFormNumberOfSubmissions"
                 }
             },
+            {
+                nameof(InterviewHEModel), new[]
+                {
+                    "CourseCode",
+                    "MethodOfFunding",
+                    "TuitionFeeAgreedTo",
+                    "HasDifficultiesAndOrDisabilities",
+                    "InterviewOutcome",
+                    "CreatedBy",
+                    "CreatedDate"
+                }
+            },
+            {
+                nameof(OfferHEModel), new[]
+                {
+                    "CourseCode",
+                    "TuitionFee",
+                    "MethodOfFundingID",
+                    "HighestQualOnEntryLevelID",
+                    "LastEducationalEstablishmentAttendedOfferID",
+                    "CreatedBy",
+                    "CreatedDate"
+                }
+            }
         };
     }
 }

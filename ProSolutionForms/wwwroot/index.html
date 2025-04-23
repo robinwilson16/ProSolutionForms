@@ -113,8 +113,12 @@
             document.body.appendChild(bodyScript6);
 
             let bodyScript7 = document.createElement('script');
-            bodyScript7.src = `${appBase.href}_framework/blazor.webassembly.js`;
+            bodyScript7.src = `${appBase.href}js/windowInterop.js`;
             document.body.appendChild(bodyScript7);
+
+            let bodyScript8 = document.createElement('script');
+            bodyScript8.src = `${appBase.href}_framework/blazor.webassembly.js`;
+            document.body.appendChild(bodyScript8);
 
             //Manifest
             let manifest = document.createElement('link');

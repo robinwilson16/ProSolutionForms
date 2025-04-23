@@ -245,7 +245,7 @@ namespace ProSolutionForms.Shared
             string[]? modelAndPropertyArray = modelAndProperty?.Replace("<data:", "").Replace(">", "").Split(".");
             string? propertyToFormatModel = modelAndPropertyArray?[0];
             string? propertyToFormat = modelAndPropertyArray?[1];
-            string? modelTypeName = $"VehicleManager.Models.{propertyToFormatModel}Model";
+            string? modelTypeName = $"ProSolutionForms.Models.{propertyToFormatModel}Model";
             string? propertyName = propertyToFormat;
             
             Console.WriteLine($"The type of the property '{propertyName}' in model '{modelTypeName}' is...");

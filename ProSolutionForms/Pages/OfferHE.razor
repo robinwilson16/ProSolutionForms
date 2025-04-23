@@ -1,0 +1,1608 @@
+﻿@page "/OfferHE"
+@page "/OfferHE/{StudentGUID}"
+@page "/OfferHE/{StudentGUID}/{ApplicationCourseID:int}"
+@page "/OfferHE/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
+@page "/OfferHE/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{ApplicationCourseID:int}"
+@page "/OfferHE/View/{StudentGUID}/{OfferHEID:int}"
+@page "/OfferHE/View/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{OfferHEID:int}"
+
+@using ProSolutionForms.Components
+@using ProSolutionForms.Models
+@using ProSolutionForms.Shared
+@using System.Net
+@inject HttpClient Http
+@inject IConfiguration configuration
+@inject NavigationManager NavManager
+@inject ILogger<MedicalLearningSupportAndTripConsentModel> Logger
+
+<PageTitle>HE Offer Form</PageTitle>
+
+<Modal @ref="modalInfo">
+    <Title><i class="fa-solid fa-circle-info"></i> @msgInfoTitle</Title>
+    <Body>
+        <p>
+            @msgInfo
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalError">
+    <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
+    <Body>
+        <div class="alert alert-danger" role="alert">
+            @msgError
+        </div>
+        @if (msgErrorStackTrace != null) 
+        {
+            <p><i class="fa-solid fa-bug"></i> Stack Trace:</p>
+            <pre class="pre-scrollable ErrorDetails">@msgErrorStackTrace</pre>
+        }
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalConfirm">
+    <Title><i class="fa-solid fa-circle-question"></i> @msgConfirmTitle</Title>
+    <Body>
+        <p>
+            @msgConfirm
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-danger" @onclick="FormAction"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
+    </Footer>
+</Modal>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md text-center">
+            <img class="img-fluid CollegeLogo" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+        </div>
+    </div>
+</div>
+
+<div class="bd-callout bd-callout-SHCG-blue bd-callout-grey GreyBackground">
+    <div class="container">
+        <div class="row">
+            <div class="col-md text-center">
+                <h3 class="mt-3 mb-3"><i class="fa-solid fa-handshake"></i> HE Offer Form</h3>
+            </div>
+        </div>
+    </div>
+
+    @if (loadDataErrorMsg != null) 
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                @loadDataErrorMsg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (OfferHEID != null && offerHE == null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                Unfortunately this form cannot be loaded as the HE Offer Form ID is invalid or not for this student.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (formSubmitted == true || existingOfferHE?.StudentDetailID != null && OfferHEID == null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-success hstack gap-3" role="alert">
+                        <div class="ms-auto me-3">
+                            <h1><i class="fa-solid fa-clipboard-check"></i></h1>
+                        </div>
+                        <div class="me-auto">
+                            <h4 class="alert-heading">HE Offer Form Successfully Submitted</h4>
+                            <hr>
+                            @if (existingOfferHE?.StudentDetailID != null)
+                            {
+                                <p>
+                                    You have already completed your HE Offer Form for @selectedApplication?.CourseCode - @selectedApplication?.CourseTitle.<br />
+                                    If you would like to make any changes please get in touch
+                                </p>
+                            }
+                            else {
+                                <p>
+                                    Thank you for completing your HE Offer Form.
+                                </p>
+                            }
+
+                        </div>
+                    </div>
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="row">
+                            <div class="col-md text-end">
+                                <button type="button" class="btn btn-success" @onclick="GoToSHCGHomepage"><i class="fa-solid fa-arrow-up-right-from-square"></i> Go To The SHCG Website</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if(student == null || offerHE == null) {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-primary text-center" role="alert">
+                        <h1>
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else {
+        <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
+            <div class="container">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md text-center">
+                        <h4>Personal Information</h4>
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-hashtag"></i> Student Ref
+                    </div>
+                    <div class="col-md-8">
+                        @student?.StudentRef
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-user"></i> Name
+                    </div>
+                    <div class="col-md-8">
+                        <strong>@student?.Forename @student?.Surname</strong>
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-calendar-days"></i> Academic Year
+                    </div>
+                    <div class="col-md-8">
+                        @student?.AcademicYearID
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (ApplicationCourseID == null && offerHE.ApplicationCourseID == null)
+        {
+            <div class="alert alert-warning hstack gap-3" role="alert">
+                <div>
+                    <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                </div>
+                <div>
+                    <p>
+                        No application was specified for @student?.Forename @student?.Surname for @student?.AcademicYearID.
+                    </p>
+                    <p>
+                        Please only use the link you were sent in the email and get in touch if you are still having issues.
+                    </p>
+                </div>
+            </div>
+        }
+        else
+        {
+            if (selectedApplication?.ApplicationCourseID == null)
+            {
+                <div class="alert alert-warning hstack gap-3" role="alert">
+                    <div>
+                        <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                    </div>
+                    <div>
+                        <p>
+                            Error loading application with Student Application ID @ApplicationCourseID
+                        </p>
+                        <p>
+                            Please ensure you are using the link that was sent to you via email.
+                        </p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success hstack gap-3 sticky-top" role="alert">
+                    <div>
+                        <h1><i class="fa-solid fa-book"></i></h1>
+                    </div>
+                    <div class="ms-auto me-auto text-center">
+                        <h4 class="alert-heading">
+                            <i class="fa-regular fa-file-lines"></i> Offer Form for @selectedApplication?.CourseCode - @selectedApplication?.CourseTitle <span class="badge text-bg-danger"><i class="fa-solid fa-sterling-sign"></i> @selectedApplication?.YearlyCourseFee Per Year</span>
+                        </h4>
+                        <p>
+                            <strong>@selectedApplication?.DeptName (@selectedApplication?.DeptCode) Department</strong>
+                        </p>
+                    </div>
+                </div>
+
+                @if (existingOffersHE?.Count > 0)
+                {
+                    <div class="alert alert-warning hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-regular fa-file-lines"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                @student?.Forename @student?.Surname already has @existingOffersHE?.Count Offers for the following courses: @String.Join(", ", existingOffersHE?.Select(i => i.CourseCode).OrderBy(i => i)!).
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                <EditForm FormName="offerHE" Model="offerHE" OnValidSubmit="SubmitForm">
+                    <FluentValidationValidator @ref="_fluentValidationValidator" />
+
+                    <div class="bd-callout bd-callout-SHCG-green bd-callout-grey WhiteBackground">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md">
+                                    <div class="row mb-3 align-items-center">
+                                        <div class="col-md text-center">
+                                            <h4>Funding Information</h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-primary hstack gap-3" role="alert">
+                                        <div>
+                                            <h1><i class="fa-solid fa-circle-info"></i></h1>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                We need you to confirm how you will be funding your course so please complete the information below so we can fully enrol you this course
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <datalist class="col-4" id="MethodsOfFunding">
+                                        @foreach (var option in Enum.GetValues(typeof(MethodOfFunding)).Cast<MethodOfFunding>())
+                                        {
+                                            <option value="@((int)option)">@option.GetEnumDisplayName()</option>
+                                        }
+                                    </datalist>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Method of Funding</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group mb-3">
+                                                <InputNumber @bind-Value="methodOfFundingValue" class="form-control" list="MethodsOfFunding" />
+                                                <span class="input-group-text w-75">
+                                                    @offerHE!.MethodOfFundingID.GetEnumDisplayName()
+                                                </span>
+                                            </div>
+
+                                            <ValidationMessage For="@(() => offerHE!.MethodOfFundingID)" />
+                                        </div>
+                                    </div>
+
+                                    @if (offerHE.MethodOfFundingID == MethodOfFunding.Employer)
+                                    {
+                                        <div class="alert alert-warning" role="alert">
+                                            <h4 class="alert-heading">Employer Details</h4>
+                                            <hr>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Name</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <InputText @bind-Value="offerHE!.EmployerName" class="form-control" />
+                                                    <ValidationMessage For="@(() => offerHE!.EmployerName)" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Address 1</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <InputText @bind-Value="offerHE!.EmployerAddress1" class="form-control" />
+                                                    <ValidationMessage For="@(() => offerHE!.EmployerAddress1)" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Address 2</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <InputText @bind-Value="offerHE!.EmployerAddress2" class="form-control" />
+                                                    <ValidationMessage For="@(() => offerHE!.EmployerAddress2)" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Address 3</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <InputText @bind-Value="offerHE!.EmployerAddress3" class="form-control" />
+                                                    <ValidationMessage For="@(() => offerHE!.EmployerAddress3)" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Post Code</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <InputText @bind-Value="offerHE!.EmployerPostCode" class="form-control" />
+                                                    <ValidationMessage For="@(() => offerHE!.EmployerPostCode)" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Contact Tel</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <InputText @bind-Value="offerHE!.EmployerTel" class="form-control" />
+                                                    <ValidationMessage For="@(() => offerHE!.EmployerTel)" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Email</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <InputText @bind-Value="offerHE!.EmployerEmail" class="form-control" />
+                                                    <ValidationMessage For="@(() => offerHE!.EmployerEmail)" />
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    }
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> UCAS Number (if you have one)</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <InputNumber @bind-Value="offerHE!.UCASNumber" class="form-control" />
+                                            <ValidationMessage For="@(() => offerHE!.UCASNumber)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Occupation (if applicable)</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <InputText @bind-Value="offerHE!.Occupation" class="form-control" />
+                                            <ValidationMessage For="@(() => offerHE!.Occupation)" />
+                                        </div>
+                                    </div>
+
+                                    <datalist class="col-4" id="TermTimeAccomodations">
+                                        @foreach (var option in Enum.GetValues(typeof(TermTimeAccomodation)).Cast<TermTimeAccomodation>())
+                                        {
+                                            <option value="@((int)option)">@option.GetEnumDisplayName()</option>
+                                        }
+                                    </datalist>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Term Time Accomodation</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group mb-3">
+                                                <InputNumber @bind-Value="termTimeAccomodationValue" class="form-control" list="TermTimeAccomodations" />
+                                                <span class="input-group-text w-75">
+                                                    @offerHE!.TermTimeAccomodationID.GetEnumDisplayName()
+                                                </span>
+                                            </div>
+
+                                            <ValidationMessage For="@(() => offerHE!.TermTimeAccomodationID)" />
+                                        </div>
+                                    </div>
+
+                                    @if (offerHE?.TermTimeAccomodationID == TermTimeAccomodation.Other)
+                                    {
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Term Time Accomodation other detail</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="offerHE!.TermTimeAccomodationOtherDetail" class="form-control" />
+                                                <ValidationMessage For="@(() => offerHE!.TermTimeAccomodationOtherDetail)" />
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <datalist class="col-4" id="HighestQualOnEntryLevels">
+                                        @foreach (var option in Enum.GetValues(typeof(HighestQualOnEntryLevel)).Cast<HighestQualOnEntryLevel>())
+                                        {
+                                            <option value="@((int)option)">@option.GetEnumDisplayName()</option>
+                                        }
+                                    </datalist>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Highest Level of Qualification Previously Attained</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group mb-3">
+                                                <InputNumber @bind-Value="highestQualOnEntryLevelValue" class="form-control" list="HighestQualOnEntryLevels" />
+                                                <span class="input-group-text w-75">
+                                                    @offerHE!.HighestQualOnEntryLevelID.GetEnumDisplayName()
+                                                </span>
+                                            </div>
+
+                                            <ValidationMessage For="@(() => offerHE!.HighestQualOnEntryLevelID)" />
+                                        </div>
+                                    </div>
+
+                                    <datalist class="col-4" id="LastEducationalEstablishmentsAttendedOffer">
+                                        @foreach (var option in Enum.GetValues(typeof(LastEducationalEstablishmentAttendedOffer)).Cast<LastEducationalEstablishmentAttendedOffer>())
+                                        {
+                                            <option value="@((int)option)">@option.GetEnumDisplayName()</option>
+                                        }
+                                    </datalist>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> The type of Educational Institution you last attended (before studying at the college)</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group mb-3">
+                                                <InputNumber @bind-Value="lastEducationalEstablishmentAttendedOfferValue" class="form-control" list="LastEducationalEstablishmentsAttendedOffer" />
+                                                <span class="input-group-text w-75">
+                                                    @offerHE!.LastEducationalEstablishmentAttendedOfferID.GetEnumDisplayName()
+                                                </span>
+                                            </div>
+
+                                            <ValidationMessage For="@(() => offerHE!.LastEducationalEstablishmentAttendedOfferID)" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md">
+                                    <div class="row mb-3 align-items-center">
+                                        <div class="col-md text-center">
+                                            <h4>Attachments</h4>
+                                        </div>
+                                    </div>
+
+                                    @if (offerHE?.Attachments != null)
+                                    {
+                                        int? attachmentRow = 0;
+                                        <div class="alert alert-info" role="alert">
+                                            <h4 class="alert-heading"><i class="fa-solid fa-paperclip"></i> Attachments</h4>
+
+                                            @foreach (var attachment in offerHE!.Attachments)
+                                            {
+                                                attachmentRow++;
+
+                                                <div class="row g-3 mb-3">
+                                                    <div class="col-md">
+                                                        <div class="card">
+                                                            <div class="card-body">
+
+                                                                <div class="row mb-3">
+                                                                    <div class="col-md">
+
+                                                                        <div class="row g-3 mb-3">
+                                                                            <div class="col-md-4">
+                                                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Attachment Type</label>
+                                                                            </div>
+                                                                            <div class="col-md-8">
+                                                                                <InputSelect @bind-Value="attachment.AttachmentTypeID" class="form-select">
+                                                                                    @foreach (var attachmentType in Enum.GetValues<AttachmentType>())
+                                                                                    {
+                                                                                        <option value="@attachmentType">@attachmentType.GetEnumDisplayName()</option>
+                                                                                    }
+                                                                                </InputSelect>
+
+                                                                                <ValidationMessage For="@(() => attachment!.AttachmentTypeID)" />
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row g-3 mb-3">
+                                                                            <div class="col-md-4">
+                                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Attachment</label>
+                                                                            </div>
+                                                                            <div class="col-md-8">
+                                                                                <InputFile @bind-Value="attachment!.AttachmentContent" class="form-control" accept="@FileFunctions.GetValidFileTypesAsString()" OnChange="(e) => LoadFile(e, attachment.OfferHEAttachmentID)" />
+                                                                                <ValidationMessage For="@(() => attachment!.AttachmentContent)" />
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row g-3 mb-3">
+                                                                            <div class="col-md-4">
+                                                                                <label class="col-form-label"><i class="fa-solid fa-note-sticky"></i> Notes</label>
+                                                                            </div>
+                                                                            <div class="col-md-8">
+                                                                                <InputTextArea @bind-Value="attachment!.Notes" class="form-control" />
+                                                                                <ValidationMessage For="@(() => attachment!.Notes)" />
+                                                                            </div>
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                    @if (attachment.AttachmentContent != null)
+                                                                    {
+                                                                        if (attachment?.AttachmentContentType?.Contains("image") ?? false)
+                                                                        {
+                                                                            <div class="col-md-3">
+                                                                                <div class="card">
+                                                                                    <div class="card-body">
+                                                                                        <a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(attachment.AttachmentContent ?? new byte[0]), attachment.AttachmentContentType)" type="@attachment.AttachmentContentType" download="@attachment.AttachmentFileName">
+                                                                                            <img src="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(attachment.ImageThumbnail ?? new byte[0]), attachment.AttachmentContentType)" class="img-fluid img-thumbnail" alt="Download @attachment.AttachmentFileName">
+                                                                                        </a>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <div class="col-md-3">
+                                                                                <div class="card">
+                                                                                    <div class="card-body text-center">
+                                                                                        <a href="@string.Format("data:{1}+xml;base64,{0}", Convert.ToBase64String(attachment?.AttachmentContent ?? new byte[0]), attachment?.AttachmentContentType)" type="@attachment?.AttachmentContentType" download="@attachment?.AttachmentFileName">
+                                                                                            <h1><i class="fa-solid fa-file-lines"></i></h1>
+                                                                                        </a>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                    }
+
+                                                                </div>
+
+                                                                <div class="row g-3 mb-3">
+                                                                    <div class="col-md">
+                                                                        <div class="d-grid gap-2 d-md-block text-end">
+                                                                            <button type="button" class="btn btn-danger" @onclick="() => RemoveAttachmentConfirm(attachment?.OfferHEAttachmentID ?? 0)"><i class="fa-solid fa-rectangle-xmark"></i> Remove This Attachment</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <div class="alert alert-secondary" role="alert">
+                                                <div class="row">
+                                                    <div class="col-md">
+                                                        <div class="d-grid gap-2 d-md-block text-end">
+                                                            <button type="button" class="btn btn-warning me-md-3" @onclick="AddAttachment"><i class="fa-solid fa-file-import"></i> Add Another Attachment</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="alert alert-warning hstack gap-3" role="alert">
+                                        <div>
+                                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                If you are unable to provide one of these forms of ID please contact us.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bd-callout bd-callout-SHCG-blue bd-callout-grey WhiteBackground">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md">
+                                    <div class="row mb-3 align-items-center">
+                                        <div class="col-md text-center">
+                                            <h4>Declarations</h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> I confirm that the information provided on this form is correct, and that any attached images are of genuine documents.</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <CustomBoolInputSelect @bind-Value="offerHE!.ConfirmInformationAndAttachmentsAreAccurate" class="form-select d-none">
+                                                <option value="">-- Please Select --</option>
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </CustomBoolInputSelect>
+                                            <div class="d-grid gap-2 d-md-block">
+                                                <button type="button" class="btn @(offerHE!.ConfirmInformationAndAttachmentsAreAccurate == true? ButtonYesTrueCSS : ButtonYesFalseCSS) me-md-3" @onclick="(e) => ConfirmInformationAndAttachmentsAreAccurateToggle()"><i class="@(offerHE!.ConfirmInformationAndAttachmentsAreAccurate == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                            </div>
+                                            <ValidationMessage For="@(() => offerHE!.ConfirmInformationAndAttachmentsAreAccurate)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> I confirm that I have read the terms and conditions for South Hampshire College Group Higher Education offers, as displayed <strong><a href="https://shcg.ac.uk/policies-and-reports/#hedocs" target="_blank" rel="noopener">here</a></strong>.</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <CustomBoolInputSelect @bind-Value="offerHE!.HaveReadHEOfferTermsAndConditions" class="form-select d-none">
+                                                <option value="">-- Please Select --</option>
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </CustomBoolInputSelect>
+                                            <div class="d-grid gap-2 d-md-block">
+                                                <button type="button" class="btn @(offerHE!.HaveReadHEOfferTermsAndConditions == true? ButtonYesTrueCSS : ButtonYesFalseCSS) me-md-3" @onclick="(e) => HaveReadHEOfferTermsAndConditionsToggle()"><i class="@(offerHE!.HaveReadHEOfferTermsAndConditions == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                            </div>
+                                            <ValidationMessage For="@(() => offerHE!.HaveReadHEOfferTermsAndConditions)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> I understand that the terms and conditions of my enrolment will be based on the funding method I have specified here.</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <CustomBoolInputSelect @bind-Value="offerHE!.UnderstandTermsAndConditionsBasedOnFundingMethodSpecified" class="form-select d-none">
+                                                <option value="">-- Please Select --</option>
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </CustomBoolInputSelect>
+                                            <div class="d-grid gap-2 d-md-block">
+                                                <button type="button" class="btn @(offerHE!.UnderstandTermsAndConditionsBasedOnFundingMethodSpecified == true? ButtonYesTrueCSS : ButtonYesFalseCSS) me-md-3" @onclick="(e) => UnderstandTermsAndConditionsBasedOnFundingMethodSpecifiedToggle()"><i class="@(offerHE!.UnderstandTermsAndConditionsBasedOnFundingMethodSpecified == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                            </div>
+                                            <ValidationMessage For="@(() => offerHE!.UnderstandTermsAndConditionsBasedOnFundingMethodSpecified)" />
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ValidationSummary />
+
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="d-grid gap-2 d-md-block text-center">
+                                    <button type="submit" class="btn btn-success me-md-3"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+                                    <button type="button" class="btn btn-warning" @onclick="ClearFormConfirm"><i class="fa-solid fa-eraser"></i> Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </EditForm>
+            }
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? StudentGUID { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart1 { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart2 { get; set; }
+    [Parameter]
+    public int? OfferHEID { get; set; }
+    [Parameter]
+    public string? CourseCode { get; set; }
+    [Parameter]
+    public int? ApplicationCourseID { get; set; }
+
+    public string? AcademicYearID { get; set; }
+
+    bool formSubmitted = false;
+
+    //Hide navbar in layout component
+    [CascadingParameter]
+    public MainLayout? Layout { get; set; }
+
+    public int? attachmentID { get; set; }
+
+    public string? action { get; set; }
+
+    private Modal? modalInfo { get; set; }
+    public string? msgInfoTitle = null;
+    public MarkupString? msgInfo = null;
+
+    private Modal? modalError { get; set; }
+    public string? msgErrorTitle = null;
+    public MarkupString? msgError = null;
+    public string? msgErrorStackTrace = null;
+
+    private Modal? modalConfirm { get; set; }
+    public string? msgConfirmTitle = null;
+    public MarkupString? msgConfirm = null;
+
+    [SupplyParameterFromForm]
+    public OfferHEModel? offerHE { get; set; }
+    public List<OfferHEAttachmentModel>? attachments { get; set; }
+
+    public OfferHEModel? existingOfferHE { get; set; }
+    public IList<OfferHEModel>? existingOffersHE { get; set; }
+    public IList<StudentApplicationModel>? studentApplications { get; set; }
+    public StudentApplicationModel? selectedApplication { get; set; }
+
+    private FluentValidationValidator? _fluentValidationValidator;
+
+    public string? loadDataErrorMsg = null;
+
+    private StudentModel? student;
+    private string? studentEndPoint;
+
+    private string? submitEndPoint;
+
+    private string? ButtonYesTrueCSS;
+    private string? ButtonYesFalseCSS;
+    private string? ButtonNoTrueCSS;
+    private string? ButtonNoFalseCSS;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Layout != null) {
+            Layout.HideNav();
+        }
+
+        bool isError = false;
+
+        if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
+            AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
+
+        if (OfferHEID != null)
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
+        else
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
+
+        if (StudentGUID == null)
+        {
+            isError = true;
+            loadDataErrorMsg = $"Your form could not be loaded. Please ensure you are using the link that was sent to you";
+        }
+        else
+        {
+            if (AcademicYearID!= null)
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{AcademicYearID}/{StudentGUID}";
+            else
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+
+            try
+            {
+                student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
+            }
+            catch (HttpRequestException ex)
+            {
+                isError = true;
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
+            }
+
+            if (isError != true) 
+            {
+                string singleOfferHEEndPoint1;
+                string singleOfferHEEndPoint2;
+                string offersHEEndPoint;
+
+                try
+                {
+                    if (OfferHEID != null)
+                    {
+                        singleOfferHEEndPoint1 = $"{configuration["APIEndpoint"]}/OfferHE/ID/{student?.StudentGUID}/{OfferHEID}";
+                        offerHE = await Http.GetFromJsonAsync<OfferHEModel>(singleOfferHEEndPoint1);
+
+                        if (offerHE != null && offerHE?.ApplicationCourseID != null)
+                            await SelectCourse(offerHE?.ApplicationCourseID);
+                    }
+                    else
+                    {
+                        //Create objects to hold form entries
+                        CreateNewObjects();
+
+                        //Create 1 attachment
+                        //evidenceFiles ??= new();
+                        attachments = new List<OfferHEAttachmentModel>();
+                        attachments?.Add(CreateNewAttachment());
+
+                        //Add attachment to main model
+                        if (offerHE != null && attachments != null)
+                            offerHE.Attachments ??= attachments;
+
+                        //Bring in Student Application Details
+                        if (ApplicationCourseID != null)
+                            await SelectCourse(ApplicationCourseID);
+                    }
+
+                    //Check if this offer already exists
+                    singleOfferHEEndPoint2 = $"{configuration["APIEndpoint"]}/OfferHE/ApplicationCourse/{student?.AcademicYearID}/{student?.StudentGUID}/{ApplicationCourseID}";
+                    existingOfferHE = await Http.GetFromJsonAsync<OfferHEModel>(singleOfferHEEndPoint2);
+                }
+                catch (HttpRequestException ex)
+                {
+                    //Not Found
+                }
+                finally
+                {
+                    //Check how may total offers there are
+                    offersHEEndPoint = $"{configuration["APIEndpoint"]}/OfferHE/{student?.AcademicYearID}/{student?.StudentGUID}";
+                    existingOffersHE = await Http.GetFromJsonAsync<List<OfferHEModel>?>(offersHEEndPoint);
+                    
+                    //Populate Drop-Downs
+                    //None
+
+                    //Test email is working for existing form
+                    //await SendEmailCollege();
+                    //await SendEmailStudent();
+                }
+            }
+        }
+
+        if (isError != true)
+        {
+            string studentApplicationEndPoint;
+
+            try
+            {
+                if (student?.StudentRef != null)
+                {
+                    studentApplicationEndPoint = $"{configuration["APIEndpoint"]}/StudentApplication/{student?.AcademicYearID}/{student?.StudentRef}";
+                    studentApplications = await Http.GetFromJsonAsync<List<StudentApplicationModel>>(studentApplicationEndPoint);
+
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                //Not Found
+            }
+        }
+    }
+
+    public void CreateNewObjects() 
+    {
+        //Main Model
+        //medicalLearningSupportAndTripConsent ??= new();
+        offerHE = CreateNewOfferHE();
+    }
+
+    private OfferHEModel CreateNewOfferHE()
+    {
+        OfferHEModel newOfferHE = new OfferHEModel();
+        newOfferHE.CreatedBy = student?.Email;
+        newOfferHE.CreatedDate = DateTime.Now;
+        newOfferHE.StudentDetailID = student?.StudentDetailID;
+        newOfferHE.AcademicYearID = student?.AcademicYearID;
+        newOfferHE.StudentRef = student?.StudentRef;
+        newOfferHE.StudentGUID = student?.StudentGUID;
+        newOfferHE.OfferingID = selectedApplication?.CourseID;
+        newOfferHE.CourseCode = selectedApplication?.CourseCode;
+        newOfferHE.ApplicationID = selectedApplication?.ApplicationID;
+        newOfferHE.ApplicationCourseID = selectedApplication?.ApplicationCourseID;
+        newOfferHE.TuitionFee = selectedApplication?.YearlyCourseFee;
+
+        if (CourseCode != null)
+            newOfferHE.CourseCode = CourseCode;
+
+        return newOfferHE;
+    }
+
+    private OfferHEAttachmentModel CreateNewAttachment()
+    {
+        OfferHEAttachmentModel newAttachment = new OfferHEAttachmentModel();
+        newAttachment.OfferHEAttachmentID = offerHE?.Attachments?.Count + 1 ?? 1;
+
+        return newAttachment;
+    }
+
+    private void FormAction() {
+        //Determine what clear form button should do on dialog box
+
+        if (action == "ClearFormConfirm") {
+            ClearForm();
+        }
+        else if (action == "RemoveAttachmentConfirm")
+        {
+            RemoveAttachment();
+        }
+        else {
+            action = "Error";
+
+            msgErrorTitle = $"Invalid Action";
+            msgError = (MarkupString)$"An invalid option was specified. Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void ClearFormConfirm()
+    {
+        action = "ClearFormConfirm";
+
+        msgConfirmTitle = $"Clear Form?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear all information on this form?";
+
+        modalConfirm!.Open();
+    }
+
+    private void ClearForm()
+    {
+        action = "ClearForm";
+
+        CreateNewObjects();
+
+        modalConfirm!.Close();
+    }
+
+    private async Task SubmitForm()
+    {
+        if (await _fluentValidationValidator!.ValidateAsync())
+        {
+            formSubmitted = true;
+            Logger.LogInformation("Id = {Id}", offerHE?.OfferHEID);
+
+            submitEndPoint = $"{configuration["APIEndpoint"]}/OfferHE";
+            try
+            {
+                if (offerHE != null)
+                {
+                    //Ensure selected application fields are set
+                    offerHE.OfferingID = selectedApplication?.CourseID;
+                    offerHE.CourseCode = selectedApplication?.CourseCode;
+                    offerHE.ApplicationID = selectedApplication?.ApplicationID;
+                    offerHE.ApplicationCourseID = selectedApplication?.ApplicationCourseID;
+                    offerHE.TuitionFee = selectedApplication?.YearlyCourseFee;
+
+                    //Clear out IDs set earlier as database will set these
+                    if (offerHE?.Attachments != null)
+                    {
+                        foreach (var attachment in offerHE?.Attachments!)
+                        {
+                            attachment.OfferHEAttachmentID = 0;
+                        }
+                    }
+
+                    HttpResponseMessage formResponse = await Http.PostAsJsonAsync<OfferHEModel>(submitEndPoint, offerHE);
+
+                    if (formResponse.IsSuccessStatusCode != true)
+                    {
+                        string responseBody = await formResponse.Content.ReadAsStringAsync();
+                        action = "Error";
+
+                        msgErrorTitle = $"Cannot Submit Form";
+                        msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                        msgErrorStackTrace = responseBody;
+
+                        modalError!.Open();
+                    }
+                    else {
+                        OfferHEModel insertedOfferHE = await formResponse.Content.ReadFromJsonAsync<OfferHEModel>() ?? new OfferHEModel();
+
+                        if (insertedOfferHE.OfferHEID > 0)
+                        {
+                            //If insert successful
+                            await SendEmailCollege();
+                            await SendEmailStudent();
+                        }
+                        else
+                        {
+                            action = "Error";
+
+                            msgErrorTitle = $"Cannot Submit Form";
+                            msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                            msgErrorStackTrace = null;
+
+                            modalError!.Open();
+                        }
+                    }
+                }
+                else
+                {
+                    action = "Error";
+
+                    msgErrorTitle = $"Cannot Submit Form";
+                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
+                    msgErrorStackTrace = null;
+
+                    modalError!.Open();
+                }
+
+            }
+            catch (HttpRequestException ex)
+            {
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
+            }
+        }
+    }
+
+    private void GoToSHCGHomepage() {
+        NavManager.NavigateTo("https://www.shcg.ac.uk");
+    }
+
+    //Functions to update drop down on button press
+    public void ConfirmInformationAndAttachmentsAreAccurateToggle()
+    {
+        if (offerHE != null)
+        {
+            if (offerHE.ConfirmInformationAndAttachmentsAreAccurate == true)
+            {
+                offerHE.ConfirmInformationAndAttachmentsAreAccurate = false;
+            }
+            else
+            {
+                offerHE.ConfirmInformationAndAttachmentsAreAccurate = true;
+            }
+        }
+    }
+    public void HaveReadHEOfferTermsAndConditionsToggle()
+    {
+        if (offerHE != null)
+        {
+            if (offerHE.HaveReadHEOfferTermsAndConditions == true)
+            {
+                offerHE.HaveReadHEOfferTermsAndConditions = false;
+            }
+            else
+            {
+                offerHE.HaveReadHEOfferTermsAndConditions = true;
+            }
+        }
+    }
+    public void UnderstandTermsAndConditionsBasedOnFundingMethodSpecifiedToggle()
+    {
+        if (offerHE != null)
+        {
+            if (offerHE.UnderstandTermsAndConditionsBasedOnFundingMethodSpecified == true)
+            {
+                offerHE.UnderstandTermsAndConditionsBasedOnFundingMethodSpecified = false;
+            }
+            else
+            {
+                offerHE.UnderstandTermsAndConditionsBasedOnFundingMethodSpecified = true;
+            }
+        }
+    }
+    
+    public void AddAttachment()
+    {
+        attachments ??= new();
+        attachments?.Add(CreateNewAttachment());
+
+        if (attachments != null)
+        {
+            offerHE!.Attachments ??= attachments;
+        }
+    }
+
+    private void RemoveAttachmentConfirm(int recordID)
+    {
+        attachmentID = recordID;
+        action = "RemoveAttachmentConfirm";
+
+        msgConfirmTitle = $"Remove Attachment?";
+        msgConfirm = (MarkupString)$"Are you sure you want to remove this attachment?";
+
+        modalConfirm!.Open();
+    }
+
+    private void RemoveAttachment()
+    {
+        action = "RemoveAttachment";
+
+        modalConfirm!.Close();
+
+        // if (offerHE?.Attachments?.Count > 1)
+        // {
+            var recordToDelete = offerHE.Attachments?
+                .Where(c => c.OfferHEAttachmentID == attachmentID).FirstOrDefault();
+
+            if (recordToDelete != null)
+            {
+                offerHE.Attachments?
+                .Remove(recordToDelete);
+            }
+            else
+            {
+                action = "Error";
+
+                msgErrorTitle = $"Cannot Remove This Attachment";
+                msgError = (MarkupString)$"There was an error removing the attachment. Please try again.";
+                msgErrorStackTrace = null;
+
+                modalError!.Open();
+            }
+        // }
+        // else
+        // {
+        //     action = "Error";
+
+        //     msgErrorTitle = $"Cannot Remove Last Attachment";
+        //     msgError = (MarkupString)$"This attachment cannot be removed as you must send us at least one attachment with your form.";
+        //     msgErrorStackTrace = null;
+
+        //     modalError!.Open();
+        // }
+    }
+
+    private async Task<int> LoadFile(InputFileChangeEventArgs e, int? recordID)
+    {
+        var attachment = offerHE?.Attachments?.Where(c => c.OfferHEAttachmentID == recordID).FirstOrDefault();
+        int result = 0;
+
+        //Eventual location to save the file to
+        string filePath = Path.Combine("UploadedFiles", "OfferHE", offerHE?.StudentRef ?? "0", ApplicationCourseID.ToString() ?? "0");
+
+        //Moved to shared function below
+        //var file = e.File;
+        //var buffer = new byte[file.Size];
+
+        //await file.OpenReadStream().ReadAsync(buffer, 0, (int)file.Size);
+        //await file.OpenReadStream().ReadExactlyAsync(buffer.AsMemory(0, (int)file.Size)); //Better way to read file
+
+        SystemFileModel? systemFile = new SystemFileModel();
+        systemFile = await FileFunctions.LoadFileIntoModel(e, filePath);
+
+        if (systemFile == null) 
+        {
+            action = "Error";
+
+            msgErrorTitle = $"Cannot Add This File";
+            msgError = (MarkupString)$"There was an error adding the file. Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+
+            result = 1;
+        }
+        else if (systemFile.FileContentType == "Error")
+        {
+            action = "Error";
+            msgErrorTitle = $"Cannot Add This File";
+            msgError = (MarkupString)systemFile!.FileName!;
+            msgErrorStackTrace = systemFile.FileExtension;
+            modalError!.Open();
+
+            result = 1;
+        }
+        else {
+            if (attachment != null)
+            {
+                attachment.AttachmentContent = systemFile.FileContent;
+                attachment.ImageThumbnail = systemFile.ImageThumbnail;
+                attachment.AttachmentFileName = systemFile.FileName;
+                attachment.AttachmentFilePath = systemFile.FilePath;
+                attachment.AttachmentFileSize = systemFile.FileSize;
+                attachment.AttachmentFileExtension = systemFile.FileExtension;
+                attachment.AttachmentContentType = systemFile.FileContentType;
+            }
+        }
+
+        return result;
+    }
+
+    // private async Task<int> SaveFile(byte[]? evidence)
+    // {
+    //     string currentFolder = Directory.GetCurrentDirectory();
+    //     string filePath = Path.Combine(currentFolder, "FundingEligibilityDeclaration", "LionKing.pdf");
+    //     var fileContents = evidence;
+
+    //     //Save File to File System
+    //     using var stream = File.Create(filePath);
+    //     if (fileContents != null) {
+    //         await stream.WriteAsync(fileContents, 0, fileContents.Length);
+    //     }
+    //     else {
+    //         return 1;
+    //     }
+
+    //     return 0;
+    // }
+
+    private async Task<int> DownloadFile(byte[] fileContent, string fileName)
+    {
+        var buffer = new byte[fileContent.Length];
+        fileContent.CopyTo(buffer, 0);
+        var content = new System.IO.MemoryStream(buffer);
+        await content.CopyToAsync(new FileStream(fileName, FileMode.Create));
+
+        return 0;
+    }
+
+    //DropDowns
+    // public List<DropDownModel> Titles { get; } = new List<DropDownModel>
+    // {
+    //     new DropDownModel { Code = "Mr", Description = "Mr" },
+    //     new DropDownModel { Code = "Mrs", Description = "Mrs" },
+    //     new DropDownModel { Code = "Miss", Description = "Miss" }
+    // };
+
+    //Values for drop-downs
+
+    public async Task<bool?> SendEmailCollege()
+    {
+        bool? IsSuccessful = false;
+
+        //Main Email With Details
+        SystemEmailModel emailMessage = NewEmailMessageCollege();
+
+        //Add Message To Email
+        string? message = EmailTemplateCollege();
+        emailMessage.EmailMessage = message;
+
+        HttpResponseMessage formResponse = new HttpResponseMessage();
+
+        if (emailMessage != null && !string.IsNullOrEmpty(emailMessage.EmailTo))
+        {
+            Logger.LogInformation("Id = {Id}", emailMessage?.SystemEmailID);
+
+            //Send the Message
+            string? sendEmailEndPoint = $"{configuration["APIEndpoint"]}/SystemEmail";
+            //formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
+
+            if (formResponse.IsSuccessStatusCode != true)
+            {
+                IsSuccessful = false;
+            }
+            else
+            {
+                IsSuccessful = true;
+            }
+        }
+
+        return IsSuccessful;
+    }
+
+    public SystemEmailModel NewEmailMessageCollege()
+    {
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        SystemEmailModel emailMessage = new SystemEmailModel
+        {
+            SystemEmailID = 1,
+            EmailFrom = emailSettings["FromAddress"],
+            EmailFromName = emailSettings["FromName"],
+            EmailTo = emailSettings["ToAddress"],
+            EmailToName = emailSettings["ToName"],
+            EmailSubject = $"HE Offer Form Completed by {student?.Forename} {student?.Surname}",
+            EmailMessage = null, //Add this later
+            IsEmailMessageHTML = true,
+            EmailKey = emailSettings["EmailKey"]
+        };
+
+        //Set correct reciption based on Student College
+        if (student?.CollegeCode == "EC")
+        {
+            emailMessage.EmailTo = emailSettings["OfferHEEmailAddressToEC"];
+            emailMessage.EmailToName = "Eastleigh College";
+        }
+        else if (student?.CollegeCode == "FC" || student?.CollegeCode == "CM" || student?.CollegeCode == "CT")
+        {
+            emailMessage.EmailTo = emailSettings["OfferHEEmailAddressToFC"];
+            emailMessage.EmailToName = "Fareham College";
+        }
+        else if (student?.CollegeCode == "SC" || student?.CollegeCode == "MC")
+        {
+            emailMessage.EmailTo = emailSettings["OfferHEEmailAddressToSC"];
+            emailMessage.EmailToName = "Southampton College";
+        }
+
+        return emailMessage;
+    }
+
+    public string? EmailTemplateCollege()
+    {
+        string? Template;
+
+        string? FormDetails = "";
+
+        if (offerHE != null)
+        {
+            FormDetails += $@"
+                <li>Student Ref: {offerHE.StudentRef}</li>
+                <li>Course Code: {offerHE.CourseCode}</li>
+                <li>Method of Funding: {offerHE.MethodOfFundingID.GetEnumDisplayName()}</li>
+                <li>
+                    Employer Details: {offerHE.MethodOfFundingID.GetEnumDisplayName()}:
+                    <ul>
+                        <li>Employer Name: {offerHE.EmployerName}</li>
+                        <li>Employer Address 1: {offerHE.EmployerAddress1}</li>
+                        <li>Employer Address 2: {offerHE.EmployerAddress2}</li>
+                        <li>Employer Address 3: {offerHE.EmployerAddress3}</li>
+                        <li>Employer Postcode: {offerHE.EmployerPostCode}</li>
+                        <li>Employer Contact Name: {offerHE.EmployerTel}</li>
+                        <li>Employer Contact Email: {offerHE.EmployerEmail}</li>
+                    </ul>
+                </li>
+                <li>UCAS Number: {offerHE.UCASNumber}</li>
+                <li>Occupation: {offerHE.Occupation}</li>
+                <li>Term Time Accomodation: {offerHE.TermTimeAccomodationID.GetEnumDisplayName()}</li>
+                <li>Highest Level of Qualification Previously Attained: {offerHE.HighestQualOnEntryLevelID.GetEnumDisplayName()}</li>
+                <li>Type of Educational Institution Last Attended: {offerHE.LastEducationalEstablishmentAttendedOfferID.GetEnumDisplayName()}</li>
+            ";
+            
+            if (offerHE?.Attachments?.Count > 0)
+            {
+                foreach (var attachment in offerHE?.Attachments!)
+                {
+                    FormDetails += $@"
+                        <li>Evidence: {attachment.AttachmentTypeID.GetEnumDisplayName()}</li>
+                        <li>
+                            <ul>
+                                <li>File Name: {attachment.AttachmentFileName}</li>
+                                <li>Notes: {attachment.Notes}</li>
+                            </ul>
+                        </li>
+                    ";
+                }
+            }
+
+            FormDetails += $@"
+                <li>Confirm Information and Attachments are Accurate: {offerHE.ConfirmInformationAndAttachmentsAreAccurate.GetYesNo()}</li>
+                <li>Have read HE Offer Terms and Conditions: {offerHE.HaveReadHEOfferTermsAndConditions.GetYesNo()}</li>
+                <li>Understand Terms and Conditions Based on Funding Method specified: {offerHE.UnderstandTermsAndConditionsBasedOnFundingMethodSpecified.GetYesNo()}</li>
+            ";
+        }
+
+        Template = $@"
+            <html>
+                <head>
+                    <title>HE Offer Form Completed by {student?.Forename} {student?.Surname}</title>
+                </head>
+                <body>
+                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300"" />
+                    <h1>HE Offer Form Completed</h1>
+                    <p>The HE Offer Form has been completed by {student?.Forename} {student?.Surname}.</p>
+                    <p>Details:</p>
+                    <ul>
+                        {FormDetails}
+                    </ul>
+                </body>
+            </html>";
+
+        return Template;
+    }
+
+    public async Task<bool?> SendEmailStudent()
+    {
+        bool? IsSuccessful = false;
+
+        //Main Email With Details
+        SystemEmailModel emailMessage = NewEmailMessageStudent();
+
+        //Add Message To Email
+        string? message = EmailTemplateStudent();
+        emailMessage.EmailMessage = message;
+
+        HttpResponseMessage formResponse = new HttpResponseMessage();
+
+        if (emailMessage != null && !string.IsNullOrEmpty(emailMessage.EmailTo))
+        {
+            Logger.LogInformation("Id = {Id}", emailMessage?.SystemEmailID);
+
+            //Send the Message
+            string? sendEmailEndPoint = $"{configuration["APIEndpoint"]}/SystemEmail";
+            formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
+
+            if (formResponse.IsSuccessStatusCode != true)
+            {
+                IsSuccessful = false;
+            }
+            else
+            {
+                IsSuccessful = true;
+            }
+        }
+
+        return IsSuccessful;
+    }
+
+    public SystemEmailModel NewEmailMessageStudent()
+    {
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        SystemEmailModel emailMessage = new SystemEmailModel
+            {
+                SystemEmailID = 1,
+                EmailFrom = emailSettings["FromAddress"],
+                EmailFromName = emailSettings["FromName"],
+                EmailTo = student?.Email,
+                EmailToName = $"{student?.Forename} {student?.Surname}",
+                EmailSubject = $"HE Offer Form for {selectedApplication?.CourseCode} - {selectedApplication?.CourseTitle} Completed",
+                EmailMessage = null, //Add this later
+                IsEmailMessageHTML = true,
+                EmailKey = emailSettings["EmailKey"]
+            };
+
+        return emailMessage;
+    }
+
+    public string? EmailTemplateStudent()
+    {
+        string? Template = "";
+
+        if (offerHE != null)
+        {
+            Template = $@"
+                <html>
+                    <head>
+                        <title>HE Offer Form Completed by {student?.Forename} {student?.Surname}</title>
+                    </head>
+                    <body>
+                        <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300px"" />
+                        <h1>HE Offer Form Completed</h1>
+                        <p>{student?.Forename}, thank you for completing your HE Offer Form.</p>
+                        <p>We will be in touch soon.</p>
+                    </body>
+                </html>";
+        }
+
+        return Template;
+    }
+
+    private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
+    {
+        if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+        {
+            loadDataErrorMsg = $"You are not authorised to view this page";
+
+            //Redirect to login screen
+            NavManager.NavigateTo($"Login/Vehicles");
+        }
+        else if (ex.Message.Contains("404 (Not Found)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" is not found";
+        }
+        else if (ex.Message.Contains("400 (Bad Request)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" resulted in an invalid request";
+        }
+        else
+        {
+            loadDataErrorMsg = $"Error: {ex.Message}";
+        }
+    }
+
+    public async Task SelectCourse(int? applicationCourseID)
+    {
+        if (applicationCourseID == 0)
+        {
+            ApplicationCourseID = null;
+            selectedApplication = null;
+
+            return;
+        }
+
+        ApplicationCourseID = applicationCourseID;
+        string selectedApplicationEndPoint;
+
+        try
+        {
+            if (student?.StudentRef != null)
+            {
+                selectedApplicationEndPoint = $"{configuration["APIEndpoint"]}/StudentApplication/{student?.AcademicYearID}/{student?.StudentRef}/{applicationCourseID}";
+                selectedApplication = await Http.GetFromJsonAsync<StudentApplicationModel>(selectedApplicationEndPoint);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            //Not Found
+        }
+    }
+
+    //Enum Drop-Downs
+    private int? methodOfFundingValue
+    {
+        get => (int?)offerHE?.MethodOfFundingID;
+        set
+        {
+            if (value.HasValue)
+            {
+                offerHE!.MethodOfFundingID = (MethodOfFunding)value.Value;
+            }
+            else
+            {
+                offerHE!.MethodOfFundingID = null;
+            }
+        }
+    }
+
+    private int? termTimeAccomodationValue
+    {
+        get => (int?)offerHE?.TermTimeAccomodationID;
+        set
+        {
+            if (value.HasValue)
+            {
+                offerHE!.TermTimeAccomodationID = (TermTimeAccomodation)value.Value;
+            }
+            else
+            {
+                offerHE!.TermTimeAccomodationID = null;
+            }
+        }
+    }
+
+    private int? highestQualOnEntryLevelValue
+    {
+        get => (int?)offerHE?.HighestQualOnEntryLevelID;
+        set
+        {
+            if (value.HasValue)
+            {
+                offerHE!.HighestQualOnEntryLevelID = (HighestQualOnEntryLevel)value.Value;
+            }
+            else
+            {
+                offerHE!.HighestQualOnEntryLevelID = null;
+            }
+        }
+    }
+
+    private int? lastEducationalEstablishmentAttendedOfferValue
+    {
+        get => (int?)offerHE?.LastEducationalEstablishmentAttendedOfferID;
+        set
+        {
+            if (value.HasValue)
+            {
+                offerHE!.LastEducationalEstablishmentAttendedOfferID = (LastEducationalEstablishmentAttendedOffer)value.Value;
+            }
+            else
+            {
+                offerHE!.LastEducationalEstablishmentAttendedOfferID = null;
+            }
+        }
+    }
+}

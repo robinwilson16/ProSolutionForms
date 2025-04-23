@@ -8,6 +8,16 @@
     overflow-y: auto;
 }
 
+.tab-pane .table-responsive {
+    min-height: 200px;
+    height: calc(100vh - 480px);
+    max-height: calc(100vh - 320px);
+    overflow: auto;
+    white-space: nowrap;
+    min-width: 100%;
+    max-width: calc(100vw);
+}
+
 .table-responsive {
     min-height: 200px;
     height: calc(100vh - 320px);

@@ -1264,7 +1264,7 @@
 
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
-                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> YES ONLY If the student is <strong>under</strong> 18 at the start of their course, I confirm, as parent/carer, by ticking this box, I agree all information provided is correct to the best of my knowledge?</label>
+                                    <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> If the student is <strong>under</strong> 18 at the start of their course, I confirm, as parent/carer, by ticking this box, I agree all information provided is correct to the best of my knowledge?</label>
                                 </div>
                                 <div class="col-md-8">
                                     <CustomBoolInputSelect @bind-Value="medicalLearningSupportAndTripConsent!.AgreeInfoIsCorrectParentCarer" class="form-select d-none">
@@ -1664,9 +1664,9 @@
                         modalError!.Open();
                     }
                     else {
-                        MedicalLearningSupportAndTripConsentModel insertedmedicalLearningSupportAndTripConsent = await formResponse.Content.ReadFromJsonAsync<MedicalLearningSupportAndTripConsentModel>() ?? new MedicalLearningSupportAndTripConsentModel();
+                        MedicalLearningSupportAndTripConsentModel insertedMedicalLearningSupportAndTripConsent = await formResponse.Content.ReadFromJsonAsync<MedicalLearningSupportAndTripConsentModel>() ?? new MedicalLearningSupportAndTripConsentModel();
 
-                        if (insertedmedicalLearningSupportAndTripConsent.MedicalLearningSupportAndTripConsentID > 0)
+                        if (insertedMedicalLearningSupportAndTripConsent.MedicalLearningSupportAndTripConsentID > 0)
                         {
                             //If insert successful
                             await SendEmailCollege();
@@ -2321,7 +2321,7 @@
                     <title>Medical, Learning Support And Trip Consent Form Completed by {student?.Forename} {student?.Surname}</title>
                 </head>
                 <body>
-                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300px"" />
+                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300"" />
                     <h1>Medical, Learning Support And Trip Consent Form Completed</h1>
                     <p>The Medical, Learning Support And Trip Consent Form has been completed by {student?.Forename} {student?.Surname}.</p>
                     <p>Details:</p>

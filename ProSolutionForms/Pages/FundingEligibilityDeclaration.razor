@@ -1,6 +1,8 @@
 ﻿@page "/FundingEligibilityDeclaration"
 @page "/FundingEligibilityDeclaration/{StudentGUID}"
 @page "/FundingEligibilityDeclaration/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
+@page "/FundingEligibilityDeclaration/{StudentGUID}/{CourseCode}"
+@page "/FundingEligibilityDeclaration/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{CourseCode}"
 @page "/FundingEligibilityDeclaration/View/{StudentGUID}/{FundingEligibilityDeclarationID:int}"
 @page "/FundingEligibilityDeclaration/View/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{FundingEligibilityDeclarationID:int}"
 
@@ -436,7 +438,7 @@
                                                                         <InputSelect @bind-Value="evidence.EvidenceTypeID" class="form-select">
                                                                             @foreach (var evidenceType in Enum.GetValues<EvidenceType>())
                                                                             {
-                                                                                <option value="@evidenceType">@evidenceType.ToString().Replace("_", " ").Replace("HH", "-")</option>
+                                                                                <option value="@evidenceType">@evidenceType.GetEnumDisplayName()</option>
                                                                             }
                                                                         </InputSelect>
 
@@ -595,6 +597,8 @@
     public int? AcademicYearIDPart2 { get; set; }
     [Parameter]
     public int? FundingEligibilityDeclarationID { get; set; }
+    [Parameter]
+    public string? CourseCode { get; set; }
 
     public string? AcademicYearID { get; set; }
 
@@ -737,7 +741,7 @@
         evidenceFiles = new List<FundingEligibilityDeclarationEvidenceModel>();
         evidenceFiles?.Add(CreateNewEvidenceFile());
 
-        //Add emergency contacts to main model
+        //Add evidence files to main model
         fundingEligibilityDeclaration.FundingEligibilityDeclarationEvidence ??= evidenceFiles;
     }
 
@@ -750,6 +754,9 @@
         newDeclaration.AcademicYearID = student?.AcademicYearID;
         newDeclaration.StudentRef = student?.StudentRef;
         newDeclaration.StudentGUID = student?.StudentGUID;
+
+        if (CourseCode != null)
+            newDeclaration.CourseCode = CourseCode;
 
         return newDeclaration;
     }
@@ -1185,6 +1192,7 @@
         {
             FormDetails += $@"
                 <li>Student Ref: {fundingEligibilityDeclaration.StudentRef}</li>
+                <li>Course Code: {fundingEligibilityDeclaration.CourseCode}</li>
             ";
             
             string? feeExemptionReason = FeeExemptionReasons?.Where(r => r.Code == fundingEligibilityDeclaration?.FeeExemptionReasonID).FirstOrDefault()?.Description;
@@ -1218,7 +1226,7 @@
                     <title>Funding Eligibility Declaration Form Completed by {student?.Forename} {student?.Surname}</title>
                 </head>
                 <body>
-                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300px"" />
+                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300"" />
                     <h1>Funding Eligibility Declaration Form Completed</h1>
                     <p>The Funding Eligibility Declaration Form has been completed by {student?.Forename} {student?.Surname}.</p>
                     <p>Details:</p>

@@ -98,213 +98,272 @@
 
     </Title>
     <Body>
-        <EditForm EditContext="@EditContextMain" OnValidSubmit="() => SaveMainRecord(true)">
-            <FluentValidationValidator @ref="_fluentValidationValidator" />
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="student-tab" data-bs-toggle="tab" data-bs-target="#student-tab-pane" type="button" role="tab" aria-controls="student-tab-pane" aria-selected="true"><i class="fa-solid fa-user"></i> Student</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="interviewsHE-tab" data-bs-toggle="tab" data-bs-target="#interviewsHE-tab-pane" type="button" role="tab" aria-controls="interviewsHE-tab-pane" aria-selected="false"><i class="fa-solid fa-graduation-cap"></i> HE Interviews</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="offersHE-tab" data-bs-toggle="tab" data-bs-target="#offersHE-tab-pane" type="button" role="tab" aria-controls="offersHE-tab-pane" aria-selected="false"><i class="fa-solid fa-clipboard-check"></i> HE Offers</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="studentTabContent">
+            <div class="tab-pane fade show active" id="student-tab-pane" role="tabpanel" aria-labelledby="student-tab" tabindex="0">
+                <EditForm EditContext="@EditContextMain" OnValidSubmit="() => SaveMainRecord(true)">
+                    <FluentValidationValidator @ref="_fluentValidationValidator" />
 
-            @if (selectedRecordCopy == null)
-            {
-                <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey GreyBackground">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-md">
-                                <div class="alert alert-primary text-center" role="alert">
-                                    <h1>
-                                        <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
-                                    </h1>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey GreyBackground">
-                    <div class="container">
-                        <div class="row g-3 mb-3">
-                            <div class="col-md">
+                    @if (selectedRecordCopy == null)
+                    {
+                        <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey GreyBackground">
+                            <div class="container">
                                 <div class="row">
-                                    <div class="col-md-4">
-                                        StudentRef
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.StudentRef
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md">
-
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        Surname
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        <strong>@selectedRecordCopy?.Surname</strong>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        Forename
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        <strong>@selectedRecordCopy?.Forename</strong>
+                                    <div class="col-md">
+                                        <div class="alert alert-primary text-center" role="alert">
+                                            <h1>
+                                                <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                                            </h1>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        College Code
+                    }
+                    else
+                    {
+                        <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey GreyBackground">
+                            <div class="container">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                StudentRef
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.StudentRef
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.CollegeCode
+                                    <div class="col-md">
+
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        College Name
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                Surname
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                <strong>@selectedRecordCopy?.Surname</strong>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.CollegeName
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                Forename
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                <strong>@selectedRecordCopy?.Forename</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                College Code
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.CollegeCode
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                College Name
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.CollegeName
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                Directorate Code
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.DirectorateCode
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                Directorate Name
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.DirectorateName
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                CAM Code
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.CAMCode
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                CAM Name
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.CAMName
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                Dept Code
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.DeptCode
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                Dept Name
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.DeptName
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                Course Code
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.CourseCode
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                Course Title
+                                            </div>
+                                            <div class="col-md-8 Text">
+                                                @selectedRecordCopy?.CourseTitle
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md">
+                                        Course Code (from Medical Form)
+                                    </div>
+                                    <div class="col-md Text">
+                                        @selectedRecordCopy?.MedicalFormCourseCode
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="alert alert-secondary" role="alert">
+                            <h4 class="alert-heading">View Form</h4>
+                            <div class="row">
+                                <div class="col-md">
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <a class="btn btn-secondary mb-1 @(selectedRecordCopy?.MedicalFormLatestSubmissionID == null ? "disabled" : "")" href="/MedicalLearningSupportAndTripConsent/View/@AcademicYearID/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.MedicalFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-notes-medical"></i> Medical, Learning Support And Trip Consent Form</a>
+                                        <a class="btn btn-warning mb-1 @(selectedRecordCopy?.CriminalConvictionFormLatestSubmissionID == null ? "disabled" : "")" href="/CriminalConviction/View/@AcademicYearID/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.CriminalConvictionFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-building-shield"></i> Criminal Conviction Form</a>
+                                        <a class="btn btn-success mb-1 @(selectedRecordCopy?.FundingEligibilityFormLatestSubmissionID == null ? "disabled" : "")" href="/FundingEligibilityDeclaration/View/@AcademicYearID/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.FundingEligibilityFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-hand-holding-dollar"></i> Funding Eligibility Declaration Form</a>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    }
 
-                        <div class="row g-3 mb-3">
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        Directorate Code
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.DirectorateCode
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        Directorate Name
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.DirectorateName
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <ValidationSummary />
 
-                        <div class="row g-3 mb-3">
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        CAM Code
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.CAMCode
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        CAM Name
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.CAMName
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        Dept Code
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.DeptCode
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        Dept Name
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.DeptName
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        Course Code
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.CourseCode
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        Course Title
-                                    </div>
-                                    <div class="col-md-8 Text">
-                                        @selectedRecordCopy?.CourseTitle
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md">
-                                Course Code (from Medical Form)
-                            </div>
-                            <div class="col-md Text">
-                                @selectedRecordCopy?.MedicalFormCourseCode
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="alert alert-secondary" role="alert">
-                    <h4 class="alert-heading">View Form</h4>
-                    <div class="row">
-                        <div class="col-md">
-                            <div class="d-grid gap-2 d-md-block">
-                                <a class="btn btn-secondary mb-1 @(selectedRecordCopy?.MedicalFormLatestSubmissionID == null ? "disabled" : "")" href="/MedicalLearningSupportAndTripConsent/View/@AcademicYearID/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.MedicalFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-notes-medical"></i> Medical, Learning Support And Trip Consent Form</a>
-                                <a class="btn btn-warning mb-1 @(selectedRecordCopy?.CriminalConvictionFormLatestSubmissionID == null ? "disabled" : "")" href="/CriminalConviction/View/@AcademicYearID/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.CriminalConvictionFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-building-shield"></i> Criminal Conviction Form</a>
-                                <a class="btn btn-success mb-1 @(selectedRecordCopy?.FundingEligibilityFormLatestSubmissionID == null ? "disabled" : "")" href="/FundingEligibilityDeclaration/View/@AcademicYearID/@selectedRecordCopy?.StudentGUID/@selectedRecordCopy?.FundingEligibilityFormLatestSubmissionID" target="_blank" role="button"><i class="fa-solid fa-hand-holding-dollar"></i> Funding Eligibility Declaration Form</a>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            <ValidationSummary />
-
-        </EditForm>
+                </EditForm>
+            </div>
+            <div class="tab-pane fade" id="interviewsHE-tab-pane" role="tabpanel" aria-labelledby="interviewsHE-tab" tabindex="0">
+                @{
+                    IList<string> ExcludeInterviewHEFields = new List<string> { "InterviewHEID", "MotivationForStudyingCourseAndIntendedNextSteps", "SuitabilityAndRelevantQualificationsAndExperience", "HighestQualOnEntryLevel", "HighestQualOnEntryDetail", "DifficultiesAndOrDisabilitiesFurtherDetails", "UnderstandsStructureOfCourse", "IsAwareOfTuitionFee", "InEmployment", "LastEducationalEstablishmentAttended", "LastEducationalEstablishmentAttendedOtherDetail", "FinanciallySupportSelfDuringCourse", "ManageDemandsOfStudyAroundJobAndFamily", "HeardAboutCourse", "HeardAboutCourseOther", "QuestionsAskedAndAdviceGiven", "LastUpdatedBy", "LastUpdatedDate", "StudentDetailID", "AcademicYearID", "StudentRef", "StudentGUID", "OfferingID" };
+                    string? DisabledInterviewHEFieldName = null;
+                    string? ErrorInterviewHEFieldName = null;
+                }
+                <Grid Items="ItemsInterviewHE"
+                      ExcludeFields="ExcludeInterviewHEFields"
+                      FilterFields="FilterFieldsInterviewHE"
+                      DisabledItemFieldName="@DisabledInterviewHEFieldName"
+                      ErrorItemFieldName="@ErrorInterviewHEFieldName"
+                      DropDownValues="DropDownValues"
+                      SelectedItemID="selectedInterviewHERecord?.InterviewHEID"
+                      OnSelectItem="SelectInterviewHERecord"
+                      OnEditItem="EditInterviewHERecord"
+                      OnDeleteItem="DeleteInterviewHERecordConfirm"
+                      OnRemoveFilters="RemoveFiltersInterviewHE"
+                      OnRemoveLastFilter="RemoveLastFilterInterviewHE"
+                      OnRemoveFilter="RemoveFilterInterviewHE"
+                      OnShowFilterHelp="ShowFilterHelpMain"
+                      OnChangeFilter="ChangeFilterInterviewHEFromComponent" />
+            </div>
+            <div class="tab-pane fade" id="offersHE-tab-pane" role="tabpanel" aria-labelledby="offersHE-tab" tabindex="0">
+                @{
+                    IList<string> ExcludeOfferHEFields = new List<string> { "OfferHEID", "EmployerName", "EmployerAddress1", "EmployerAddress2", "EmployerAddress3", "EmployerPostCode", "EmployerTel", "EmployerEmail", "UCASNumber", "Occupation", "TermTimeAccomodationID", "TermTimeAccomodationOtherDetail", "Attachments", "ConfirmInformationAndAttachmentsAreAccurate", "HaveReadHEOfferTermsAndConditions", "UnderstandTermsAndConditionsBasedOnFundingMethodSpecified", "LastUpdatedBy", "LastUpdatedDate", "StudentDetailID", "AcademicYearID", "StudentRef", "StudentGUID", "OfferingID" };
+                    string? DisabledOfferHEFieldName = null;
+                    string? ErrorOfferHEFieldName = null;
+                }
+                <Grid Items="ItemsOfferHE"
+                      ExcludeFields="ExcludeOfferHEFields"
+                      FilterFields="FilterFieldsOfferHE"
+                      DisabledItemFieldName="@DisabledOfferHEFieldName"
+                      ErrorItemFieldName="@ErrorOfferHEFieldName"
+                      DropDownValues="DropDownValues"
+                      SelectedItemID="selectedOfferHERecord?.OfferHEID"
+                      OnSelectItem="SelectOfferHERecord"
+                      OnEditItem="EditOfferHERecord"
+                      OnDeleteItem="DeleteOfferHERecordConfirm"
+                      OnRemoveFilters="RemoveFiltersOfferHE"
+                      OnRemoveLastFilter="RemoveLastFilterOfferHE"
+                      OnRemoveFilter="RemoveFilterOfferHE"
+                      OnShowFilterHelp="ShowFilterHelpMain"
+                      OnChangeFilter="ChangeFilterOfferHEFromComponent" />
+            </div>
+        </div>
     </Body>
     <Footer>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => AdvanceToMainRecord(-1)"><i class="fa-solid fa-square-caret-left"></i></button>
@@ -454,7 +513,7 @@
     else {
         <div class="container-fluid">
             @{
-                IList<string> ExcludeMainFields = new List<string> { "StudentDetailID", "StudentID", "StudentGUID", "CollegeName", "DirectorateName", "CAMName", "ApplicationSourceID", "ApplicationSourceName", "MedicalFormLatestSubmissionID", "CriminalConvictionFormLatestSubmissionID", "FundingEligibilityFormLatestSubmissionID", "MedicalConsentFormReceivedCode", "TripPhotographicCosentObtainedCode" };
+                IList<string> ExcludeMainFields = new List<string> { "StudentDetailID", "StudentID", "StudentGUID", "CollegeName", "DirectorateName", "CAMName", "ApplicationSourceID", "ApplicationSourceName", "MedicalFormLatestSubmissionID", "CriminalConvictionFormLatestSubmissionID", "FundingEligibilityFormLatestSubmissionID", "InterviewHEFormLatestSubmissionID", "OfferHEFormLatestSubmissionID", "MedicalConsentFormReceivedCode", "TripPhotographicCosentObtainedCode" };
                 string? DisabledItemFieldName = null;
                 string? ErrorItemFieldName = null;
             }
@@ -530,6 +589,23 @@
     private string? selectedDatabaseFieldFormatted { get; set; }
 
     //Related datasets
+    private List<InterviewHEModel>? interviewsHE { get; set; }
+    private List<OfferHEModel>? offersHE { get; set; }
+
+    private IList<Func<InterviewHEModel, bool>> filtersInterviewHE = new List<Func<InterviewHEModel, bool>>();
+    private IList<Func<OfferHEModel, bool>> filtersOfferHE = new List<Func<OfferHEModel, bool>>();
+
+    private IQueryable<InterviewHEModel>? ItemsInterviewHE =>
+        interviewsHE?.AsQueryable().Where(i => selectedRecord == null ? 1 == 1 : i.StudentDetailID == selectedRecord.StudentDetailID && filtersInterviewHE.All(filter => filter(i)));
+    private IQueryable<OfferHEModel>? ItemsOfferHE =>
+        offersHE?.AsQueryable().Where(i => selectedRecord == null ? 1 == 1 : i.StudentDetailID == selectedRecord.StudentDetailID && filtersOfferHE.All(filter => filter(i)));
+
+    public InterviewHEModel? selectedInterviewHERecord { get; set; } = new InterviewHEModel();
+    private InterviewHEModel? selectedInterviewHERecordCopy { get; set; } = new InterviewHEModel();
+
+    public OfferHEModel? selectedOfferHERecord { get; set; } = new OfferHEModel();
+    private OfferHEModel? selectedOfferHERecordCopy { get; set; } = new OfferHEModel();
+
     protected override async Task OnInitializedAsync()
     {
         if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
@@ -552,6 +628,13 @@
             await LoadAcademicYears();
         }
 
+        if (isError != true)
+        {
+            //Load other objects
+            await LoadInterviewsHE();
+            await LoadOffersHE();
+        }
+
         PopulateDropDownValuesMain();
     }
 
@@ -569,6 +652,44 @@
         {
             isError = true;
             HandleJsonException(ex, "StudentDetail", StudentDetailID.ToString() ?? "");
+        }
+
+        return isError;
+    }
+
+    public async Task<bool?> LoadInterviewsHE()
+    {
+        bool? isError = false;
+        string interviewsHEEndPoint = $"{configuration["APIEndpoint"]}/InterviewHE";
+
+        try
+        {
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", SystemUser?.BearerToken);
+            interviewsHE = await Http.GetFromJsonAsync<List<InterviewHEModel>>(interviewsHEEndPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            isError = true;
+            HandleJsonException(ex, "InterviewHE", StudentDetailID.ToString() ?? "");
+        }
+
+        return isError;
+    }
+
+    public async Task<bool?> LoadOffersHE()
+    {
+        bool? isError = false;
+        string offersHEEndPoint = $"{configuration["APIEndpoint"]}/OfferHE";
+
+        try
+        {
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", SystemUser?.BearerToken);
+            offersHE = await Http.GetFromJsonAsync<List<OfferHEModel>>(offersHEEndPoint);
+        }
+        catch (HttpRequestException ex)
+        {
+            isError = true;
+            HandleJsonException(ex, "OfferHE", StudentDetailID.ToString() ?? "");
         }
 
         return isError;
@@ -608,6 +729,22 @@
         .FirstOrDefault();
     }
 
+    private InterviewHEModel? GetInterviewHERecord(int recordID)
+    {
+        return
+        interviewsHE?
+        .Where(t => t.InterviewHEID == recordID)
+        .FirstOrDefault();
+    }
+
+    private OfferHEModel? GetOfferHERecord(int recordID)
+    {
+        return
+        offersHE?
+        .Where(t => t.OfferHEID == recordID)
+        .FirstOrDefault();
+    }
+
     private void SelectMainRecord(int? recordID)
     {
         if (recordID != null && recordID > 0)
@@ -625,6 +762,38 @@
         //Keep a copy of this object to be used for edit form so original object can remain untouched until save operation (otherwise it changes on screen)
         if (selectedRecord != null)
             selectedRecordCopy = selectedRecord?.Clone();
+    }
+
+    private void SelectInterviewHERecord(int? recordID)
+    {
+        if (recordID != null && recordID > 0)
+        {
+            selectedInterviewHERecord = GetInterviewHERecord(recordID ?? 0);
+        }
+        else
+        {
+            selectedInterviewHERecord = new InterviewHEModel();
+        }
+
+        //Keep a copy of this object to be used for edit form so original object can remain untouched until save operation (otherwise it changes on screen)
+        if (selectedInterviewHERecord != null)
+            selectedInterviewHERecordCopy = selectedInterviewHERecord?.Clone();
+    }
+
+    private void SelectOfferHERecord(int? recordID)
+    {
+        if (recordID != null && recordID > 0)
+        {
+            selectedOfferHERecord = GetOfferHERecord(recordID ?? 0);
+        }
+        else
+        {
+            selectedOfferHERecord = new OfferHEModel();
+        }
+
+        //Keep a copy of this object to be used for edit form so original object can remain untouched until save operation (otherwise it changes on screen)
+        if (selectedOfferHERecord != null)
+            selectedOfferHERecordCopy = selectedOfferHERecord?.Clone();
     }
 
     public async Task AdvanceToMainRecord(int numRecords)
@@ -662,6 +831,80 @@
             }
         }
         //}
+    }
+
+    public async Task AdvanceToInterviewHERecord(int numRecords)
+    {
+        if (await SaveInterviewHERecord(false) == true)
+        {
+            int? currentRecordID = selectedInterviewHERecord?.InterviewHEID;
+            InterviewHEModel? nextRecord = new InterviewHEModel();
+
+            if (numRecords > 0)
+            {
+                nextRecord =
+                ItemsInterviewHE?
+                .SkipWhile(obj => obj.InterviewHEID != currentRecordID)
+                .Skip(numRecords)
+                .FirstOrDefault();
+            }
+            else if (numRecords < 0)
+            {
+                int numRecordsBack = Math.Abs(numRecords);
+                nextRecord =
+                    ItemsInterviewHE?
+                    .Reverse()
+                    .SkipWhile(obj => obj.InterviewHEID != currentRecordID)
+                    .Skip(numRecordsBack)
+                    .FirstOrDefault();
+            }
+
+            if (nextRecord != null)
+            {
+                if (nextRecord?.InterviewHEID != null)
+                {
+                    selectedInterviewHERecord = nextRecord;
+                    selectedInterviewHERecordCopy = nextRecord;
+                }
+            }
+        }
+    }
+
+    public async Task AdvanceToOfferHERecord(int numRecords)
+    {
+        if (await SaveOfferHERecord(false) == true)
+        {
+            int? currentRecordID = selectedOfferHERecord?.OfferHEID;
+            OfferHEModel? nextRecord = new OfferHEModel();
+
+            if (numRecords > 0)
+            {
+                nextRecord =
+                ItemsOfferHE?
+                .SkipWhile(obj => obj.OfferHEID != currentRecordID)
+                .Skip(numRecords)
+                .FirstOrDefault();
+            }
+            else if (numRecords < 0)
+            {
+                int numRecordsBack = Math.Abs(numRecords);
+                nextRecord =
+                    ItemsOfferHE?
+                    .Reverse()
+                    .SkipWhile(obj => obj.OfferHEID != currentRecordID)
+                    .Skip(numRecordsBack)
+                    .FirstOrDefault();
+            }
+
+            if (nextRecord != null)
+            {
+                if (nextRecord?.OfferHEID != null)
+                {
+                    selectedOfferHERecord = nextRecord;
+                    selectedOfferHERecordCopy = nextRecord;
+                }
+            }
+        }
     }
 
     public void PopulateDropDownValuesMain()
@@ -723,14 +966,27 @@
     private IDictionary<string, string>? selectedRecordChanges = new Dictionary<string, string>();
 
     public Dictionary<string, (object? value, ComparisonOperator? comparisonOperator)>? FilterFieldsMain { get; set; }
-
-
+    
+    public Dictionary<string, (object? value, ComparisonOperator? comparisonOperator)>? FilterFieldsInterviewHE { get; set; }
+    public Dictionary<string, (object? value, ComparisonOperator? comparisonOperator)>? FilterFieldsOfferHE { get; set; }
 
     public IList<object?>? DropDownValues { get; set; }
 
     private void ChangeFilterMainFromComponent((string fieldName, object? value, ComparisonOperator? comparisonOperator) args)
     {
         FilterFieldsMain = GridFilterAndSort.ChangeFilter<StudentDetailModel>(args.fieldName, (args.value, args.comparisonOperator), FilterFieldsMain, filtersMain);
+        //Console.WriteLine($"Filter {args.fieldName} value {args.value}");
+    }
+
+    private void ChangeFilterInterviewHEFromComponent((string fieldName, object? value, ComparisonOperator? comparisonOperator) args)
+    {
+        FilterFieldsInterviewHE = GridFilterAndSort.ChangeFilter<InterviewHEModel>(args.fieldName, (args.value, args.comparisonOperator), FilterFieldsInterviewHE, filtersInterviewHE);
+        //Console.WriteLine($"Filter {args.fieldName} value {args.value}");
+    }
+
+    private void ChangeFilterOfferHEFromComponent((string fieldName, object? value, ComparisonOperator? comparisonOperator) args)
+    {
+        FilterFieldsOfferHE = GridFilterAndSort.ChangeFilter<OfferHEModel>(args.fieldName, (args.value, args.comparisonOperator), FilterFieldsOfferHE, filtersOfferHE);
         //Console.WriteLine($"Filter {args.fieldName} value {args.value}");
     }
 
@@ -741,6 +997,30 @@
             FilterFieldsMain.Clear();
         }
         filtersMain.Clear();
+
+        // Trigger UI update
+        StateHasChanged();
+    }
+
+    private void RemoveFiltersInterviewHE()
+    {
+        if (FilterFieldsInterviewHE != null)
+        {
+            FilterFieldsInterviewHE.Clear();
+        }
+        filtersInterviewHE.Clear();
+
+        // Trigger UI update
+        StateHasChanged();
+    }
+
+    private void RemoveFiltersOfferHE()
+    {
+        if (FilterFieldsOfferHE != null)
+        {
+            FilterFieldsOfferHE.Clear();
+        }
+        filtersOfferHE.Clear();
 
         // Trigger UI update
         StateHasChanged();
@@ -761,6 +1041,36 @@
         }
     }
 
+    private void RemoveLastFilterInterviewHE()
+    {
+        if (FilterFieldsInterviewHE != null)
+        {
+            string? lastKey = FilterFieldsInterviewHE.Keys.LastOrDefault();
+
+            if (lastKey != null)
+            {
+                FilterFieldsInterviewHE.Remove(lastKey);
+            }
+
+            GridFilterAndSort.ApplyFilters<InterviewHEModel>(FilterFieldsInterviewHE, filtersInterviewHE);
+        }
+    }
+
+    private void RemoveLastFilterOfferHE()
+    {
+        if (FilterFieldsOfferHE != null)
+        {
+            string? lastKey = FilterFieldsOfferHE.Keys.LastOrDefault();
+
+            if (lastKey != null)
+            {
+                FilterFieldsOfferHE.Remove(lastKey);
+            }
+
+            GridFilterAndSort.ApplyFilters<OfferHEModel>(FilterFieldsOfferHE, filtersOfferHE);
+        }
+    }
+
     private void RemoveFilterMain(string? fieldName)
     {
         if (fieldName != null)
@@ -770,6 +1080,28 @@
         }
 
         GridFilterAndSort.ApplyFilters<StudentDetailModel>(FilterFieldsMain, filtersMain);
+    }
+
+    private void RemoveFilterInterviewHE(string? fieldName)
+    {
+        if (fieldName != null)
+        {
+            if (FilterFieldsInterviewHE != null)
+                FilterFieldsInterviewHE.Remove(fieldName);
+        }
+
+        GridFilterAndSort.ApplyFilters<InterviewHEModel>(FilterFieldsInterviewHE, filtersInterviewHE);
+    }
+
+    private void RemoveFilterOfferHE(string? fieldName)
+    {
+        if (fieldName != null)
+        {
+            if (FilterFieldsOfferHE != null)
+                FilterFieldsOfferHE.Remove(fieldName);
+        }
+
+        GridFilterAndSort.ApplyFilters<OfferHEModel>(FilterFieldsOfferHE, filtersOfferHE);
     }
 
     private void ShowFilterHelpMain()
@@ -806,7 +1138,15 @@
         else if (action == "DeleteMainRecordConfirm")
         {
             await DeleteMainRecord();
-        }  
+        }
+        else if (action == "DeleteInterviewHERecordConfirm")
+        {
+            await DeleteInterviewHERecord();
+        }
+        else if (action == "DeleteOfferHERecordConfirm")
+        {
+            await DeleteOfferHERecord();
+        }
         else
         {
             action = "Error";
@@ -885,6 +1225,26 @@
 
             modalError!.Open();
         }
+    }
+
+    public async Task EditInterviewHERecord(int? recordID)
+    {
+        if (recordID != null)
+            SelectInterviewHERecord(recordID);
+
+        string formURL = $"/InterviewHE/View/{AcademicYearID}/{selectedRecordCopy?.StudentGUID}/{selectedInterviewHERecordCopy?.InterviewHEID}";
+
+        await JSRuntime.InvokeVoidAsync("windowInterop.openWindow", new object[2] { formURL, "_blank" });
+    }
+
+    public async Task EditOfferHERecord(int? recordID)
+    {
+        if (recordID != null)
+            SelectOfferHERecord(recordID);
+
+        string formURL = $"/OfferHE/View/{AcademicYearID}/{selectedRecordCopy?.StudentGUID}/{selectedOfferHERecordCopy?.OfferHEID}";
+
+        await JSRuntime.InvokeVoidAsync("windowInterop.openWindow", new object[2] { formURL, "_blank" });
     }
 
     public async Task<bool> SaveMainRecord(bool? CloseDialogAfterSave)
@@ -1012,6 +1372,16 @@
         return returnValue;
     }
 
+    private async Task<bool> SaveInterviewHERecord(bool? CloseDialogAfterSave)
+    {
+        return true;
+    }
+
+    private async Task<bool> SaveOfferHERecord(bool? CloseDialogAfterSave)
+    {
+        return true;
+    }
+
     private void DeleteMainRecordConfirm()
     {
         if (selectedRecord?.StudentDetailID > 0)
@@ -1104,6 +1474,26 @@
         {
             HandleJsonException(ex, "StudentDetail", selectedRecord?.StudentDetailID.ToString() ?? "0");
         }
+    }
+
+    private async Task DeleteInterviewHERecordConfirm()
+    {
+  
+    }
+
+    private async Task DeleteInterviewHERecord()
+    {
+  
+    }
+
+    private async Task DeleteOfferHERecordConfirm()
+    {
+
+    }
+
+    private async Task DeleteOfferHERecord()
+    {
+
     }
 
     //Additional Functions

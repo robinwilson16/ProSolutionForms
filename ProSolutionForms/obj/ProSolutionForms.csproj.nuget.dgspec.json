@@ -57,28 +57,28 @@
             },
             "Microsoft.AspNetCore.Components.QuickGrid": {
               "target": "Package",
-              "version": "[9.0.2, )"
+              "version": "[9.0.4, )"
             },
             "Microsoft.AspNetCore.Components.WebAssembly": {
               "target": "Package",
-              "version": "[9.0.2, )"
+              "version": "[9.0.4, )"
             },
             "Microsoft.AspNetCore.Components.WebAssembly.Authentication": {
               "target": "Package",
-              "version": "[9.0.2, )"
+              "version": "[9.0.4, )"
             },
             "Microsoft.AspNetCore.Components.WebAssembly.DevServer": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.2, )"
+              "version": "[9.0.4, )"
             },
             "Microsoft.AspNetCore.WebUtilities": {
               "target": "Package",
-              "version": "[9.0.2, )"
+              "version": "[9.0.4, )"
             },
             "Microsoft.EntityFrameworkCore.Abstractions": {
               "target": "Package",
-              "version": "[9.0.2, )"
+              "version": "[9.0.4, )"
             },
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
@@ -89,12 +89,12 @@
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.3, )",
+              "version": "[9.0.4, )",
               "autoReferenced": true
             },
             "TinyMCE": {
               "target": "Package",
-              "version": "[7.7.0, )"
+              "version": "[7.8.0, )"
             },
             "TinyMCE.Blazor": {
               "target": "Package",
@@ -112,6 +112,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
+              "version": "[9.0.4, 9.0.4]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"

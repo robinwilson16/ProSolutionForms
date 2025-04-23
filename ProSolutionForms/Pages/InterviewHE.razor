@@ -1,0 +1,1483 @@
+﻿@page "/InterviewHE"
+@page "/InterviewHE/{StudentGUID}"
+@page "/InterviewHE/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
+@page "/InterviewHE/{StudentGUID}/{CourseCode}"
+@page "/InterviewHE/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{CourseCode}"
+@page "/InterviewHE/View/{StudentGUID}/{InterviewHEID:int}"
+@page "/InterviewHE/View/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{InterviewHEID:int}"
+@page "/InterviewHE/Student/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentRef}"
+
+@using ProSolutionForms.Components
+@using ProSolutionForms.Models
+@using ProSolutionForms.Services
+@using ProSolutionForms.Shared
+@using System.Net
+@using TinyMCE.Blazor
+@inject HttpClient Http
+@inject IConfiguration configuration
+@inject NavigationManager NavManager
+@inject ILogger<InterviewHEModel> Logger
+@inject AppData appData
+@inject IJSRuntime JSRuntime
+
+<PageTitle>HE Interview Form</PageTitle>
+
+<Modal @ref="modalInfo">
+    <Title><i class="fa-solid fa-circle-info"></i> @msgInfoTitle</Title>
+    <Body>
+        <p>
+            @msgInfo
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalError">
+    <Title><i class="fa-solid fa-triangle-exclamation"></i> @msgErrorTitle</Title>
+    <Body>
+        <div class="alert alert-danger" role="alert">
+            @msgError
+        </div>
+        @if (msgErrorStackTrace != null) 
+        {
+            <p><i class="fa-solid fa-bug"></i> Stack Trace:</p>
+            <pre class="pre-scrollable ErrorDetails">@msgErrorStackTrace</pre>
+        }
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalError!.Close()"><i class="fa-solid fa-rectangle-xmark"></i> Close</button>
+    </Footer>
+</Modal>
+
+<Modal @ref="modalConfirm">
+    <Title><i class="fa-solid fa-circle-question"></i> @msgConfirmTitle</Title>
+    <Body>
+        <p>
+            @msgConfirm
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-danger" @onclick="FormAction"><i class="fa-solid fa-trash"></i> Yes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => modalConfirm!.Close()"><i class="fa-solid fa-right-from-bracket"></i> Cancel</button>
+    </Footer>
+</Modal>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md text-center">
+            <img class="img-fluid CollegeLogo" src="/images/SHCG-Logo-Coloured-RGB.png" title="SHCG Logo" />
+        </div>
+    </div>
+</div>
+
+<div class="bd-callout bd-callout-SHCG-blue bd-callout-grey GreyBackground">
+    <div class="container">
+        <div class="row">
+            <div class="col-md text-center">
+                <h3 class="mt-3 mb-3"><i class="fa-solid fa-clipboard-question"></i> HE Interview Form</h3>
+            </div>
+        </div>
+    </div>
+
+    @if (loadDataErrorMsg != null) 
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                @loadDataErrorMsg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (InterviewHEID != null && interviewHE == null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-danger hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                Unfortunately this form cannot be loaded as the Interview HE Form ID is invalid or not for this student.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (formSubmitted == true)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-success hstack gap-3" role="alert">
+                        <div class="ms-auto me-3">
+                            <h1><i class="fa-solid fa-clipboard-check"></i></h1>
+                        </div>
+                        <div class="me-auto">
+                            <h4 class="alert-heading">HE Interview Form Successfully Submitted</h4>
+                            <hr>
+
+                            <p>
+                                The interview details for @selectedApplication?.CourseCode have been successfully saved for @student?.Forename @student?.Surname
+                            </p>
+
+                        </div>
+                    </div>
+                    <div class="alert alert-warning hstack gap-3" role="alert">
+                        <div class="ms-auto me-3">
+                            <h1><i class="fa-solid fa-layer-group"></i></h1>
+                        </div>
+                        <div class="me-auto">
+                            <p>
+                                If you have applied for multiple courses within South Hampshire College Group, please contact us to confirm which course you wish to proceed with.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="row">
+                            <div class="col-md text-end">
+                                <button type="button" class="btn btn-success" @onclick="GoToSHCGHomepage"><i class="fa-solid fa-arrow-up-right-from-square"></i> Go To The SHCG Website</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (student == null || interviewHE == null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-md">
+                    <div class="alert alert-primary text-center" role="alert">
+                        <h1>
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading ...
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else {
+        <div class="bd-callout bd-callout-SHCG-yellow bd-callout-grey WhiteBackground">
+            <div class="container">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md text-center">
+                        <h4>Personal Information</h4>
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-hashtag"></i> Student Ref
+                    </div>
+                    <div class="col-md-8">
+                        @student?.StudentRef
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-user"></i> Name
+                    </div>
+                    <div class="col-md-8">
+                        <strong>@student?.Forename @student?.Surname</strong>
+                    </div>
+                </div>
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-4">
+                        <i class="fa-solid fa-calendar-days"></i> Academic Year
+                    </div>
+                    <div class="col-md-8">
+                        @student?.AcademicYearID
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (ApplicationCourseID == null && interviewHE.ApplicationCourseID == null)
+        {
+            <div class="bd-callout bd-callout-SHCG-teal bd-callout-grey WhiteBackground">
+                <div class="container">
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-md text-center">
+                            <h4>Applications for @student?.Forename @student?.Surname</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            @if (studentApplications != null && studentApplications?.Count == 0)
+                            {
+                                <div class="alert alert-warning hstack gap-3" role="alert">
+                                    <div>
+                                        <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                                    </div>
+                                    <div>
+                                        <p>
+                                            No applications found for @student?.Forename @student?.Surname for @student?.AcademicYearID
+                                        </p>
+                                        <p>
+                                            Please add one or more applications to this student in ProSolution then return to complete this form
+                                        </p>
+                                    </div>
+                                </div>
+
+                            }
+                            else
+                            {
+                                <div class="alert alert-primary hstack gap-3" role="alert">
+                                    <div>
+                                        <h1><i class="fa-solid fa-circle-info"></i></h1>
+                                    </div>
+                                    <div>
+                                        <p>
+                                            Please select an application by clicking the Interview Form button on the right:
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="d-none d-md-table-cell">&nbsp;</th>
+                                            <th scope="col">&nbsp;</th>
+                                            <th scope="col" class="d-none d-lg-table-cell">Directorate</th>
+                                            <th scope="col" class="d-none d-lg-table-cell">CAM</th>
+                                            <th scope="col" class="d-none d-sm-table-cell">Dept Code</th>
+                                            <th scope="col" class="d-none d-md-table-cell">Dept Name</th>
+                                            <th scope="col">Course Code</th>
+                                            <th scope="col" class="d-none d-md-table-cell">Course Title</th>
+                                            <th scope="col" class="text-center">Status</th>
+                                            <th scope="col" class="d-none d-xl-table-cell">Start Date</th>
+                                            <th scope="col" class="d-none d-xl-table-cell">End Date</th>
+                                            <th scope="col" class="d-none d-sm-table-cell">Yearly Tuition Fee</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var application in studentApplications!)
+                                        {
+                                            string? rowType;
+                                            string? buttonType;
+                                            string? badgeType;
+
+                                            if (@application.ApplicationStatusCode == "E")
+                                            {
+                                                rowType = "text-success";
+                                                buttonType = "btn-success";
+                                                badgeType = "bg-success";
+                                            }
+                                            else if (@application.ApplicationStatusCode == "W")
+                                            {
+                                                rowType = "text-danger";
+                                                buttonType = "btn-danger";
+                                                badgeType = "bg-danger";
+                                            }
+                                            else
+                                            {
+                                                rowType = "text-primary";
+                                                buttonType = "btn-primary";
+                                                badgeType = "bg-primary";
+                                            }
+
+                                            <tr class="@rowType">
+                                                <td class="@rowType d-none d-md-table-cell"><i class="fa-solid fa-book"></i></td>
+                                                <td class="@rowType">@application.CollegeCode</td>
+                                                <td class="@rowType d-none d-lg-table-cell">@application.DirectorateCode</td>
+                                                <td class="@rowType d-none d-lg-table-cell">@application.CAMCode</td>
+                                                <td class="@rowType d-none d-sm-table-cell">@application.DeptCode</td>
+                                                <td class="@rowType d-none d-md-table-cell">@application.DeptName</td>
+                                                <td class="@rowType">@application.CourseCode</td>
+                                                <td class="@rowType d-none d-md-table-cell">@application.CourseTitle</td>
+                                                <td class="@rowType text-center"><span class="badge text-@badgeType">@application.ApplicationStatusName</span></td>
+                                                <td class="@rowType d-none d-xl-table-cell">@application.StartDate?.Format("dd/MM/yyyy")</td>
+                                                <td class="@rowType d-none d-xl-table-cell">@application.EndDate?.Format("dd/MM/yyyy")</td>
+                                                <td class="@rowType d-none d-sm-table-cell"><span class="badge text-bg-danger"><i class="fa-solid fa-sterling-sign"></i> @application.YearlyCourseFee</span></td>
+                                                <td><button type="button" class="btn @buttonType text-nowrap" @onclick="() => SelectCourse(application?.ApplicationCourseID)" disabled="@(application.ApplicationStatusCode == "A" ? false : true)"><i class="fa-solid fa-clipboard-question"></i> Interview Form</button></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            if (selectedApplication?.ApplicationCourseID == null)
+            {
+                <div class="alert alert-warning hstack gap-3" role="alert">
+                    <div>
+                        <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                    </div>
+                    <div>
+                        <p>
+                            Error loading the student application
+                        </p>
+                        <p>
+                            Please go back to the student and re-select the application
+                        </p>
+                        <p>
+                            <button type="button" class="btn btn-primary" @onclick="() => SelectCourse(0)"><i class="fa-solid fa-arrow-rotate-left"></i> Go Back</button>
+                        </p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success hstack gap-3 sticky-top" role="alert">
+                    <div>
+                        <h1><i class="fa-solid fa-book"></i></h1>
+                    </div>
+                    <div class="ms-auto me-auto text-center">
+                        <h4 class="alert-heading">
+                            <i class="fa-regular fa-file-lines"></i> Interview Form for @selectedApplication?.CourseCode - @selectedApplication?.CourseTitle <span class="badge text-bg-danger"><i class="fa-solid fa-sterling-sign"></i> @selectedApplication?.YearlyCourseFee Per Year</span>
+                        </h4>
+                        <p>
+                            <strong>@selectedApplication?.DeptName (@selectedApplication?.DeptCode) Department</strong>
+                        </p>
+                        <p>
+                            <button type="button" class="btn btn-primary" @onclick="ReturnToApplicationSelectionConfirm"><i class="fa-solid fa-arrow-rotate-left"></i> Go Back and Select a Different Course</button>
+                        </p>
+                    </div>
+                </div>
+
+                @if (existingInterviewsHE?.Count > 0)
+                {
+                    <div class="alert alert-warning hstack gap-3" role="alert">
+                        <div>
+                            <h1><i class="fa-regular fa-file-lines"></i></h1>
+                        </div>
+                        <div>
+                            <p>
+                                @student?.Forename @student?.Surname already has @existingInterviewsHE?.Count Interviews for the following courses: @String.Join(", ", existingInterviewsHE?.Select(i => i.CourseCode).OrderBy(i => i)!).
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                <EditForm FormName="interviewHE" Model="interviewHE" OnValidSubmit="SubmitForm">
+                    <FluentValidationValidator @ref="_fluentValidationValidator" />
+
+                    <div class="bd-callout bd-callout-SHCG-green bd-callout-grey WhiteBackground">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md">
+                                    <div class="row mb-3 align-items-center">
+                                        <div class="col-md text-center">
+                                            <h4>Interview Questions</h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-primary hstack gap-3" role="alert">
+                                        <div>
+                                            <h1><i class="fa-solid fa-circle-info"></i></h1>
+                                        </div>
+                                        <div>
+                                            <p>
+                                                We are required to ensure that applicants are given access to all the information they need to make an informed decision about enrolling on a course of study with us.<br />
+                                                The questions below are designed to provide you with topics to discuss and are not a prescriptive script to repeat verbatim.
+                                            </p>
+                                            <p>
+                                                That said, please ensure all the topics mentioned here are raised and applicants are given the change to ask questions about them.
+                                            </p>
+                                            <p>
+                                                Please make a note of any specific advice given to applicants beyond the information provided on the website.
+                                            </p>
+                                            <p>
+                                                Don't be afraid to refer to the HE Handbook or put the applicant in touch with the Group Manager for Higher Education for guidance if you are unsure what to advise.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-12">
+                                            <label class="col-form-label"><i class="fa-solid fa-comment"></i> Why does the learner want to study this course in particular and what are they hoping it will lead to after completion?</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <Editor Conf="@editorConf" @bind-Value="interviewHE!.MotivationForStudyingCourseAndIntendedNextSteps" Field="() => interviewHE!.MotivationForStudyingCourseAndIntendedNextSteps" LicenseKey="gpl" />
+                                            @* <InputTextArea @bind-Value="interviewHE!.MotivationForStudyingCourseAndIntendedNextSteps" class="form-control" /> *@
+                                            <ValidationMessage For="@(() => interviewHE!.MotivationForStudyingCourseAndIntendedNextSteps)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-12">
+                                            <label class="col-form-label"><i class="fa-solid fa-comment"></i> Why does the applicant consider themselves suitable for this course? Do they have relevant qualifications that meet the entry requirements and/or what relevant experience do they have?</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <Editor Conf="@editorConf" @bind-Value="interviewHE!.SuitabilityAndRelevantQualificationsAndExperience" Field="() => interviewHE!.SuitabilityAndRelevantQualificationsAndExperience" LicenseKey="gpl" />
+                                            <ValidationMessage For="@(() => interviewHE!.SuitabilityAndRelevantQualificationsAndExperience)" />
+                                        </div>
+                                    </div>
+
+                                    <datalist class="col-4" id="HighestQualOnEntryLevels">
+                                        @foreach (var option in Enum.GetValues(typeof(HighestQualOnEntryLevel)).Cast<HighestQualOnEntryLevel>())
+                                        {
+                                            <option value="@((int)option)">@option.GetEnumDisplayName()</option>
+                                        }
+                                    </datalist>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Highest Prior Qualification Level</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group mb-3">
+                                                <InputNumber @bind-Value="highestQualOnEntryLevelValue" class="form-control" list="HighestQualOnEntryLevels" />
+                                                <span class="input-group-text w-75">
+                                                    @interviewHE!.HighestQualOnEntryLevel.GetEnumDisplayName()
+                                                </span>
+                                            </div>
+
+                                            <ValidationMessage For="@(() => interviewHE!.HighestQualOnEntryLevel)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Highest Prior Qualification Detail</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <InputText @bind-Value="interviewHE!.HighestQualOnEntryDetail" class="form-control" />
+                                            <ValidationMessage For="@(() => interviewHE!.HighestQualOnEntryDetail)" />
+
+                                            <div class="alert alert-warning hstack gap-3" role="alert">
+                                                <div>
+                                                    <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                                                </div>
+                                                <div>
+                                                    <p>
+                                                        Please be sure to provide the level, type and title such as Level 3 Extended Diploma in Animal Care
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Does the applicant have any learning difficulties and/or disabilities?</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <CustomBoolInputSelect @bind-Value="interviewHE!.HasDifficultiesAndOrDisabilities" class="form-select d-none">
+                                                <option value="">-- Please Select --</option>
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </CustomBoolInputSelect>
+                                            <div class="d-grid gap-2 d-md-block">
+                                                <button type="button" class="btn @(interviewHE!.HasDifficultiesAndOrDisabilities == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => HasDifficultiesAndOrDisabilitiesToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                                <button type="button" class="btn @(interviewHE!.HasDifficultiesAndOrDisabilities == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => HasDifficultiesAndOrDisabilitiesToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                            </div>
+                                            <ValidationMessage For="@(() => interviewHE!.HasDifficultiesAndOrDisabilities)" />
+                                        </div>
+                                    </div>
+
+                                    @if (interviewHE?.HasDifficultiesAndOrDisabilities == true)
+                                    {
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-12">
+                                                <label class="col-form-label"><i class="fa-solid fa-comment"></i> Learning difficulties and disabilities further details including how this will impact their course of study</label>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <Editor Conf="@editorConf" @bind-Value="interviewHE!.DifficultiesAndOrDisabilitiesFurtherDetails" Field="() => interviewHE!.SuitabilityAndRelevantQualificationsAndExperience" LicenseKey="gpl" />
+                                                <ValidationMessage For="@(() => interviewHE!.DifficultiesAndOrDisabilitiesFurtherDetails)" />
+
+                                                <div class="alert alert-warning hstack gap-3" role="alert">
+                                                    <div>
+                                                        <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                                                    </div>
+                                                    <div>
+                                                        <p>
+                                                            Please be sure to mention <strong>Disabled Student's Allowance</strong>
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    }
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> I have explained the structure of the course to the applicant, including modules covered and how they will be assessed?</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <CustomBoolInputSelect @bind-Value="interviewHE!.UnderstandsStructureOfCourse" class="form-select d-none">
+                                                <option value="">-- Please Select --</option>
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </CustomBoolInputSelect>
+                                            <div class="d-grid gap-2 d-md-block">
+                                                <button type="button" class="btn @(interviewHE!.UnderstandsStructureOfCourse == true? ButtonYesTrueCSS : ButtonYesFalseCSS) me-md-3" @onclick="(e) => UnderstandsStructureOfCourseToggle()"><i class="@(interviewHE!.UnderstandsStructureOfCourse == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                            </div>
+                                            <ValidationMessage For="@(() => interviewHE!.UnderstandsStructureOfCourse)" />
+                                        </div>
+                                    </div>
+
+                                    <datalist class="col-4" id="MethodsOfFunding">
+                                        @foreach (var option in Enum.GetValues(typeof(MethodOfFunding)).Cast<MethodOfFunding>())
+                                        {
+                                            <option value="@((int)option)">@option.GetEnumDisplayName()</option>
+                                        }
+                                    </datalist>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Method of Funding</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group mb-3">
+                                                <InputNumber @bind-Value="methodOfFundingValue" class="form-control" list="MethodsOfFunding" />
+                                                <span class="input-group-text w-75">
+                                                    @interviewHE!.MethodOfFunding.GetEnumDisplayName()
+                                                </span>
+                                            </div>
+
+                                            <ValidationMessage For="@(() => interviewHE!.MethodOfFunding)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> I have made the applicant aware of the correct <strong>annual</strong> tuition fee, of <span class="badge text-bg-danger"><i class="fa-solid fa-sterling-sign"></i> @selectedApplication?.YearlyCourseFee Per Year</span>?</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <CustomBoolInputSelect @bind-Value="interviewHE!.IsAwareOfTuitionFee" class="form-select d-none">
+                                                <option value="">-- Please Select --</option>
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </CustomBoolInputSelect>
+                                            <div class="d-grid gap-2 d-md-block">
+                                                <button type="button" class="btn @(interviewHE!.IsAwareOfTuitionFee == true? ButtonYesTrueCSS : ButtonYesFalseCSS) me-md-3" @onclick="(e) => IsAwareOfTuitionFeeToggle()"><i class="@(interviewHE!.IsAwareOfTuitionFee == true? "fa-solid fa-square-check" : "fa-regular fa-square")"></i></button>
+                                            </div>
+                                            <ValidationMessage For="@(() => interviewHE!.IsAwareOfTuitionFee)" />
+                                        </div>
+                                    </div>
+                                    <InputNumber @bind-Value="interviewHE!.TuitionFeeAgreedTo" class="form-control d-none" />
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Is the applicant in employment?</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <CustomBoolInputSelect @bind-Value="interviewHE!.InEmployment" class="form-select d-none">
+                                                <option value="">-- Please Select --</option>
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </CustomBoolInputSelect>
+                                            <div class="d-grid gap-2 d-md-block">
+                                                <button type="button" class="btn @(interviewHE!.InEmployment == true? ButtonYesTrueCSS : ButtonYesFalseCSS) YesNoButton me-md-3" @onclick="() => InEmploymentToggle(true)"><i class="fa-solid fa-square-check"></i> Yes</button>
+                                                <button type="button" class="btn @(interviewHE!.InEmployment == false? ButtonNoTrueCSS : ButtonNoFalseCSS) YesNoButton" @onclick="() => InEmploymentToggle(false)"><i class="fa-solid fa-square-xmark"></i> No</button>
+                                            </div>
+                                            <ValidationMessage For="@(() => interviewHE!.InEmployment)" />
+                                        </div>
+                                    </div>
+
+                                    <datalist class="col-4" id="EducationalEstablishments">
+                                        @foreach (var option in Enum.GetValues(typeof(LastEducationalEstablishmentAttended)).Cast<LastEducationalEstablishmentAttended>())
+                                        {
+                                            <option value="@((int)option)">@option.GetEnumDisplayName()</option>
+                                        }
+                                    </datalist>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Last educational establishment type attended</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group mb-3">
+                                                <InputNumber @bind-Value="lastEducationalEstablishmentAttendedValue" class="form-control" list="EducationalEstablishments" />
+                                                <span class="input-group-text w-75">
+                                                    @interviewHE!.LastEducationalEstablishmentAttended.GetEnumDisplayName()
+                                                </span>
+                                            </div>
+
+                                            <ValidationMessage For="@(() => interviewHE!.LastEducationalEstablishmentAttended)" />
+                                        </div>
+                                    </div>
+
+                                    @if (lastEducationalEstablishmentAttendedValue == 99)
+                                    {
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Last educational establishment attended other details</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="interviewHE!.LastEducationalEstablishmentAttendedOtherDetail" class="form-control" />
+                                                <ValidationMessage For="@(() => interviewHE!.LastEducationalEstablishmentAttendedOtherDetail)" />
+                                            </div>
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        interviewHE!.LastEducationalEstablishmentAttendedOtherDetail = null;
+                                    }
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-12">
+                                            <label class="col-form-label"><i class="fa-solid fa-comment"></i> Has the applicant considered how they will be able to support themselves financialy during the course?</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <Editor Conf="@editorConf" @bind-Value="interviewHE!.FinanciallySupportSelfDuringCourse" Field="() => interviewHE!.FinanciallySupportSelfDuringCourse" LicenseKey="gpl" />
+                                            <ValidationMessage For="@(() => interviewHE!.FinanciallySupportSelfDuringCourse)" />
+
+                                            <div class="alert alert-warning hstack gap-3" role="alert">
+                                                <div>
+                                                    <h1><i class="fa-solid fa-triangle-exclamation"></i></h1>
+                                                </div>
+                                                <div>
+                                                    <p>
+                                                        Please be sure to mention <strong>Maintenance Loan Entitlement</strong>, <strong>Council Tax Discount</strong> and <strong>Universal Credit Entitlement</strong>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-12">
+                                            <label class="col-form-label"><i class="fa-solid fa-comment"></i> Has the candidate given some thought to how they will manage the demands of study, especially if they are studying part time around a job, family, etc.?</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <Editor Conf="@editorConf" @bind-Value="interviewHE!.ManageDemandsOfStudyAroundJobAndFamily" Field="() => interviewHE!.ManageDemandsOfStudyAroundJobAndFamily" LicenseKey="gpl" />
+                                            <ValidationMessage For="@(() => interviewHE!.ManageDemandsOfStudyAroundJobAndFamily)" />
+                                        </div>
+                                    </div>
+
+                                    <datalist class="col-4" id="HeardAboutCourseOptions">
+                                        @foreach (var option in Enum.GetValues(typeof(HeardAboutCourse)).Cast<HeardAboutCourse>())
+                                        {
+                                            <option value="@((int)option)">@option.GetEnumDisplayName()</option>
+                                        }
+                                    </datalist>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Where did the applicant find out about the course?</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group mb-3">
+                                                <InputNumber @bind-Value="heardAboutCourseValue" class="form-control" list="HeardAboutCourseOptions" />
+                                                <span class="input-group-text w-75">
+                                                    @interviewHE!.HeardAboutCourse.GetEnumDisplayName()
+                                                </span>
+                                            </div>
+
+                                            <ValidationMessage For="@(() => interviewHE!.HeardAboutCourse)" />
+                                        </div>
+                                    </div>
+
+                                    @if (heardAboutCourseValue == 99)
+                                    {
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> Heard About Course Other Details</label>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <InputText @bind-Value="interviewHE!.HeardAboutCourseOther" class="form-control" />
+                                                <ValidationMessage For="@(() => interviewHE!.HeardAboutCourseOther)" />
+                                            </div>
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        interviewHE!.HeardAboutCourseOther = null;
+                                    }
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-12">
+                                            <label class="col-form-label"><i class="fa-solid fa-comment"></i> Record details of any questions asked or advice given relating to their chosen course of study</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <Editor Conf="@editorConf" @bind-Value="interviewHE!.QuestionsAskedAndAdviceGiven" Field="() => interviewHE!.QuestionsAskedAndAdviceGiven" LicenseKey="gpl" />
+                                            <ValidationMessage For="@(() => interviewHE!.QuestionsAskedAndAdviceGiven)" />
+                                        </div>
+                                    </div>
+
+                                    <datalist class="col-4" id="InterviewOutcomes">
+                                        @foreach (var option in Enum.GetValues(typeof(InterviewOutcome)).Cast<InterviewOutcome>())
+                                        {
+                                            <option value="@((int)option)">@option.GetEnumDisplayName()</option>
+                                        }
+                                    </datalist>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label"><i class="fa-solid fa-angles-right"></i> What is the outcome of this interview?</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="input-group mb-3">
+                                                <InputNumber @bind-Value="interviewOutcomeValue" class="form-control" list="InterviewOutcomes" />
+                                                <span class="input-group-text w-75">
+                                                    @interviewHE!.InterviewOutcome.GetEnumDisplayName()
+                                                </span>
+                                            </div>
+
+                                            <ValidationMessage For="@(() => interviewHE!.InterviewOutcome)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-12">
+                                            <label class="col-form-label"><i class="fa-solid fa-comment"></i> Record details of any conditions related to an offer</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <Editor Conf="@editorConf" @bind-Value="interviewHE!.OfferConditions" Field="() => interviewHE!.OfferConditions" LicenseKey="gpl" />
+                                            <ValidationMessage For="@(() => interviewHE!.OfferConditions)" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ValidationSummary />
+
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="d-grid gap-2 d-md-block text-center">
+                                    <button type="submit" class="btn btn-success me-md-3"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+                                    <button type="button" class="btn btn-warning" @onclick="ClearFormConfirm"><i class="fa-solid fa-eraser"></i> Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </EditForm>
+            }
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? StudentGUID { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart1 { get; set; }
+    [Parameter]
+    public int? AcademicYearIDPart2 { get; set; }
+    [Parameter]
+    public string? StudentRef { get; set; }
+    [Parameter]
+    public int? InterviewHEID { get; set; }
+    [Parameter]
+    public string? CourseCode { get; set; }
+
+    public string? AcademicYearID { get; set; }
+
+    public int? ApplicationCourseID { get; set; }
+
+    bool formSubmitted = false;
+
+    //Hide navbar in layout component
+    [CascadingParameter]
+    public MainLayout? Layout { get; set; }
+
+    public string? action { get; set; }
+
+    private Modal? modalInfo { get; set; }
+    public string? msgInfoTitle = null;
+    public MarkupString? msgInfo = null;
+
+    private Modal? modalError { get; set; }
+    public string? msgErrorTitle = null;
+    public MarkupString? msgError = null;
+    public string? msgErrorStackTrace = null;
+
+    private Modal? modalConfirm { get; set; }
+    public string? msgConfirmTitle = null;
+    public MarkupString? msgConfirm = null;
+
+    [SupplyParameterFromForm]
+    public InterviewHEModel? interviewHE { get; set; }
+
+    public IList<InterviewHEModel>? existingInterviewsHE { get; set; }
+    public IList<StudentApplicationModel>? studentApplications { get; set; }
+    public StudentApplicationModel? selectedApplication { get; set; }
+
+    private FluentValidationValidator? _fluentValidationValidator;
+
+    public string? loadDataErrorMsg = null;
+
+    private StudentModel? student;
+    private string? studentEndPoint;
+
+    private string? submitEndPoint;
+
+    private string? ButtonYesTrueCSS;
+    private string? ButtonYesFalseCSS;
+    private string? ButtonNoTrueCSS;
+    private string? ButtonNoFalseCSS;
+
+    public HighestQualOnEntryLevel HighestQualOnEntryLevels { get; set; }
+
+    public SystemUserModel? SystemUser { get; set; }
+    public SystemUserModel? AlreadyLoggedInUser { get; set; }
+
+    private Dictionary<string, object> editorConf = new Dictionary<string, object>{
+        {"toolbar", "undo redo | bold italic"},
+        {"height", 200},
+        { "menubar", false },
+        { "statusbar", false }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUser();
+
+        if (Layout != null) {
+            Layout.HideNav();
+        }
+
+        bool isError = false;
+
+        if (AcademicYearIDPart1 != null && AcademicYearIDPart2 != null)
+            AcademicYearID = $"{AcademicYearIDPart1.ToString()}/{AcademicYearIDPart2.ToString()}";
+
+        if (InterviewHEID != null)
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
+        else
+        {
+            ButtonYesTrueCSS = "btn-success";
+            ButtonYesFalseCSS = "btn-outline-secondary";
+            ButtonNoTrueCSS = "btn-success";
+            ButtonNoFalseCSS = "btn-outline-secondary";
+        }
+
+        if (StudentGUID == null && StudentRef == null)
+        {
+            isError = true;
+            loadDataErrorMsg = $"The student form could not be loaded. Please check the link and try again";
+        }
+        else
+        {
+            if (AcademicYearID != null && StudentRef != null)
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/Ref/{AcademicYearID}/{StudentRef}";
+            else if (AcademicYearID != null)
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{AcademicYearID}/{StudentGUID}";
+            else
+                studentEndPoint = $"{configuration["APIEndpoint"]}/Student/{StudentGUID}";
+
+            try
+            {
+                student = await Http.GetFromJsonAsync<StudentModel>(studentEndPoint);
+            }
+            catch (HttpRequestException ex)
+            {
+                isError = true;
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
+            }
+
+            if (isError != true) 
+            {
+                string interviewHEEndPoint;
+
+                try
+                {
+                    if (InterviewHEID != null)
+                    {
+                        interviewHEEndPoint = $"{configuration["APIEndpoint"]}/InterviewHE/ID/{student?.StudentGUID}/{InterviewHEID}";
+                        interviewHE = await Http.GetFromJsonAsync<InterviewHEModel>(interviewHEEndPoint);
+
+                        if (interviewHE != null && interviewHE?.ApplicationCourseID != null)
+                            await SelectCourse(interviewHE?.ApplicationCourseID);
+                    }
+                    else
+                    {
+                        //Create objects to hold form entries
+                        CreateNewObjects();
+
+                        interviewHEEndPoint = $"{configuration["APIEndpoint"]}/InterviewHE/{student?.AcademicYearID}/{student?.StudentGUID}";
+                        existingInterviewsHE = await Http.GetFromJsonAsync<IList<InterviewHEModel>>(interviewHEEndPoint);
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    //Not Found
+                }
+                finally
+                {
+                    //Populate Drop-Downs
+
+                    //Test email is working for existing form
+                    //await SendEmailCollege();
+                    //await SendEmailStaff();
+                    //await SendEmailStudent();
+                }
+            }
+
+            if (isError != true)
+            {
+                string studentApplicationEndPoint;
+
+                try
+                {
+                    if (student?.StudentRef != null)
+                    {
+                        studentApplicationEndPoint = $"{configuration["APIEndpoint"]}/StudentApplication/{student?.AcademicYearID}/{student?.StudentRef}";
+                        studentApplications = await Http.GetFromJsonAsync<List<StudentApplicationModel>>(studentApplicationEndPoint);
+
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    //Not Found
+                }
+            }
+        }
+    }
+
+    public void CreateNewObjects() 
+    {
+        //Main Model
+        //interviewHE ??= new();
+        interviewHE = CreateNewInterviewHE();
+    }
+
+    private InterviewHEModel CreateNewInterviewHE()
+    {
+        InterviewHEModel newInterviewHE = new InterviewHEModel();
+        newInterviewHE.CreatedBy = student?.Email;
+        newInterviewHE.CreatedDate = DateTime.Now;
+        newInterviewHE.StudentDetailID = student?.StudentDetailID;
+        newInterviewHE.AcademicYearID = student?.AcademicYearID;
+        newInterviewHE.StudentRef = student?.StudentRef;
+        newInterviewHE.StudentGUID = student?.StudentGUID;
+        newInterviewHE.ApplicationCourseID = ApplicationCourseID;
+
+        if (CourseCode != null)
+            newInterviewHE.CourseCode = CourseCode;
+
+        return newInterviewHE;
+    }
+
+    private async Task FormAction() {
+        //Determine what clear form button should do on dialog box
+
+        if (action == "ClearFormConfirm") {
+            ClearForm();
+        }
+        else if (action == "ReturnToApplicationSelectionConfirm")
+        {
+            await ReturnToApplicationSelection();
+        }
+        else {
+            action = "Error";
+
+            msgErrorTitle = $"Invalid Action";
+            msgError = (MarkupString)$"An invalid option was specified. Please try again.";
+            msgErrorStackTrace = null;
+
+            modalError!.Open();
+        }
+    }
+
+    private void ClearFormConfirm()
+    {
+        action = "ClearFormConfirm";
+
+        msgConfirmTitle = $"Clear Form?";
+        msgConfirm = (MarkupString)$"Are you sure you want to clear all information on this form?";
+
+        modalConfirm!.Open();
+    }
+
+    private void ClearForm()
+    {
+        action = "ClearForm";
+
+        CreateNewObjects();
+
+        modalConfirm!.Close();
+    }
+
+    private async Task SubmitForm()
+    {
+        if (await _fluentValidationValidator!.ValidateAsync())
+        {
+            formSubmitted = true;
+            Logger.LogInformation("Id = {Id}", interviewHE?.InterviewHEID);
+
+            submitEndPoint = $"{configuration["APIEndpoint"]}/InterviewHE";
+            try
+            {
+                if (interviewHE != null)
+                {
+                    //Clear out IDs set earlier as database will set these
+                    //None
+
+                    interviewHE.OfferingID = selectedApplication?.CourseID;
+                    interviewHE.CourseCode = selectedApplication?.CourseCode;
+                    interviewHE.TuitionFeeAgreedTo = selectedApplication?.YearlyCourseFee;
+
+                    HttpResponseMessage formResponse = await Http.PostAsJsonAsync<InterviewHEModel>(submitEndPoint, interviewHE);
+
+                    if (formResponse.IsSuccessStatusCode != true)
+                    {
+                        string responseBody = await formResponse.Content.ReadAsStringAsync();
+                        action = "Error";
+
+                        msgErrorTitle = $"Cannot Submit Form";
+                        msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                        msgErrorStackTrace = responseBody;
+
+                        modalError!.Open();
+                    }
+                    else {
+                        InterviewHEModel insertedInterviewHE = await formResponse.Content.ReadFromJsonAsync<InterviewHEModel>() ?? new InterviewHEModel();
+
+                        if (insertedInterviewHE.InterviewHEID > 0)
+                        {
+                            //If insert successful
+                            await SendEmailCollege();
+                            await SendEmailStaff();
+                        }
+                        else
+                        {
+                            action = "Error";
+
+                            msgErrorTitle = $"Cannot Submit Form";
+                            msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please check your network connection and attempt to submit again.";
+                            msgErrorStackTrace = null;
+
+                            modalError!.Open();
+                        }
+                    }
+                }
+                else
+                {
+                    action = "Error";
+
+                    msgErrorTitle = $"Cannot Submit Form";
+                    msgError = (MarkupString)$"Unfortunately the form could not be submitted successfully due to an error.<br />Please try again.";
+                    msgErrorStackTrace = null;
+
+                    modalError!.Open();
+                }
+
+            }
+            catch (HttpRequestException ex)
+            {
+                HandleJsonException(ex, "GUID", StudentGUID ?? "");
+            }
+        }
+    }
+
+    private void GoToSHCGHomepage() {
+        NavManager.NavigateTo("https://www.shcg.ac.uk");
+    }
+
+    //Functions to update drop down on button press
+    public void HasDifficultiesAndOrDisabilitiesToggle(bool? trueOrFalse)
+    {
+        if (trueOrFalse == true)
+        {
+            interviewHE!.HasDifficultiesAndOrDisabilities = trueOrFalse;
+        }
+        else
+        {
+            interviewHE!.HasDifficultiesAndOrDisabilities = trueOrFalse;
+            interviewHE!.DifficultiesAndOrDisabilitiesFurtherDetails = null;
+        }
+    }
+    public void UnderstandsStructureOfCourseToggle()
+    {
+        if (interviewHE != null)
+        {
+            if (interviewHE.UnderstandsStructureOfCourse == true)
+            {
+                interviewHE.UnderstandsStructureOfCourse = false;
+            }
+            else
+            {
+                interviewHE.UnderstandsStructureOfCourse = true;
+            }
+        }
+    }
+    public void IsAwareOfTuitionFeeToggle()
+    {
+        if (interviewHE != null)
+        {
+            if (interviewHE.IsAwareOfTuitionFee == true)
+            {
+                interviewHE.IsAwareOfTuitionFee = false;
+            }
+            else
+            {
+                interviewHE.IsAwareOfTuitionFee = true;
+            }
+        }
+    }
+    public void InEmploymentToggle(bool? trueOrFalse) => interviewHE!.InEmployment = trueOrFalse;
+
+    //Values for drop-downs
+
+
+    private void ReturnToApplicationSelectionConfirm()
+    {
+        action = "ReturnToApplicationSelectionConfirm";
+
+        msgConfirmTitle = $"Return To Application Selection?";
+        msgConfirm = (MarkupString)$"Are you sure you want to return to the application selection screen which will clear the information entered below?";
+
+        modalConfirm!.Open();
+    }
+
+    private async Task ReturnToApplicationSelection()
+    {
+        action = "ReturnToApplicationSelection";
+        
+        modalConfirm!.Close();
+
+        await SelectCourse(0);
+    }
+
+    public async Task<bool?> SendEmailCollege()
+    {
+        bool? IsSuccessful = false;
+
+        //Main Email With Details
+        SystemEmailModel emailMessage = NewEmailMessageCollege();
+
+        //Add Message To Email
+        string? message = EmailTemplateCollege();
+        emailMessage.EmailMessage = message;
+
+        HttpResponseMessage formResponse = new HttpResponseMessage();
+
+        if (emailMessage != null && !string.IsNullOrEmpty(emailMessage.EmailTo))
+        {
+            Logger.LogInformation("Id = {Id}", emailMessage?.SystemEmailID);
+
+            //Send the Message
+            string? sendEmailEndPoint = $"{configuration["APIEndpoint"]}/SystemEmail";
+            //formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
+
+            if (formResponse.IsSuccessStatusCode != true)
+            {
+                IsSuccessful = false;
+            }
+            else
+            {
+                IsSuccessful = true;
+            }
+        }
+
+        return IsSuccessful;
+    }
+
+    public SystemEmailModel NewEmailMessageCollege()
+    {
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        SystemEmailModel emailMessage = new SystemEmailModel
+        {
+            SystemEmailID = 1,
+            EmailFrom = emailSettings["FromAddress"],
+            EmailFromName = emailSettings["FromName"],
+            EmailTo = emailSettings["ToAddress"],
+            EmailToName = emailSettings["ToName"],
+            EmailSubject = $"Medical, Learning Support And Trip Consent Form Completed by {student?.Forename} {student?.Surname}",
+            EmailMessage = null, //Add this later
+            IsEmailMessageHTML = true,
+            EmailKey = emailSettings["EmailKey"]
+        };
+
+        //Set correct reciption based on Student College
+        if (student?.CollegeCode == "EC")
+        {
+            emailMessage.EmailTo = emailSettings["InterviewHEEmailAddressToEC"];
+            emailMessage.EmailToName = "Eastleigh College";
+        }
+        else if (student?.CollegeCode == "FC" || student?.CollegeCode == "CM" || student?.CollegeCode == "CT")
+        {
+            emailMessage.EmailTo = emailSettings["InterviewHEEmailAddressToFC"];
+            emailMessage.EmailToName = "Fareham College";
+        }
+        else if (student?.CollegeCode == "SC" || student?.CollegeCode == "MC")
+        {
+            emailMessage.EmailTo = emailSettings["InterviewHEEmailAddressToSC"];
+            emailMessage.EmailToName = "Southampton College";
+        }
+
+        return emailMessage;
+    }
+
+    public string? EmailTemplateCollege()
+    {
+        string? Template;
+
+        string? FormDetails = "";
+
+        if (interviewHE != null)
+        {
+            FormDetails += $@"
+                <li>Student Ref: {interviewHE.StudentRef}</li>
+                <li>Course Code: {interviewHE.CourseCode}</li>
+                <li>Motivation for Studying Course And Intended Next Steps: {interviewHE.MotivationForStudyingCourseAndIntendedNextSteps}</li>
+                <li>Suitability and Relevant Qualifications and Experience: {interviewHE.SuitabilityAndRelevantQualificationsAndExperience}</li>
+                <li>Highest Qual On Entry Level: {interviewHE.HighestQualOnEntryLevel.GetEnumDisplayName()}</li>
+                <li>Highest Qual On Entry Detail: {interviewHE.HighestQualOnEntryDetail}</li>
+                <li>Has Difficulties and/or Disabilities: {interviewHE.HasDifficultiesAndOrDisabilities.GetYesNo()}</li>
+                <li>Difficulties and/or Disabilities Further Details: {interviewHE.DifficultiesAndOrDisabilitiesFurtherDetails}</li>
+                <li>Understands Structure of Course: {interviewHE.UnderstandsStructureOfCourse.GetYesNo()}</li>
+                <li>Method of Funding: {interviewHE.MethodOfFunding.GetEnumDisplayName()}</li>
+                <li>Is Aware of Tuition Fee: {interviewHE.IsAwareOfTuitionFee.GetYesNo()}</li>
+                <li>Tuition Fee Agreed To: {interviewHE.TuitionFeeAgreedTo:C2}</li>
+                <li>In Employment: {interviewHE.InEmployment.GetYesNo()}</li>
+                <li>Last Educational Establishment Attended: {interviewHE.LastEducationalEstablishmentAttended.GetEnumDisplayName()}</li>
+                <li>LastEducational Establishment Attended Other Detail: {interviewHE.LastEducationalEstablishmentAttendedOtherDetail}</li>
+                <li>Financially Support Self During Course: {interviewHE.FinanciallySupportSelfDuringCourse}</li>
+                <li>Manage Demands of Study Around Job and Family: {interviewHE.ManageDemandsOfStudyAroundJobAndFamily}</li>
+                <li>Heard About Course: {interviewHE.HeardAboutCourse.GetEnumDisplayName()}</li>
+                <li>Heard About Course Other: {interviewHE.HeardAboutCourseOther}</li>
+                <li>Questions Asked and Advice Given: {interviewHE.QuestionsAskedAndAdviceGiven}</li>
+                <li>Interview Outcome: {interviewHE.InterviewOutcome.GetEnumDisplayName()}</li>
+                <li>Offer Conditions: {interviewHE.OfferConditions}</li>
+            ";
+        }
+
+        Template = $@"
+            <html>
+                <head>
+                    <title>HE Interview Form Completed by {SystemUser?.Name}</title>
+                </head>
+                <body>
+                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300"" />
+                    <h1>HE Interview Form Completed</h1>
+                    <p>The HE Interview Form has been completed by {SystemUser?.Name}.</p>
+                    <p>Details:</p>
+                    <ul>
+                    {FormDetails}
+                    </ul>
+                </body>
+            </html>";
+
+        return Template;
+    }
+
+    public async Task<bool?> SendEmailStaff()
+    {
+        bool? IsSuccessful = false;
+
+        //Main Email With Details
+        SystemEmailModel emailMessage = NewEmailMessageStaff();
+
+        //Add Message To Email
+        string? message = EmailTemplateCollege();
+        emailMessage.EmailMessage = message;
+
+        HttpResponseMessage formResponse = new HttpResponseMessage();
+
+        if (emailMessage != null && !string.IsNullOrEmpty(emailMessage.EmailTo))
+        {
+            Logger.LogInformation("Id = {Id}", emailMessage?.SystemEmailID);
+
+            //Send the Message
+            string? sendEmailEndPoint = $"{configuration["APIEndpoint"]}/SystemEmail";
+            formResponse = await Http.PostAsJsonAsync<SystemEmailModel>(sendEmailEndPoint, emailMessage!);
+
+            if (formResponse.IsSuccessStatusCode != true)
+            {
+                IsSuccessful = false;
+            }
+            else
+            {
+                IsSuccessful = true;
+            }
+        }
+
+        return IsSuccessful;
+    }
+
+    public SystemEmailModel NewEmailMessageStaff()
+    {
+        var emailSettings = configuration.GetSection("EmailSettings");
+
+        SystemEmailModel emailMessage = new SystemEmailModel
+            {
+                SystemEmailID = 1,
+                EmailFrom = emailSettings["FromAddress"],
+                EmailFromName = emailSettings["FromName"],
+                EmailTo = SystemUser?.Email,
+                EmailToName = $"{SystemUser?.Name}",
+                EmailSubject = $"HE Interview Form Completed",
+                EmailMessage = null, //Add this later
+                IsEmailMessageHTML = true,
+                EmailKey = emailSettings["EmailKey"]
+            };
+
+        return emailMessage;
+    }
+
+    private void HandleJsonException(HttpRequestException ex, string objectName, string objectID)
+    {
+        if (ex.Message.Contains(HttpStatusCode.Unauthorized.ToString()))
+        {
+            loadDataErrorMsg = $"You are not authorised to view this page";
+
+            //Redirect to login screen
+            NavManager.NavigateTo($"Login/Vehicles");
+        }
+        else if (ex.Message.Contains("404 (Not Found)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" is not found";
+        }
+        else if (ex.Message.Contains("400 (Bad Request)"))
+        {
+            loadDataErrorMsg = $"The {objectName} \"{objectID}\" resulted in an invalid request";
+        }
+        else
+        {
+            loadDataErrorMsg = $"Error: {ex.Message}";
+        }
+    }
+
+    public async Task GetUser()
+    {
+        AlreadyLoggedInUser = await LocalStorageFunctions.GetItem<SystemUserModel>(JSRuntime, Logger, "CurrentUser");
+
+        if (appData.CurrentUser?.Email != null)
+            SystemUser = appData.CurrentUser;
+        else if (AlreadyLoggedInUser?.Email != null)
+            SystemUser = AlreadyLoggedInUser;
+        else
+            SystemUser = null;
+    }
+
+    public async Task SelectCourse(int? applicationCourseID)
+    {
+        if (applicationCourseID == 0) 
+        {
+            ApplicationCourseID = null;
+            selectedApplication = null;
+
+            return;
+        }
+
+        ApplicationCourseID = applicationCourseID;
+        string selectedApplicationEndPoint;
+
+        try
+        {
+            if (student?.StudentRef != null)
+            {
+                selectedApplicationEndPoint = $"{configuration["APIEndpoint"]}/StudentApplication/{student?.AcademicYearID}/{student?.StudentRef}/{applicationCourseID}";
+                selectedApplication = await Http.GetFromJsonAsync<StudentApplicationModel>(selectedApplicationEndPoint);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            //Not Found
+        }
+    }
+
+    //Enum Drop-Downs
+    private int? highestQualOnEntryLevelValue
+    {
+        get => (int?)interviewHE?.HighestQualOnEntryLevel;
+        set
+        {
+            if (value.HasValue)
+            {
+                interviewHE!.HighestQualOnEntryLevel = (HighestQualOnEntryLevel)value.Value;
+            }
+            else
+            {
+                interviewHE!.HighestQualOnEntryLevel = null;
+            }
+        }
+    }
+
+    private int? methodOfFundingValue
+    {
+        get => (int?)interviewHE?.MethodOfFunding;
+        set
+        {
+            if (value.HasValue)
+            {
+                interviewHE!.MethodOfFunding = (MethodOfFunding)value.Value;
+            }
+            else
+            {
+                interviewHE!.MethodOfFunding = null;
+            }
+        }
+    }
+
+    private int? lastEducationalEstablishmentAttendedValue
+    {
+        get => (int?)interviewHE?.LastEducationalEstablishmentAttended;
+        set
+        {
+            if (value.HasValue)
+            {
+                interviewHE!.LastEducationalEstablishmentAttended = (LastEducationalEstablishmentAttended)value.Value;
+            }
+            else
+            {
+                interviewHE!.LastEducationalEstablishmentAttended = null;
+            }
+        }
+    }
+
+    private int? heardAboutCourseValue
+    {
+        get => (int?)interviewHE?.HeardAboutCourse;
+        set
+        {
+            if (value.HasValue)
+            {
+                interviewHE!.HeardAboutCourse = (HeardAboutCourse)value.Value;
+            }
+            else
+            {
+                interviewHE!.HeardAboutCourse = null;
+            }
+        }
+    }
+
+    private int? interviewOutcomeValue
+    {
+        get => (int?)interviewHE?.InterviewOutcome;
+        set
+        {
+            if (value.HasValue)
+            {
+                interviewHE!.InterviewOutcome = (InterviewOutcome)value.Value;
+            }
+            else
+            {
+                interviewHE!.InterviewOutcome = null;
+            }
+        }
+    }
+}

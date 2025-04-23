@@ -1,6 +1,8 @@
 ﻿@page "/CriminalConviction"
 @page "/CriminalConviction/{StudentGUID}"
 @page "/CriminalConviction/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}"
+@page "/CriminalConviction/{StudentGUID}/{CourseCode}"
+@page "/CriminalConviction/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{CourseCode}"
 @page "/CriminalConviction/View/{StudentGUID}/{CriminalConvictionID:int}"
 @page "/CriminalConviction/View/{AcademicYearIDPart1:int}/{AcademicYearIDPart2:int}/{StudentGUID}/{CriminalConvictionID:int}"
 
@@ -444,6 +446,8 @@
     public int? AcademicYearIDPart2 { get; set; }
     [Parameter]
     public int? CriminalConvictionID { get; set; }
+    [Parameter]
+    public string? CourseCode { get; set; }
 
     public string? AcademicYearID { get; set; }
 
@@ -595,6 +599,9 @@
         newCriminalConviction.AcademicYearID = student?.AcademicYearID;
         newCriminalConviction.StudentRef = student?.StudentRef;
         newCriminalConviction.StudentGUID = student?.StudentGUID;
+
+        if (CourseCode != null)
+            newCriminalConviction.CourseCode = CourseCode;
 
         return newCriminalConviction;
     }
@@ -971,6 +978,7 @@
         {
             FormDetails += $@"
                 <li>Student Ref: {criminalConviction.StudentRef}</li>
+                <li>Course Code: {criminalConviction.CourseCode}</li>
             ";
 
             if (criminalConviction?.Offences?.Count > 0)
@@ -1003,7 +1011,7 @@
                     <title>Criminal Conviction Form Completed by {student?.Forename} {student?.Surname}</title>
                 </head>
                 <body>
-                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300px"" />
+                    <img src=""https://forms.shcg.ac.uk/images/SHCG-Logo-Coloured-RGB.png"" alt=""SHCG Logo"" width=""300"" />
                     <h1>Criminal Conviction Form Completed</h1>
                     <p>The Criminal Conviction Form has been completed by {student?.Forename} {student?.Surname}.</p>
                     <p>Details:</p>
